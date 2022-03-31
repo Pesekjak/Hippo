@@ -11,9 +11,4 @@ public class TypeAnnotation extends SkriptClass {
         super(type, ClassType.ANNOTATION);
     }
 
-    @Override
-    public String toJavaCode() {
-        return null;
-    }
-
 }

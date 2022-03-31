@@ -101,6 +101,4 @@ public abstract class SkriptClass extends Annotatable {
         return defineEvent;
     }
 
-    public abstract String toJavaCode();
-
 }

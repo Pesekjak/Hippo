@@ -8,28 +8,23 @@ import java.util.HashMap;
 
 public class TypeRecord extends SkriptClass {
 
-    private final HashMap<String, Argument> constructorArguments;
+    private final HashMap<String, Argument> recordConstructorArguments;
 
     public TypeRecord(@NotNull Type type) {
         super(type, ClassType.RECORD);
-        constructorArguments = new HashMap<>();
+        recordConstructorArguments = new HashMap<>();
     }
 
-    @Override
-    public String toJavaCode() {
-        return null;
+    public HashMap<String, Argument> getRecordConstructorArguments() {
+        return recordConstructorArguments;
     }
 
-    public HashMap<String, Argument> getConstructorArguments() {
-        return constructorArguments;
+    public void addRecordConstructorArgument(Argument argument) {
+        this.recordConstructorArguments.putIfAbsent(argument.getName(), argument);
+        this.recordConstructorArguments.replace(argument.getName(), argument);
     }
 
-    public void addConstructorArgument(Argument argument) {
-        this.constructorArguments.putIfAbsent(argument.getName(), argument);
-        this.constructorArguments.replace(argument.getName(), argument);
-    }
-
-    public void removeConstructorArgument(String name) {
-        this.constructorArguments.remove(name);
+    public void removeRecordConstructorArgument(String name) {
+        this.recordConstructorArguments.remove(name);
     }
 }

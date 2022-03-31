@@ -11,9 +11,4 @@ public class TypeInterface extends SkriptClass {
         super(type, ClassType.INTERFACE);
     }
 
-    @Override
-    public String toJavaCode() {
-        return null;
-    }
-
 }

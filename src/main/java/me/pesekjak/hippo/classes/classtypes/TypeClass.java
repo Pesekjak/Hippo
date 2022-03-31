@@ -11,9 +11,4 @@ public class TypeClass extends SkriptClass {
         super(type, ClassType.CLASS);
     }
 
-    @Override
-    public String toJavaCode() {
-        return null;
-    }
-
 }

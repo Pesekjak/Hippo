@@ -11,9 +11,4 @@ public class TypeEnum extends SkriptClass {
         super(type, ClassType.ENUM);
     }
 
-    @Override
-    public String toJavaCode() {
-        return null;
-    }
-
 }
