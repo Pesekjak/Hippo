@@ -1,11 +1,14 @@
 package me.pesekjak.hippo.skript;
 
 import ch.njol.skript.classes.ClassInfo;
+import ch.njol.skript.classes.Parser;
+import ch.njol.skript.lang.ParseContext;
 import ch.njol.skript.registrations.Classes;
 import me.pesekjak.hippo.classes.*;
 import me.pesekjak.hippo.classes.contents.annotation.Annotation;
 import me.pesekjak.hippo.classes.contents.annotation.AnnotationElement;
 import me.pesekjak.hippo.skript.classes.Pair;
+import org.jetbrains.annotations.NotNull;
 
 public class ClassInfos {
 
@@ -23,6 +26,29 @@ public class ClassInfos {
                 .name("Character")
                 .description("Represents Java Character primitive type.")
                 .since("1.0-BETA.1")
+                .parser(new Parser<>() {
+                    @Override
+                    public Character parse(@NotNull String s, @NotNull ParseContext parseContext) {
+                        if (!s.startsWith("'") || !s.endsWith("'")) return null;
+                        if (s.length() != 3) return null;
+                        return s.charAt(1);
+                    }
+
+                    @Override
+                    public boolean canParse(@NotNull ParseContext context) {
+                        return true;
+                    }
+
+                    @Override
+                    public @NotNull String toString(Character character, int i) {
+                        return character.toString();
+                    }
+
+                    @Override
+                    public @NotNull String toVariableNameString(Character character) {
+                        return character.toString();
+                    }
+                })
         );
 
         Classes.registerClass(new ClassInfo<>(ClassType.class, "skriptclasstype")
@@ -43,6 +69,13 @@ public class ClassInfos {
                 .user("types?")
                 .name("Type")
                 .description("Type used for creating classes.")
+                .since("1.0-BETA.1")
+        );
+
+        Classes.registerClass(new ClassInfo<>(PrimitiveType.class, "primitivetype")
+                .user("primitive types?")
+                .name("Primitive Type")
+                .description("Type of Primitives used for creating classes.")
                 .since("1.0-BETA.1")
         );
 
