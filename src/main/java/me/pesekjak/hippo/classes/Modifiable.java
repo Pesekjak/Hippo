@@ -19,12 +19,12 @@ public class Modifiable {
         modifiers.remove(modifier);
     }
 
-    public String modifiersAsString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        for(Modifier modifier : modifiers) {
-            stringBuilder.append(" ").append(modifier.getIdentifier());
-        }
-        return stringBuilder.toString();
-    }
+//    public String modifiersAsString() {
+//        StringBuilder stringBuilder = new StringBuilder();
+//        for(Modifier modifier : modifiers) {
+//            stringBuilder.append(" ").append(modifier.getIdentifier());
+//        }
+//        return stringBuilder.toString();
+//    }
 
 }

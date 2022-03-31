@@ -39,7 +39,7 @@ public class EffRecord extends Effect {
             return;
         }
         for(Pair pair : pairExpression.getAll(event)) {
-            ((TypeRecord) skriptClass).addConstructorArgument(pair.asArgument());
+            ((TypeRecord) skriptClass).addRecordConstructorArgument(pair.asArgument());
         }
     }
 

@@ -2,28 +2,28 @@ package me.pesekjak.hippo.classes;
 
 public class Argument {
 
-    private final Primitive primitive;
+    private final PrimitiveType primitiveType;
     private final String name;
     private Type type;
 
-    public Argument(Primitive primitive, Type type, String name) {
-        this.primitive = primitive;
+    public Argument(PrimitiveType primitive, Type type, String name) {
+        this.primitiveType = primitive;
         this.name = name;
         this.type = type;
     }
 
-    public Argument(Primitive primitive, String name) {
-        this.primitive = primitive;
+    public Argument(PrimitiveType primitive, String name) {
+        this.primitiveType = primitive;
         this.name = name;
     }
 
     public Argument(Type type, String name) {
-        this(Primitive.NONE, name);
+        this(new PrimitiveType(Primitive.NONE), name);
         this.type = type;
     }
 
-    public Primitive getPrimitive() {
-        return primitive;
+    public PrimitiveType getPrimitiveType() {
+        return primitiveType;
     }
 
     public String getName() {

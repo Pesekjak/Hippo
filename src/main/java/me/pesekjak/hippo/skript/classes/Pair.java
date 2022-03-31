@@ -1,14 +1,14 @@
 package me.pesekjak.hippo.skript.classes;
 
 import me.pesekjak.hippo.classes.Argument;
-import me.pesekjak.hippo.classes.Primitive;
+import me.pesekjak.hippo.classes.PrimitiveType;
 import me.pesekjak.hippo.classes.Type;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public record Pair(@NotNull Primitive primitive, @Nullable Type type, String name) {
+public record Pair(@NotNull PrimitiveType primitive, @Nullable Type type, String name) {
 
-    public Primitive getPrimitive() { return primitive; }
+    public PrimitiveType getPrimitiveType() { return primitive; }
 
     public Type getType() {
         return type;

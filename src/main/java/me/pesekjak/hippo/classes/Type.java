@@ -2,13 +2,10 @@ package me.pesekjak.hippo.classes;
 
 import me.pesekjak.hippo.hooks.SkriptReflectHook;
 
-public class Type {
+public class Type extends IType {
 
-    public final String dotPath;
-    public final String descriptor;
-    public final String internalName;
-
-    public boolean isVarArg = false;
+    private final String dotPath;
+    private final String internalName;
 
     public Type(String dotPath, String descriptor, String internalName) {
         this.dotPath = dotPath;
@@ -32,6 +29,7 @@ public class Type {
         return dotPath;
     }
 
+    @Override
     public String getDescriptor() {
         return descriptor;
     }
@@ -47,33 +45,17 @@ public class Type {
         return internalName.substring(internalName.lastIndexOf('/') + 1);
     }
 
-    private String arrayBlocks() {
-        StringBuilder builder = new StringBuilder();
-        String input = descriptor;
-        int x;
-        while ((x = input.indexOf("[")) > -1) {
-            input = input.substring(x + 1);
-            builder.append("[]");
-        }
-        return builder.toString();
+    @Override
+    public String getRawDescriptor() {
+        return descriptor.replace("[", "");
     }
 
+    @Override
     public Type arrayType() {
         return new Type(dotPath, "[" + descriptor, internalName);
     }
 
-    public boolean isArray() {
-        return descriptor.startsWith("[");
-    }
-
-    public void setVarArg(boolean varArg) {
-        isVarArg = varArg;
-    }
-
-    public boolean isVarArg() {
-        return isVarArg;
-    }
-
+    @Override
     public Type varArgType() {
         Type type = new Type(dotPath, descriptor, internalName);
         type.setVarArg(true);

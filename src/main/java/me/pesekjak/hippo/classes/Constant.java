@@ -22,12 +22,12 @@ public class Constant {
         this(null, type, path);
     }
 
-    public String toJavaCode() {
-        if(constant instanceof String) return "\"" + constant + "\"";
-        if(constant instanceof Character) return "'" + constant + "'";
-        if(constant != null) return constant.toString();
-        if(type != null) return type.getDotPath() + "." + path;
-        return null;
-    }
+//    public String toJavaCode() {
+//        if(constant instanceof String) return "\"" + constant + "\"";
+//        if(constant instanceof Character) return "'" + constant + "'";
+//        if(constant != null) return constant.toString();
+//        if(type != null) return type.getDotPath() + "." + path;
+//        return null;
+//    }
 
 }

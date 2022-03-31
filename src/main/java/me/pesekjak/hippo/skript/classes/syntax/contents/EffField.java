@@ -37,7 +37,7 @@ public class EffField extends Effect {
         ((NewSkriptClassEvent) event).setCurrentNode(node);
         if(!ClassBuilder.validate(event)) return;
         Pair pair = pairExpression.getSingle(event);
-        Field field = new Field(pair.getPrimitive(), pair.getType(), pair.getName());
+        Field field = new Field(pair.getPrimitiveType(), pair.getType(), pair.getName());
         if(modifierExpression != null) {
             Arrays.stream(modifierExpression.getAll(event)).toList().forEach(field::addModifier);
         }

@@ -38,7 +38,7 @@ public class EffMethod extends Effect {
         ((NewSkriptClassEvent) event).setCurrentNode(node);
         if(!ClassBuilder.validate(event)) return;
         Pair pair = pairExpression.getSingle(event);
-        Method method = new Method(pair.getPrimitive(), pair.getType(), pair.getName());
+        Method method = new Method(pair.getPrimitiveType(), pair.getType(), pair.getName());
         method.setRunnable(false);
         if(modifierExpression != null) {
             Arrays.stream(modifierExpression.getAll(event)).toList().forEach(method::addModifier);

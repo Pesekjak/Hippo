@@ -2,27 +2,25 @@ package me.pesekjak.hippo.classes.contents;
 
 import ch.njol.skript.lang.Expression;
 import me.pesekjak.hippo.classes.*;
-import me.pesekjak.hippo.classes.contents.annotation.Annotation;
-import me.pesekjak.hippo.classes.registry.SkriptClassRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class Field extends Annotatable {
 
-    private final Primitive primitive;
+    private final PrimitiveType primitiveType;
     private final Type type;
     private final String name;
     private Expression<?> value;
     private Constant constant;
 
-    public Field(@NotNull Primitive primitive, @Nullable Type type, @NotNull String name) {
-        this.primitive = primitive;
+    public Field(@NotNull PrimitiveType primitive, @Nullable Type type, @NotNull String name) {
+        this.primitiveType = primitive;
         this.type = type;
         this.name = name;
     }
 
-    public Primitive getPrimitive() {
-        return primitive;
+    public PrimitiveType getPrimitiveType() {
+        return primitiveType;
     }
 
     public Type getType() {

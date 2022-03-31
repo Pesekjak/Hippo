@@ -10,7 +10,7 @@ import java.util.List;
 
 public class Method extends Annotatable {
 
-    private final Primitive primitive;
+    private final PrimitiveType primitiveType;
     private final Type type;
     private final String name;
 
@@ -22,16 +22,16 @@ public class Method extends Annotatable {
 
     private Trigger trigger;
 
-    public Method(@NotNull Primitive primitive, @Nullable Type type, @NotNull String name) {
-        this.primitive = primitive;
+    public Method(@NotNull PrimitiveType primitive, @Nullable Type type, @NotNull String name) {
+        this.primitiveType = primitive;
         this.type = type;
         this.name = name;
         this.arguments = new ArrayList<>();
         this.isRunnable = false;
     }
 
-    public Primitive getPrimitive() {
-        return primitive;
+    public PrimitiveType getPrimitiveType() {
+        return primitiveType;
     }
 
     public Type getType() {

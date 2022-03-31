@@ -20,6 +20,21 @@ public enum Primitive {
         this.descriptor = descriptor;
     }
 
+    public static Primitive fromDescriptor(String descriptor) {
+        return switch (descriptor) {
+            case "Z" -> Primitive.BOOLEAN;
+            case "C" -> Primitive.CHAR;
+            case "B" -> Primitive.BYTE;
+            case "S" -> Primitive.SHORT;
+            case "I" -> Primitive.INT;
+            case "F" -> Primitive.FLOAT;
+            case "J" -> Primitive.LONG;
+            case "D" -> Primitive.DOUBLE;
+            case "V" -> Primitive.VOID;
+            default -> Primitive.NONE;
+        };
+    }
+
     public String getPrimitive() {
         return primitive;
     }

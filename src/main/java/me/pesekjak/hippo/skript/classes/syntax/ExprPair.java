@@ -7,6 +7,7 @@ import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.Primitive;
+import me.pesekjak.hippo.classes.PrimitiveType;
 import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.skript.classes.Pair;
 import me.pesekjak.hippo.utils.SkriptUtils;
@@ -18,18 +19,18 @@ public class ExprPair extends SimpleExpression<Pair> {
 
     static {
         Skript.registerExpression(ExprPair.class, Pair.class, ExpressionType.COMBINED,
-                "(%-primitive%|%-type%) <[a-zA-Z0-9]*>"
+                "(%-primitivetype%|%-type%) <[a-zA-Z0-9]*>"
         );
     }
 
     private Expression<Type> typeExpression;
-    private Expression<Primitive> primitiveExpression;
+    private Expression<PrimitiveType> primitiveExpression;
     private String name;
 
     @Override
     protected Pair @NotNull [] get(@NotNull Event event) {
         Type type = null;
-        Primitive primitive = Primitive.NONE;
+        PrimitiveType primitive = new PrimitiveType(Primitive.NONE);
         if(typeExpression != null) type = typeExpression.getSingle(event);
         if(primitiveExpression != null) primitive = primitiveExpression.getSingle(event);
         return new Pair[] { new Pair(primitive, type, name) };

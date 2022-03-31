@@ -48,7 +48,7 @@ public class SecMethod extends Section {
         ((NewSkriptClassEvent) event).setCurrentNode(node);
         if(!ClassBuilder.validate(event)) return null;
         Pair pair = pairExpression.getSingle(event);
-        Method method = new Method(pair.getPrimitive(), pair.getType(), pair.getName());
+        Method method = new Method(pair.getPrimitiveType(), pair.getType(), pair.getName());
         method.setRunnable(true);
         method.setTrigger(methodTrigger);
         if(modifierExpression != null) {
