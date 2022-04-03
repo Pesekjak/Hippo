@@ -18,7 +18,7 @@ public class ExprAnnotation extends SimpleExpression<Annotation> {
 
     static {
         Skript.registerExpression(ExprAnnotation.class, Annotation.class, ExpressionType.COMBINED,
-                "\\@%type%\\([%-annotationelements%]\\)"
+                "\\@%asmtype%\\([%-annotationelements%]\\)"
         );
     }
 

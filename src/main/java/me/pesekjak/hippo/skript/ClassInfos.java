@@ -65,8 +65,8 @@ public class ClassInfos {
                 .since("1.0-BETA.1")
         );
 
-        Classes.registerClass(new ClassInfo<>(Type.class, "type")
-                .user("types?")
+        Classes.registerClass(new ClassInfo<>(Type.class, "asmtype")
+                .user("asmtypes?")
                 .name("Type")
                 .description("Type used for creating classes.")
                 .since("1.0-BETA.1")

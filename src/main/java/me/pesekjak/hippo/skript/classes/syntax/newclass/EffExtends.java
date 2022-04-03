@@ -23,7 +23,7 @@ public class EffExtends extends Effect {
 
     static {
         Skript.registerEffect(EffExtends.class,
-                "extends: %types%"
+                "extends: %asmtypes%"
         );
     }
 

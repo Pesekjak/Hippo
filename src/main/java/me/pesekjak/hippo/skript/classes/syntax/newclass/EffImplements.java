@@ -23,7 +23,7 @@ public class EffImplements extends Effect {
 
     static {
         Skript.registerEffect(EffImplements.class,
-                "implements: %types%"
+                "implements: %asmtypes%"
         );
     }
 

@@ -17,7 +17,7 @@ public class ExprConstant extends SimpleExpression<Constant> {
 
     static {
         Skript.registerExpression(ExprConstant.class, Constant.class, ExpressionType.COMBINED,
-                "\\!(%-number%|%-boolean%|%-string%|%-character%|%-type%\\:<([a-zA-Z_$][a-zA-Z\\d_$]*\\.)*[a-zA-Z_$][a-zA-Z\\d_$]*>)"
+                "\\!(%-number%|%-boolean%|%-string%|%-character%|%-asmtype%\\:<([a-zA-Z_$][a-zA-Z\\d_$]*\\.)*[a-zA-Z_$][a-zA-Z\\d_$]*>)"
         );
     }
 

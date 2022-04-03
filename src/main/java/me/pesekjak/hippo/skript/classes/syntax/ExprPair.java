@@ -19,7 +19,7 @@ public class ExprPair extends SimpleExpression<Pair> {
 
     static {
         Skript.registerExpression(ExprPair.class, Pair.class, ExpressionType.COMBINED,
-                "(%-primitivetype%|%-type%) <[a-zA-Z0-9]*>"
+                "(%-primitivetype%|%-asmtype%) <[a-zA-Z0-9]*>"
         );
     }
 
