@@ -8,6 +8,7 @@ import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.Constant;
 import me.pesekjak.hippo.classes.Modifier;
+import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.classes.contents.Method;
 import me.pesekjak.hippo.skript.classes.ClassBuilder;
 import me.pesekjak.hippo.skript.classes.Pair;
@@ -22,13 +23,14 @@ public class EffMethod extends Effect {
 
     static {
         Skript.registerEffect(EffMethod.class,
-                "%javamodifiers% %pair% \\([%-pairs%]\\) [default %-constant%]"
+                "%javamodifiers% %pair% \\([%-pairs%]\\) [throws %-asmtypes%] [default %-constant%]"
         );
     }
 
     private Expression<Modifier> modifierExpression;
     private Expression<Pair> pairExpression;
     private Expression<Pair> argumentExpression;
+    private Expression<Type> exceptionExpression;
     private Expression<Constant> constantExpression;
     private Node node;
 
@@ -45,6 +47,9 @@ public class EffMethod extends Effect {
         }
         if(argumentExpression != null) {
             Arrays.stream(argumentExpression.getAll(event)).toList().forEach((argumentPair) -> method.addArgument(argumentPair.asArgument()));
+        }
+        if(exceptionExpression != null) {
+            Arrays.stream(exceptionExpression.getAll(event)).toList().forEach(method::addException);
         }
         if(constantExpression != null) {
             method.setDefaultConstant(constantExpression.getSingle(event));
@@ -64,7 +69,8 @@ public class EffMethod extends Effect {
         modifierExpression = SkriptUtils.defendExpression(expressions[0]);
         pairExpression = SkriptUtils.defendExpression(expressions[1]);
         argumentExpression = SkriptUtils.defendExpression(expressions[2]);
-        constantExpression = SkriptUtils.defendExpression(expressions[3]);
+        exceptionExpression = SkriptUtils.defendExpression(expressions[3]);
+        constantExpression = SkriptUtils.defendExpression(expressions[4]);
         node = getParser().getNode();
         return getParser().isCurrentEvent(NewSkriptClassEvent.class);
     }

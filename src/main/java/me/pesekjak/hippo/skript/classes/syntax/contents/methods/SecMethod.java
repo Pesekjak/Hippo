@@ -6,6 +6,7 @@ import ch.njol.skript.config.SectionNode;
 import ch.njol.skript.lang.*;
 import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.Modifier;
+import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.classes.contents.Method;
 import me.pesekjak.hippo.skript.classes.ClassBuilder;
 import me.pesekjak.hippo.skript.classes.Pair;
@@ -22,13 +23,14 @@ public class SecMethod extends Section {
 
     static {
         Skript.registerSection(SecMethod.class,
-                "%javamodifiers% %pair% \\([%-pairs%]\\)"
+                "%javamodifiers% %pair% \\([%-pairs%]\\) [throws %-asmtypes%]"
         );
     }
 
     private Expression<Modifier> modifierExpression;
     private Expression<Pair> pairExpression;
     private Expression<Pair> argumentExpression;
+    private Expression<Type> exceptionExpression;
     private Node node;
     private Trigger methodTrigger;
 
@@ -37,6 +39,7 @@ public class SecMethod extends Section {
         modifierExpression = SkriptUtils.defendExpression(expressions[0]);
         pairExpression = SkriptUtils.defendExpression(expressions[1]);
         argumentExpression = SkriptUtils.defendExpression(expressions[2]);
+        exceptionExpression = SkriptUtils.defendExpression(expressions[3]);
         node = getParser().getNode();
         methodTrigger = loadCode(sectionNode, "method", MethodCallEvent.class);
         return getParser().isCurrentEvent(NewSkriptClassEvent.class);
@@ -56,6 +59,9 @@ public class SecMethod extends Section {
         }
         if(argumentExpression != null) {
             Arrays.stream(argumentExpression.getAll(event)).toList().forEach((argumentPair) -> method.addArgument(argumentPair.asArgument()));
+        }
+        if(exceptionExpression != null) {
+            Arrays.stream(exceptionExpression.getAll(event)).toList().forEach(method::addException);
         }
         ClassBuilder.getStackedAnnotations().forEach(method::addAnnotation);
         ClassBuilder.clearStackedAnnotations();

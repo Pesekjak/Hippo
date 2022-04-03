@@ -15,6 +15,7 @@ public class Method extends Annotatable {
     private final String name;
 
     private final List<Argument> arguments;
+    private final List<Type> exceptions;
 
     private boolean isRunnable;
 
@@ -27,6 +28,7 @@ public class Method extends Annotatable {
         this.type = type;
         this.name = name;
         this.arguments = new ArrayList<>();
+        this.exceptions = new ArrayList<>();
         this.isRunnable = false;
     }
 
@@ -52,6 +54,18 @@ public class Method extends Annotatable {
 
     public void removeArgument(Argument argument) {
         arguments.remove(argument);
+    }
+
+    public List<Type> getExceptions() {
+        return exceptions;
+    }
+
+    public void addException(Type exception) {
+        exceptions.add(exception);
+    }
+
+    public void removeException(Type exception) {
+        exceptions.remove(exception);
     }
 
     public boolean isRunnable() {
