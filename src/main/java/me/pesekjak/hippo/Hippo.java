@@ -12,6 +12,26 @@ import java.io.IOException;
 
 public class Hippo extends JavaPlugin {
 
+    //  .-''''-. _
+    // ('    '  '0)-/)
+    // '..____..:    ⳹._
+    //   ⳹u  u (        '-..------._
+    //   |     /      :   '.        '--.
+    //  .nn_nn/ (      :   '            '⳹
+    // ( '' '' /      ;     .             ⳹
+    //  ''----' "⳹          :            : '.
+    //         .'/                           '.
+    //        / /                             '.
+    //       /_|       )                     .⳹|
+    //         |      /⳹                     . '
+    //         '--.__|  '--._  ,            /
+    //                      /'-,          .'
+    //                     /   |        _.'
+    //                    (____⳹       /
+    //                          ⳹      ⳹
+    //                           '-'-'-'
+    // MIGHTY HIPPO FROM THE HIPO LAKE
+
     private static Hippo instance;
     private static SkriptAddon addonInstance;
 
