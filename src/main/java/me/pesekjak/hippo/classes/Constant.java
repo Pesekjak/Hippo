@@ -22,7 +22,19 @@ public class Constant {
         this(null, type, path);
     }
 
-//    public String toJavaCode() {
+    public Object getConstantObject() {
+        return constant;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    //    public String toJavaCode() {
 //        if(constant instanceof String) return "\"" + constant + "\"";
 //        if(constant instanceof Character) return "'" + constant + "'";
 //        if(constant != null) return constant.toString();

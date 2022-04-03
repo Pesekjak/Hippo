@@ -31,6 +31,10 @@ public abstract class SkriptClass extends Annotatable {
         return type;
     }
 
+    public ClassType getClassType() {
+        return classType;
+    }
+
     public String getClassName() {
         return type.getDotPath();
     }

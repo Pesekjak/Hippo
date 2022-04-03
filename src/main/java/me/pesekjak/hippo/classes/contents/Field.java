@@ -47,6 +47,10 @@ public class Field extends Annotatable {
         this.constant = constant;
     }
 
+    public String getDescriptor() {
+        return this.getType() != null ? this.getType().getDescriptor() : this.getPrimitiveType().getDescriptor();
+    }
+
 //    public String toJavaCode(SkriptClass skriptClass) {
 //        StringBuilder stringBuilder = new StringBuilder();
 //        String fieldType;

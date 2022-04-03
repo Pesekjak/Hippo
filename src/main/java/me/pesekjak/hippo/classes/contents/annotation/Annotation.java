@@ -19,6 +19,10 @@ public class Annotation {
         return type;
     }
 
+    public List<AnnotationElement> getElements() {
+        return elements;
+    }
+
     public void addConstant(AnnotationElement element) {
         elements.add(element);
     }
@@ -27,7 +31,7 @@ public class Annotation {
         elements.remove(element);
     }
 
-//    public String toJavaCode() {
+    //    public String toJavaCode() {
 //        StringBuilder stringBuilder = new StringBuilder();
 //        stringBuilder.append("@").append(type.getJavaClassPath()).append("(");
 //        int i = 0;
