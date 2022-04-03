@@ -17,14 +17,15 @@ public class ExprJavaModifier extends SimpleExpression<Modifier> {
         Skript.registerExpression(ExprJavaModifier.class, Modifier.class, ExpressionType.SIMPLE,
                 "public",
                 "private",
-                "default",
                 "protected",
                 "final",
                 "static",
                 "abstract",
                 "transient",
                 "synchronized",
-                "volatile"
+                "volatile",
+                "native",
+                "strictfp"
         );
     }
 
@@ -36,14 +37,15 @@ public class ExprJavaModifier extends SimpleExpression<Modifier> {
         switch (pattern) {
             case 0 -> modifier = Modifier.PUBLIC;
             case 1 -> modifier = Modifier.PRIVATE;
-            case 2 -> modifier = Modifier.DEFAULT;
-            case 3 -> modifier = Modifier.PROTECTED;
-            case 4 -> modifier = Modifier.FINAL;
-            case 5 -> modifier = Modifier.STATIC;
-            case 6 -> modifier = Modifier.ABSTRACT;
-            case 7 -> modifier = Modifier.TRANSIENT;
-            case 8 -> modifier = Modifier.SYNCHRONIZED;
-            case 9 -> modifier = Modifier.VOLATILE;
+            case 2 -> modifier = Modifier.PROTECTED;
+            case 3 -> modifier = Modifier.FINAL;
+            case 4 -> modifier = Modifier.STATIC;
+            case 5 -> modifier = Modifier.ABSTRACT;
+            case 6 -> modifier = Modifier.TRANSIENT;
+            case 7 -> modifier = Modifier.SYNCHRONIZED;
+            case 8 -> modifier = Modifier.VOLATILE;
+            case 9 -> modifier = Modifier.NATIVE;
+            case 10 -> modifier = Modifier.STRICTFP;
         }
         return new Modifier[] { modifier };
     }
