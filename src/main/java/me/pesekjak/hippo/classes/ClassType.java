@@ -1,20 +1,28 @@
 package me.pesekjak.hippo.classes;
 
+import org.objectweb.asm.Opcodes;
+
 public enum ClassType {
 
-    CLASS("class"),
-    INTERFACE("interface"),
-    RECORD("record"),
-    ENUM("enum"),
-    ANNOTATION("annotation");
+    CLASS("class", 0),
+    INTERFACE("interface", Opcodes.ACC_INTERFACE),
+    RECORD("record", Opcodes.ACC_RECORD),
+    ENUM("enum", Opcodes.ACC_ENUM),
+    ANNOTATION("annotation", Opcodes.ACC_ANNOTATION);
 
     public String identifier;
+    public int value;
 
-    ClassType(String identifier) {
+    ClassType(String identifier, int value) {
         this.identifier = identifier;
+        this.value = value;
     }
 
     public String getIdentifier() {
         return identifier;
+    }
+
+    public int getValue() {
+        return value;
     }
 }
