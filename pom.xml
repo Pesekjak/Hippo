@@ -63,6 +63,13 @@
             <version>9.2</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>skript-reflect</groupId>
+            <artifactId>skript-reflect</artifactId>
+            <scope>system</scope>
+            <version>1.0</version>
+            <systemPath>${project.basedir}/libs/skript-reflect.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <properties>
