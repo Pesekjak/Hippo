@@ -8,6 +8,7 @@ import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.Constant;
 import me.pesekjak.hippo.classes.Type;
+import me.pesekjak.hippo.skript.classes.ClassBuilder;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
 import org.bukkit.event.Event;
@@ -17,7 +18,7 @@ public class ExprConstant extends SimpleExpression<Constant> {
 
     static {
         Skript.registerExpression(ExprConstant.class, Constant.class, ExpressionType.COMBINED,
-                "\\!(%-number%|%-boolean%|%-string%|%-character%|%-asmtype%\\:<([a-zA-Z_$][a-zA-Z\\d_$]*\\.)*[a-zA-Z_$][a-zA-Z\\d_$]*>)"
+                "\\!(%-number%|%-boolean%|%-string%|%-character%|%-javatype%\\:<([a-zA-Z_$][a-zA-Z\\d_$]*\\.)*[a-zA-Z_$][a-zA-Z\\d_$]*>)"
         );
     }
 
@@ -25,7 +26,7 @@ public class ExprConstant extends SimpleExpression<Constant> {
     private Expression<Boolean> booleanExpression;
     private Expression<String> stringExpression;
     private Expression<Character> characterExpression;
-    private Expression<Type> typeExpression;
+    private Expression<?> typeExpression;
 
     private String constantPath;
 
@@ -42,7 +43,9 @@ public class ExprConstant extends SimpleExpression<Constant> {
         } else if (characterExpression != null) {
             constant = new Constant(characterExpression.getSingle(event));
         } else if (typeExpression != null) {
-            constant = new Constant(typeExpression.getSingle(event), constantPath);
+            Type type = ClassBuilder.getTypeFromExpression(typeExpression);
+            if(type == null) return new Constant[0];
+            constant = new Constant(type, constantPath);
         }
 
         return new Constant[] { constant };

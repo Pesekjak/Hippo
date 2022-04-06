@@ -9,6 +9,9 @@ import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.classes.contents.annotation.Annotation;
 import me.pesekjak.hippo.classes.contents.annotation.AnnotationElement;
+import me.pesekjak.hippo.hooks.SkriptReflectHook;
+import me.pesekjak.hippo.skript.classes.ClassBuilder;
+import me.pesekjak.hippo.skript.classes.syntax.ExprType;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
 import org.bukkit.event.Event;
@@ -18,16 +21,19 @@ public class ExprAnnotation extends SimpleExpression<Annotation> {
 
     static {
         Skript.registerExpression(ExprAnnotation.class, Annotation.class, ExpressionType.COMBINED,
-                "\\@%asmtype%\\([%-annotationelements%]\\)"
+                "\\@%-javatype%\\([%-annotationelements%]\\)"
         );
     }
 
-    private Expression<Type> typeExpression;
+    private Expression<?> typeExpression;
     private Expression<AnnotationElement> elementsExpression;
 
     @Override
     protected Annotation @NotNull [] get(@NotNull Event event) {
-        Annotation annotation = new Annotation(typeExpression.getSingle(event));
+        Annotation annotation = null;
+        Type type = ClassBuilder.getTypeFromExpression(typeExpression);
+        if(type == null) return new Annotation[0];
+        annotation = new Annotation(type);
         if(elementsExpression != null) {
             for(AnnotationElement element : elementsExpression.getAll(event)) {
                 annotation.addConstant(element);

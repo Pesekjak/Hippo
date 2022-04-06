@@ -4,6 +4,7 @@ import ch.njol.skript.Skript;
 import ch.njol.skript.lang.*;
 import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.classes.registry.SkriptClassRegistry;
+import me.pesekjak.hippo.skript.classes.ClassBuilder;
 import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +24,7 @@ public class EvtNewSkriptClass extends SelfRegisteringSkriptEvent {
     @Override
     public void register(@NotNull Trigger trigger) {
         NewSkriptClassEvent event = new NewSkriptClassEvent(type.getDotPath());
+        ClassBuilder.setRegisteringEvent(event);
         trigger.execute(event);
     }
 

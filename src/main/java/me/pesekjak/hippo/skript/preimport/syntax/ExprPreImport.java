@@ -25,7 +25,11 @@ public class ExprPreImport extends SimpleExpression<Object> {
 
     @Override
     protected Object @NotNull [] get(@NotNull Event event) {
-        return new Object[] { SkriptReflectHook.buildJavaType(PreImportManager.MANAGER.getPreImporting(script).getPreImport(classAlias).getType().findClass()) };
+        Object javaType = SkriptReflectHook.buildJavaType(PreImportManager.MANAGER.getPreImporting(script).getPreImport(classAlias).getType().findClass());
+        if(javaType != null) {
+            return new Object[] { javaType };
+        }
+        return new Object[] { PreImportManager.MANAGER.getPreImporting(script).getPreImport(classAlias).getType() };
     }
 
     @Override
