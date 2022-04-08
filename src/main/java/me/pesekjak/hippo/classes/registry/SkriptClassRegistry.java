@@ -24,8 +24,4 @@ public class SkriptClassRegistry {
         skriptClassMap.clear();
     }
 
-//    public static String getJavaCodeForClass(String name) {
-//        return "me.pesekjak.hippo.classes.registry.SkriptClassRegistry.REGISTRY.getSkriptClass(\"" + name + "\")";
-//    }
-
 }

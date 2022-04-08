@@ -9,9 +9,7 @@ import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.classes.contents.annotation.Annotation;
 import me.pesekjak.hippo.classes.contents.annotation.AnnotationElement;
-import me.pesekjak.hippo.hooks.SkriptReflectHook;
-import me.pesekjak.hippo.skript.classes.ClassBuilder;
-import me.pesekjak.hippo.skript.classes.syntax.ExprType;
+import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
 import org.bukkit.event.Event;
@@ -31,7 +29,7 @@ public class ExprAnnotation extends SimpleExpression<Annotation> {
     @Override
     protected Annotation @NotNull [] get(@NotNull Event event) {
         Annotation annotation = null;
-        Type type = ClassBuilder.getTypeFromExpression(typeExpression);
+        Type type = SkriptClassBuilder.getTypeFromExpression(typeExpression);
         if(type == null) return new Annotation[0];
         annotation = new Annotation(type);
         if(elementsExpression != null) {

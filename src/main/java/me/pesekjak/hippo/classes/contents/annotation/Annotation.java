@@ -31,17 +31,4 @@ public class Annotation {
         elements.remove(element);
     }
 
-    //    public String toJavaCode() {
-//        StringBuilder stringBuilder = new StringBuilder();
-//        stringBuilder.append("@").append(type.getJavaClassPath()).append("(");
-//        int i = 0;
-//        for(AnnotationElement element : elements) {
-//            stringBuilder.append(element.getConstantName()).append(" = ").append(element.getConstant().toJavaCode());
-//            i++;
-//            if(i != elements.size()) stringBuilder.append(", ");
-//        }
-//        stringBuilder.append(")");
-//        return stringBuilder.toString();
-//    }
-
 }

@@ -16,6 +16,12 @@ import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Expression returning Pairs, more info about them in Pair.java,
+ * expression %-primitive% has to be there to keep nice looking
+ * syntax and prevent vanilla Skript conflicts, more info in
+ * ExprPrimitiveType.java
+ */
 public class ExprPair extends SimpleExpression<Pair> {
 
     static {

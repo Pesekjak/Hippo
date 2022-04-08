@@ -16,6 +16,9 @@ import org.jetbrains.annotations.NotNull;
 public class ExprPrimitiveType extends SimpleExpression<PrimitiveType> {
 
     static {
+        // First parser mark has to be $ to prevent conflicts with vanilla Skript that happen for
+        // some unknown reason, only place this expression is used is ExprPair where extra support
+        // for ExprPrimitive is added so Skript users don't have to use $ for non array primitives
         Skript.registerExpression(ExprPrimitiveType.class, PrimitiveType.class, ExpressionType.COMBINED,
                 "%primitive%(1¦$|2¦<^(\\[\\])*>)(3¦|4¦\\.\\.\\.)"
         );

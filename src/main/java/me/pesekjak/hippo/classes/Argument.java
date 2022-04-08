@@ -38,7 +38,4 @@ public class Argument {
         this.type = type;
     }
 
-//    public String toJavaCode() {
-//        return (type != null ? type.getJavaClassPath() : primitive.getPrimitive()) + " " + name;
-//    }
 }

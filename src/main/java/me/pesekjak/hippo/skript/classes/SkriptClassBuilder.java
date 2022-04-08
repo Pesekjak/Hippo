@@ -1,50 +1,59 @@
 package me.pesekjak.hippo.skript.classes;
 
-import ch.njol.skript.config.Config;
 import ch.njol.skript.lang.Expression;
 import me.pesekjak.hippo.classes.SkriptClass;
 import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.classes.contents.annotation.Annotation;
 import me.pesekjak.hippo.classes.registry.SkriptClassRegistry;
 import me.pesekjak.hippo.hooks.SkriptReflectHook;
-import me.pesekjak.hippo.preimport.PreImportManager;
 import me.pesekjak.hippo.skript.classes.syntax.ExprType;
 import me.pesekjak.hippo.utils.Logger;
-import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
 import org.bukkit.event.Event;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClassBuilder {
+/**
+ * Utility class for easier ClassBuilding out of Skript's expressions
+ */
+public class SkriptClassBuilder {
 
     public static SkriptClass registeringClass;
     public static Event registeringEvent;
     public static List<Annotation> stackedAnnotations = new ArrayList<>();
 
-    private ClassBuilder() { }
+    private SkriptClassBuilder() { }
 
+    /**
+     * @return Class that's currently being registered (code of the class is being run by Skript)
+     */
     public static SkriptClass getRegisteringClass() {
         return registeringClass;
     }
 
     public static void setRegisteringClass(SkriptClass registeringClass) {
-        ClassBuilder.registeringClass = registeringClass;
+        SkriptClassBuilder.registeringClass = registeringClass;
     }
 
+    /**
+     * @return Event with which EvtNewSkriptClass was called
+     */
     public static Event getRegisteringEvent() {
         return registeringEvent;
     }
 
     public static void setRegisteringEvent(Event registeringEvent) {
-        ClassBuilder.registeringEvent = registeringEvent;
+        SkriptClassBuilder.registeringEvent = registeringEvent;
     }
 
     public static Event getCurrentEvent() {
         return registeringClass != null && registeringClass.getDefineEvent() != null ? registeringClass.getDefineEvent() : registeringEvent;
     }
 
+    /**
+     * @return Annotations that will apply to the next Annotatable class content
+     */
     public static List<Annotation> getStackedAnnotations() {
         return stackedAnnotations;
     }
@@ -57,6 +66,11 @@ public class ClassBuilder {
         stackedAnnotations.clear();
     }
 
+    /**
+     * Checks if provided event is for registering new class if it has assigned class type
+     * @param event Event for check
+     * @return true if event is NewSkriptClassEvent and its class has assigned class type, else false
+     */
     public static boolean validate(Event event) {
         if(!(event instanceof NewSkriptClassEvent)) return false;
         if((SkriptClassRegistry.REGISTRY.getSkriptClass(((NewSkriptClassEvent) event).getClassName())) != null) return true;
@@ -65,29 +79,32 @@ public class ClassBuilder {
         return false;
     }
 
-    public static String getClassNameFromExpression(Expression<?> expression, Event event) {
-        expression = SkriptUtils.defendExpression(expression);
-        Object javaType = expression.getSingle(event);
-        if((expression.toString().charAt(0) == '$')) {
-            String classAlias = expression.toString().substring(1);
-            Config config = ((NewSkriptClassEvent) event).getCurrentNode().getConfig();
-            return PreImportManager.MANAGER.getPreImporting(config).getPreImport(classAlias).preImportType().getDotPath();
-        }
-        if(javaType != null) return SkriptReflectHook.classOfJavaType(javaType).getName();
-        Logger.severe("Expression '" + expression + "' isn't supported as Class object by Hippo");
-        return null;
-    }
-
+    /**
+     * Returns Hippo's Type from expressions with return type of Reflect's JavaType
+     * @param typeExpression Expression of Reflect's JavaType
+     * @return Hippo Type out of typeExpression
+     */
     public static Type getTypeFromExpression(Expression<?> typeExpression) {
         Type type = null;
         if(typeExpression instanceof ExprType) {
+            // Special case with Hippo's ExprType, in case provided expression single JavaType
+            // from ExprType, getSingleType is called, returning Type with array and vararg support
             type = ((ExprType) typeExpression).getSingleType();
         } else if(typeExpression != null) {
-            Object typeObject = typeExpression.getSingle(ClassBuilder.getCurrentEvent());
+            Object typeObject = typeExpression.getSingle(SkriptClassBuilder.getCurrentEvent());
+            if(typeObject == null) return null;
             if(typeObject instanceof Type) {
+                // In case class doesn't exist yet and expression returned Hippo's type,
+                // happens with PreImported classes
                 type = (Type) typeObject;
             } else {
-                type = new Type(SkriptReflectHook.classOfJavaType(typeObject));
+                try {
+                    // In case provided expression is Reflect's JavaType expression or
+                    // different source of JavaType
+                    type = new Type(SkriptReflectHook.classOfJavaType(typeObject));
+                } catch (Exception e) {
+                    return null;
+                }
             }
         }
         return type;

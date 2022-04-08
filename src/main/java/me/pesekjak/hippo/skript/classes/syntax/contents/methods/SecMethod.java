@@ -8,7 +8,7 @@ import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.Modifier;
 import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.classes.contents.Method;
-import me.pesekjak.hippo.skript.classes.ClassBuilder;
+import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
 import me.pesekjak.hippo.skript.classes.Pair;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
@@ -49,7 +49,7 @@ public class SecMethod extends Section {
     protected TriggerItem walk(@NotNull Event event) {
         ((NewSkriptClassEvent) event).setCurrentTriggerItem(this);
         ((NewSkriptClassEvent) event).setCurrentNode(node);
-        if(!ClassBuilder.validate(event)) return null;
+        if(!SkriptClassBuilder.validate(event)) return null;
         Pair pair = pairExpression.getSingle(event);
         Method method = new Method(pair.getPrimitiveType(), pair.getType(), pair.getName());
         method.setRunnable(true);
@@ -63,9 +63,9 @@ public class SecMethod extends Section {
         if(exceptionExpression != null) {
             Arrays.stream(exceptionExpression.getAll(event)).toList().forEach(method::addException);
         }
-        ClassBuilder.getStackedAnnotations().forEach(method::addAnnotation);
-        ClassBuilder.clearStackedAnnotations();
-        ClassBuilder.getRegisteringClass().addMethod(pair.getName(), method);
+        SkriptClassBuilder.getStackedAnnotations().forEach(method::addAnnotation);
+        SkriptClassBuilder.clearStackedAnnotations();
+        SkriptClassBuilder.getRegisteringClass().addMethod(pair.getName(), method);
         return super.walk(event, false);
     }
 

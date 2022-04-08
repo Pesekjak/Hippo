@@ -8,7 +8,7 @@ import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.Constant;
 import me.pesekjak.hippo.classes.Type;
-import me.pesekjak.hippo.skript.classes.ClassBuilder;
+import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
 import org.bukkit.event.Event;
@@ -43,7 +43,7 @@ public class ExprConstant extends SimpleExpression<Constant> {
         } else if (characterExpression != null) {
             constant = new Constant(characterExpression.getSingle(event));
         } else if (typeExpression != null) {
-            Type type = ClassBuilder.getTypeFromExpression(typeExpression);
+            Type type = SkriptClassBuilder.getTypeFromExpression(typeExpression);
             if(type == null) return new Constant[0];
             constant = new Constant(type, constantPath);
         }

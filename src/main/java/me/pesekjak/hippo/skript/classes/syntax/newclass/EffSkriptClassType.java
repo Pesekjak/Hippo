@@ -9,7 +9,7 @@ import me.pesekjak.hippo.classes.ClassType;
 import me.pesekjak.hippo.classes.SkriptClass;
 import me.pesekjak.hippo.classes.classtypes.*;
 import me.pesekjak.hippo.classes.registry.SkriptClassRegistry;
-import me.pesekjak.hippo.skript.classes.ClassBuilder;
+import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
 import org.bukkit.event.Event;
@@ -39,7 +39,7 @@ public class EffSkriptClassType extends Effect {
             case ANNOTATION -> newClass = new TypeAnnotation(((NewSkriptClassEvent) event).toType());
         }
         SkriptClassRegistry.REGISTRY.addSkriptClass(((NewSkriptClassEvent) event).getClassName(), newClass);
-        ClassBuilder.setRegisteringClass(newClass);
+        SkriptClassBuilder.setRegisteringClass(newClass);
     }
 
     @Override

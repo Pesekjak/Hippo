@@ -9,7 +9,7 @@ import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.Constant;
 import me.pesekjak.hippo.classes.Modifier;
 import me.pesekjak.hippo.classes.contents.Field;
-import me.pesekjak.hippo.skript.classes.ClassBuilder;
+import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
 import me.pesekjak.hippo.skript.classes.Pair;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
@@ -35,7 +35,7 @@ public class EffField extends Effect {
     protected void execute(@NotNull Event event) {
         ((NewSkriptClassEvent) event).setCurrentTriggerItem(this);
         ((NewSkriptClassEvent) event).setCurrentNode(node);
-        if(!ClassBuilder.validate(event)) return;
+        if(!SkriptClassBuilder.validate(event)) return;
         Pair pair = pairExpression.getSingle(event);
         Field field = new Field(pair.getPrimitiveType(), pair.getType(), pair.getName());
         if(modifierExpression != null) {
@@ -48,9 +48,9 @@ public class EffField extends Effect {
                 field.setValue(valueExpression);
             }
         }
-        ClassBuilder.getStackedAnnotations().forEach(field::addAnnotation);
-        ClassBuilder.clearStackedAnnotations();
-        ClassBuilder.getRegisteringClass().addField(pair.getName(), field);
+        SkriptClassBuilder.getStackedAnnotations().forEach(field::addAnnotation);
+        SkriptClassBuilder.clearStackedAnnotations();
+        SkriptClassBuilder.getRegisteringClass().addField(pair.getName(), field);
     }
 
     @Override

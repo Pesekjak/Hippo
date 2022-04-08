@@ -7,9 +7,8 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.SkriptClass;
-import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.classes.contents.annotation.Annotation;
-import me.pesekjak.hippo.skript.classes.ClassBuilder;
+import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
 import org.bukkit.event.Event;
@@ -32,9 +31,9 @@ public class EffAnnotations extends Effect {
     protected void execute(@NotNull Event event) {
         ((NewSkriptClassEvent) event).setCurrentTriggerItem(this);
         ((NewSkriptClassEvent) event).setCurrentNode(node);
-        if(!ClassBuilder.validate(event)) return;
+        if(!SkriptClassBuilder.validate(event)) return;
         Annotation[] annotations = annotationExpression.getAll(event);
-        SkriptClass registeringClass = ClassBuilder.getRegisteringClass();
+        SkriptClass registeringClass = SkriptClassBuilder.getRegisteringClass();
         Arrays.stream(annotations).toList().forEach(registeringClass::addAnnotation);
     }
 

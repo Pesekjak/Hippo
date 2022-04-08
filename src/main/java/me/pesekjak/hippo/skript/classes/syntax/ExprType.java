@@ -1,7 +1,6 @@
 package me.pesekjak.hippo.skript.classes.syntax;
 
 import ch.njol.skript.Skript;
-import ch.njol.skript.config.Config;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser;
@@ -10,12 +9,17 @@ import ch.njol.skript.lang.util.SimpleLiteral;
 import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.hooks.SkriptReflectHook;
-import me.pesekjak.hippo.skript.classes.ClassBuilder;
+import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Special Expression returning Reflect's JavaType but constructing Hippo's Type
+ * in background with array and vararg support that can be returned by calling
+ * getSingleType.
+ */
 public class ExprType extends SimpleExpression<Object> {
 
     static {
@@ -63,9 +67,8 @@ public class ExprType extends SimpleExpression<Object> {
     public Type getSingleType() {
         Type type = null;
         if(javaTypeExpression != null) {
-            String className = ClassBuilder.getClassNameFromExpression(javaTypeExpression, ClassBuilder.getCurrentEvent());
-            if (className == null) return null;
-            type = new Type(className);
+            type = SkriptClassBuilder.getTypeFromExpression(javaTypeExpression);
+            if(type == null) return null;
         }
         if(type == null) return null;
         if(parseMark == 1 || parseMark == 6) {

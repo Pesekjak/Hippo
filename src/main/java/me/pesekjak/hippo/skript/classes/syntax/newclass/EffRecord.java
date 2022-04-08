@@ -9,7 +9,7 @@ import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.SkriptClass;
 import me.pesekjak.hippo.classes.classtypes.TypeRecord;
 import me.pesekjak.hippo.classes.registry.SkriptClassRegistry;
-import me.pesekjak.hippo.skript.classes.ClassBuilder;
+import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
 import me.pesekjak.hippo.skript.classes.Pair;
 import me.pesekjak.hippo.utils.Logger;
 import me.pesekjak.hippo.utils.SkriptUtils;
@@ -32,7 +32,7 @@ public class EffRecord extends Effect {
     protected void execute(@NotNull Event event) {
         ((NewSkriptClassEvent) event).setCurrentTriggerItem(this);
         ((NewSkriptClassEvent) event).setCurrentNode(node);
-        if(!ClassBuilder.validate(event)) return;
+        if(!SkriptClassBuilder.validate(event)) return;
         SkriptClass skriptClass = SkriptClassRegistry.REGISTRY.getSkriptClass(((NewSkriptClassEvent) event).getClassName());
         if(!(skriptClass instanceof TypeRecord)) {
             Logger.severe("You can't set record property for class '" + ((NewSkriptClassEvent) event).getClassName() + "' because type of the class isn't record: " + ((NewSkriptClassEvent) event).getCurrentNode().toString());

@@ -12,6 +12,12 @@ import me.pesekjak.hippo.preimport.PreImportManager;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Expression for PreImported classes, to pre-importing a class EvtPreImport and EffPreImport
+ * This Expression returns either a Reflect's JavaType of Hippo's Type, depending on existence of the class
+ * If class doesn't exist, Type of pre-imported class is returned, if it does, JavaType of the same
+ * class is returned instead.
+ */
 public class ExprPreImport extends SimpleExpression<Object> {
 
     static {
@@ -44,7 +50,7 @@ public class ExprPreImport extends SimpleExpression<Object> {
 
     @Override
     public @NotNull String toString(Event event, boolean b) {
-        return "$" + classAlias;
+        return classAlias;
     }
 
     @Override

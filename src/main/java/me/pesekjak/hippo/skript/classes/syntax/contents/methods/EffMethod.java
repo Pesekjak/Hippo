@@ -10,7 +10,7 @@ import me.pesekjak.hippo.classes.Constant;
 import me.pesekjak.hippo.classes.Modifier;
 import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.classes.contents.Method;
-import me.pesekjak.hippo.skript.classes.ClassBuilder;
+import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
 import me.pesekjak.hippo.skript.classes.Pair;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
@@ -38,7 +38,7 @@ public class EffMethod extends Effect {
     protected void execute(@NotNull Event event) {
         ((NewSkriptClassEvent) event).setCurrentTriggerItem(this);
         ((NewSkriptClassEvent) event).setCurrentNode(node);
-        if(!ClassBuilder.validate(event)) return;
+        if(!SkriptClassBuilder.validate(event)) return;
         Pair pair = pairExpression.getSingle(event);
         Method method = new Method(pair.getPrimitiveType(), pair.getType(), pair.getName());
         method.setRunnable(false);
@@ -54,9 +54,9 @@ public class EffMethod extends Effect {
         if(constantExpression != null) {
             method.setDefaultConstant(constantExpression.getSingle(event));
         }
-        ClassBuilder.getStackedAnnotations().forEach(method::addAnnotation);
-        ClassBuilder.clearStackedAnnotations();
-        ClassBuilder.getRegisteringClass().addMethod(pair.getName(), method);
+        SkriptClassBuilder.getStackedAnnotations().forEach(method::addAnnotation);
+        SkriptClassBuilder.clearStackedAnnotations();
+        SkriptClassBuilder.getRegisteringClass().addMethod(pair.getName(), method);
     }
 
     @Override

@@ -9,15 +9,13 @@ import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.SkriptClass;
 import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.hooks.SkriptReflectHook;
-import me.pesekjak.hippo.skript.classes.ClassBuilder;
-import me.pesekjak.hippo.skript.classes.syntax.ExprType;
+import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class EffExtends extends Effect {
@@ -35,7 +33,7 @@ public class EffExtends extends Effect {
     protected void execute(@NotNull Event event) {
         ((NewSkriptClassEvent) event).setCurrentTriggerItem(this);
         ((NewSkriptClassEvent) event).setCurrentNode(node);
-        if(!ClassBuilder.validate(event)) return;
+        if(!SkriptClassBuilder.validate(event)) return;
         List<Type> types = new ArrayList<>();
         for(Object typeObject : typeExpression.getAll(event)) {
             if(typeObject instanceof Type) {
@@ -44,7 +42,7 @@ public class EffExtends extends Effect {
                 types.add(new Type(SkriptReflectHook.classOfJavaType(typeObject)));
             }
         }
-        SkriptClass registeringClass = ClassBuilder.getRegisteringClass();
+        SkriptClass registeringClass = SkriptClassBuilder.getRegisteringClass();
         types.stream().toList().forEach(registeringClass::addExtendingType);
     }
 

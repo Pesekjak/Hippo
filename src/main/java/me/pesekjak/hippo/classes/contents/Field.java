@@ -51,33 +51,4 @@ public class Field extends Annotatable {
         return this.getType() != null ? this.getType().getDescriptor() : this.getPrimitiveType().getDescriptor();
     }
 
-//    public String toJavaCode(SkriptClass skriptClass) {
-//        StringBuilder stringBuilder = new StringBuilder();
-//        String fieldType;
-//        for(Annotation annotation : getAnnotations()) {
-//            stringBuilder.append(annotation.toJavaCode()).append(" ");
-//        }
-//        stringBuilder.append(modifiersAsString()).append(" ");
-//        if(type != null) {
-//            fieldType = type.getJavaClassPath();
-//        } else {
-//            fieldType = primitive.getPrimitive();
-//        }
-//        stringBuilder.append(fieldType).append(" ");
-//        stringBuilder.append(name);
-//        if(constant != null || value != null) stringBuilder.append(" = ").append("(").append(fieldType).append(") ");
-//        if(constant != null) {
-//            stringBuilder.append(constant.toJavaCode());
-//        }
-//        if(value != null) {
-//            stringBuilder.append(SkriptClassRegistry.getJavaCodeForClass(skriptClass.getClassName()))
-//            .append(".getField(\"").append(this.name).append("\").")
-//            .append("getValue()").append(".getSingle(")
-//            .append(SkriptClassRegistry.getJavaCodeForClass(skriptClass.getClassName())).append(".getDefineEvent()")
-//            .append(")");
-//        }
-//        stringBuilder.append(";");
-//        return stringBuilder.toString();
-//    }
-
 }
