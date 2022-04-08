@@ -13,8 +13,8 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Expression for PreImported classes, to pre-importing a class EvtPreImport and EffPreImport
- * This Expression returns either a Reflect's JavaType of Hippo's Type, depending on existence of the class
+ * Expression for PreImported classes, to pre-import a class EvtPreImport and EffPreImport are used.
+ * This Expression returns either a Reflect's JavaType or Hippo's Type, depending on existence of the class.
  * If class doesn't exist, Type of pre-imported class is returned, if it does, JavaType of the same
  * class is returned instead.
  */
