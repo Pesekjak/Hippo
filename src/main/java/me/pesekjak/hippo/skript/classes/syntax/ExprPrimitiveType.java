@@ -17,7 +17,7 @@ public class ExprPrimitiveType extends SimpleExpression<PrimitiveType> {
 
     static {
         Skript.registerExpression(ExprPrimitiveType.class, PrimitiveType.class, ExpressionType.COMBINED,
-                "*%primitive%(1¦|2¦<^(\\[\\])*>)(3¦|4¦\\.\\.\\.)"
+                "%primitive%(1¦$|2¦<^(\\[\\])*>)(3¦|4¦\\.\\.\\.)"
         );
     }
 

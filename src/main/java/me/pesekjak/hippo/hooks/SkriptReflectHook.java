@@ -25,6 +25,7 @@ public class SkriptReflectHook {
 
     public static Object buildJavaType(Class<?> classInstance) {
         Object javaType = null;
+        if(classInstance == null) return null;
         try {
             javaType = Reflectness.newInstance(Reflectness.getConstructor(javaTypeClass, Class.class), classInstance);
         } catch (Exception ignored) { }
