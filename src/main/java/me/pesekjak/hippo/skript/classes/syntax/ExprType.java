@@ -8,7 +8,6 @@ import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.skript.lang.util.SimpleLiteral;
 import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.Type;
-import me.pesekjak.hippo.hooks.SkriptReflectHook;
 import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
@@ -16,26 +15,39 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Special Expression returning Reflect's JavaType but constructing Hippo's Type
- * in background with array and vararg support that can be returned by calling
- * getSingleType.
+ * Expression that converts Reflect's JavaType to Hippo's Type and
+ * adds array and vararg information to it.
  */
-public class ExprType extends SimpleExpression<Object> {
+public class ExprType extends SimpleExpression<Type> {
 
     static {
-        Skript.registerExpression(ExprType.class, Object.class, ExpressionType.COMBINED,
-                "%javatype%(1¦$|2¦<^(\\[\\])*>)(3¦|4¦\\.\\.\\.)"
+        Skript.registerExpression(ExprType.class, Type.class, ExpressionType.COMBINED,
+                "%javatype%(1¦$|2¦<^(\\[\\])*>)(3¦|4¦\\.\\.\\.)",
+                "%javatype%\\.\\.\\."
         );
     }
 
     private Expression<?> javaTypeExpression;
     private int arraySize = 0;
     private int parseMark;
+    private int pattern;
 
     @Override
-    protected Object @NotNull [] get(@NotNull Event event) {
-        if(javaTypeExpression == null) return new Object[0];
-        return new Object[] { javaTypeExpression.getAll(event) };
+    protected Type @NotNull [] get(@NotNull Event event) {
+        if(javaTypeExpression == null) return new Type[0];
+        Type type = SkriptClassBuilder.getTypeFromExpression(javaTypeExpression);
+        if(type == null) return new Type[0];
+        if(pattern == 0) {
+            if (parseMark == 1 || parseMark == 6) {
+                for (int i = 0; i < arraySize; ++i) {
+                    type = type.arrayType();
+                }
+            }
+            if(parseMark == 5 || parseMark == 6) type = type.varArgType();
+        } else {
+            type = type.arrayType();
+        }
+        return new Type[] { type };
     }
 
     @Override
@@ -44,8 +56,8 @@ public class ExprType extends SimpleExpression<Object> {
     }
 
     @Override
-    public @NotNull Class<? extends Object> getReturnType() {
-        return SkriptReflectHook.getJavaTypeClass();
+    public @NotNull Class<? extends Type> getReturnType() {
+        return Type.class;
     }
 
     @Override
@@ -55,6 +67,7 @@ public class ExprType extends SimpleExpression<Object> {
 
     @Override
     public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult) {
+        pattern = i;
         javaTypeExpression = SkriptUtils.defendExpression(expressions[0]);
         if(javaTypeExpression.getClass() == SimpleLiteral.class) return false;
         if(parseResult.regexes.size() > 0) {
@@ -62,22 +75,6 @@ public class ExprType extends SimpleExpression<Object> {
         }
         this.parseMark = parseResult.mark;
         return getParser().isCurrentEvent(NewSkriptClassEvent.class) && getParser().getCurrentSections().size() == 0;
-    }
-
-    public Type getSingleType() {
-        Type type = null;
-        if(javaTypeExpression != null) {
-            type = SkriptClassBuilder.getTypeFromExpression(javaTypeExpression);
-            if(type == null) return null;
-        }
-        if(type == null) return null;
-        if(parseMark == 1 || parseMark == 6) {
-            for(int i = 0; i < arraySize; ++i) {
-                type = type.arrayType();
-            }
-        }
-        if(parseMark == 5 || parseMark == 6) type = type.varArgType();
-        return type;
     }
 
 }

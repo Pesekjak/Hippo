@@ -86,11 +86,7 @@ public class SkriptClassBuilder {
      */
     public static Type getTypeFromExpression(Expression<?> typeExpression) {
         Type type = null;
-        if(typeExpression instanceof ExprType) {
-            // Special case with Hippo's ExprType, in case provided expression single JavaType
-            // from ExprType, getSingleType is called, returning Type with array and vararg support
-            type = ((ExprType) typeExpression).getSingleType();
-        } else if(typeExpression != null) {
+        if(typeExpression != null) {
             Object typeObject = typeExpression.getSingle(SkriptClassBuilder.getCurrentEvent());
             if(typeObject == null) return null;
             if(typeObject instanceof Type) {

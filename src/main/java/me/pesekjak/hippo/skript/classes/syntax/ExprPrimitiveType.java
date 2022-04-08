@@ -16,31 +16,33 @@ import org.jetbrains.annotations.NotNull;
 public class ExprPrimitiveType extends SimpleExpression<PrimitiveType> {
 
     static {
-        // First parser mark has to be $ to prevent conflicts with vanilla Skript that happen for
-        // some unknown reason, only place this expression is used is ExprPair where extra support
-        // for ExprPrimitive is added so Skript users don't have to use $ for non array primitives
         Skript.registerExpression(ExprPrimitiveType.class, PrimitiveType.class, ExpressionType.COMBINED,
-                "%primitive%(1¦$|2¦<^(\\[\\])*>)(3¦|4¦\\.\\.\\.)"
+                "%primitive%(1¦$|2¦<^(\\[\\])*>)(3¦|4¦\\.\\.\\.)",
+                "%primitive%\\.\\.\\."
         );
     }
 
     private Expression<Primitive> primitiveExpression;
     private int arraySize = 0;
     private int parseMark;
+    private int pattern;
 
     @Override
     protected PrimitiveType @NotNull [] get(@NotNull Event event) {
-        PrimitiveType type = null;
-        if(primitiveExpression != null) {
-            type = new PrimitiveType(primitiveExpression.getSingle(event));
-        }
-        if(type == null) return new PrimitiveType[0];
-        if(parseMark == 1 || parseMark == 6) {
-            for(int i = 0; i < arraySize; ++i) {
-                type = type.arrayType();
+        PrimitiveType type;
+        if(primitiveExpression == null) return new PrimitiveType[0];
+        if(primitiveExpression.getSingle(event) == null) return new PrimitiveType[0];
+        type = new PrimitiveType(primitiveExpression.getSingle(event));
+        if(pattern == 0) {
+            if(parseMark == 1 || parseMark == 6) {
+                for(int i = 0; i < arraySize; ++i) {
+                    type = type.arrayType();
+                }
             }
+            if(parseMark == 5 || parseMark == 6) type = type.varArgType();
+        } else {
+            type = type.varArgType();
         }
-        if(parseMark == 5 || parseMark == 6) type = type.varArgType();
         return new PrimitiveType[] { type };
     }
 
@@ -61,6 +63,7 @@ public class ExprPrimitiveType extends SimpleExpression<PrimitiveType> {
 
     @Override
     public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult) {
+        pattern = i;
         primitiveExpression = SkriptUtils.defendExpression(expressions[0]);
         if(parseResult.regexes.size() > 0) {
             arraySize = parseResult.regexes.get(0).group().length() / 2;

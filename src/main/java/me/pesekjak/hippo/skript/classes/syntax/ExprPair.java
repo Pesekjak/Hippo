@@ -16,28 +16,25 @@ import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Expression returning Pairs, more info about them in Pair.java,
- * expression %-primitive% has to be there to keep nice looking
- * syntax and prevent vanilla Skript conflicts, more info in
- * ExprPrimitiveType.java
- */
 public class ExprPair extends SimpleExpression<Pair> {
 
     static {
         Skript.registerExpression(ExprPair.class, Pair.class, ExpressionType.COMBINED,
-                "(%-primitive%|%-primitivetype%|%-javatype%) <[a-zA-Z0-9]*>"
+                "(%-primitive%|%-primitivetype%|%-javatype%|%-asmtype%) <[a-zA-Z0-9]*>"
         );
     }
 
-    private Expression<?> typeExpression;
-    private Expression<PrimitiveType> primitiveTypeExpression;
     private Expression<Primitive> primitiveExpression;
+    private Expression<PrimitiveType> primitiveTypeExpression;
+    private Expression<?> javaTypeExpression;
+    private Expression<Type> typeExpression;
     private String name;
 
     @Override
     protected Pair @NotNull [] get(@NotNull Event event) {
-        Type type = SkriptClassBuilder.getTypeFromExpression(typeExpression);
+        Type type = null;
+        if(javaTypeExpression != null) type = SkriptClassBuilder.getTypeFromExpression(javaTypeExpression);
+        if(typeExpression != null) type = typeExpression.getSingle(event);
         PrimitiveType primitive = new PrimitiveType(Primitive.NONE);
         if(primitiveTypeExpression != null) primitive = primitiveTypeExpression.getSingle(event);
         if(primitiveExpression != null) primitive = new PrimitiveType(primitiveExpression.getSingle(event));
@@ -63,7 +60,8 @@ public class ExprPair extends SimpleExpression<Pair> {
     public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult) {
         primitiveExpression = SkriptUtils.defendExpression(expressions[0]);
         primitiveTypeExpression = SkriptUtils.defendExpression(expressions[1]);
-        typeExpression = SkriptUtils.defendExpression(expressions[2]);
+        javaTypeExpression = SkriptUtils.defendExpression(expressions[2]);
+        typeExpression = SkriptUtils.defendExpression(expressions[3]);
         name = parseResult.regexes.get(0).group();
         return getParser().isCurrentEvent(NewSkriptClassEvent.class);
     }
