@@ -89,10 +89,22 @@ public class ClassBuilder {
 
     private void setupAnnotation(AnnotationVisitor av, Annotation annotation) {
         for(AnnotationElement element : annotation.getElements()) {
-            if(element.getConstant().getConstantObject() != null) {
-                av.visit(element.getConstantName(), element.getConstant().getConstantObject());
+            if(element.getConstantArray() == null) {
+                if(element.getConstant().getConstantObject() != null) {
+                    av.visit(element.getConstantName(), element.getConstant().getConstantObject());
+                } else {
+                    av.visitEnum(element.getConstantName(), element.getConstant().getType().getDescriptor(), element.getConstant().getPath());
+                }
             } else {
-                av.visitEnum(element.getConstantName(), element.getConstant().getType().getDescriptor(), element.getConstant().getPath());
+                AnnotationVisitor arrayVisitor = av.visitArray(element.getConstantName());
+                for(Constant constant : element.getConstantArray().getConstants()) {
+                    if(constant.getConstantObject() != null) {
+                        arrayVisitor.visit(null, constant.getConstantObject());
+                    } else {
+                        arrayVisitor.visitEnum(null, constant.getType().getDescriptor(), constant.getPath());
+                    }
+                }
+                arrayVisitor.visitEnd();
             }
         }
     }
@@ -113,7 +125,9 @@ public class ClassBuilder {
         for(Field field : skriptClass.getFields().values()) {
             if(field.getConstant() != null) {
                 setupConstantField(mv, field);
-            } else if (field.getValue() != null) {
+            } else if(field.getConstantArray() != null) {
+                setupConstantArrayField(mv, field);
+            } else if(field.getValue() != null) {
                 setupValueField(mv, field);
             }
         }
@@ -131,6 +145,27 @@ public class ClassBuilder {
             mv.visitFieldInsn(Opcodes.GETSTATIC, field.getConstant().getType().getInternalName(), field.getConstant().getPath(), field.getConstant().getType().getDescriptor());
             mv.visitTypeInsn(Opcodes.CHECKCAST, descriptor);
         }
+        mv.visitFieldInsn(Opcodes.PUTFIELD, internalName, field.getName(), descriptor);
+    }
+
+    private void setupConstantArrayField(MethodVisitor mv, Field field) {
+        String descriptor = field.getDescriptor();
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitIntInsn(Opcodes.BIPUSH, field.getConstantArray().getConstants().size());
+        mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/Object");
+        int i = 0;
+        for(Constant constant : field.getConstantArray().getConstants()) {
+            mv.visitInsn(Opcodes.DUP);
+            mv.visitIntInsn(Opcodes.BIPUSH, i);
+            if(constant.getConstantObject() != null) {
+                mv.visitLdcInsn(constant.getConstantObject());
+            } else {
+                mv.visitFieldInsn(Opcodes.GETSTATIC, constant.getType().getInternalName(), constant.getPath(), constant.getType().getDescriptor());
+            }
+            mv.visitInsn(Opcodes.AASTORE);
+            i++;
+        }
+        mv.visitTypeInsn(Opcodes.CHECKCAST, descriptor);
         mv.visitFieldInsn(Opcodes.PUTFIELD, internalName, field.getName(), descriptor);
     }
 

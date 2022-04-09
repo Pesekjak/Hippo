@@ -7,10 +7,13 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.Constant;
+import me.pesekjak.hippo.classes.ConstantArray;
 import me.pesekjak.hippo.classes.Modifier;
 import me.pesekjak.hippo.classes.contents.Field;
 import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
 import me.pesekjak.hippo.skript.classes.Pair;
+import me.pesekjak.hippo.skript.classes.syntax.ExprConstant;
+import me.pesekjak.hippo.skript.classes.syntax.ExprConstantArray;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
 import org.bukkit.event.Event;
@@ -42,8 +45,10 @@ public class EffField extends Effect {
             Arrays.stream(modifierExpression.getAll(event)).toList().forEach(field::addModifier);
         }
         if(valueExpression != null) {
-            if(valueExpression.toString().equalsIgnoreCase("constant")) {
+            if(valueExpression instanceof ExprConstant) {
                 field.setConstant((Constant) valueExpression.getSingle(event));
+            } else if(valueExpression instanceof ExprConstantArray) {
+                field.setConstantArray((ConstantArray) valueExpression.getSingle(event));
             } else {
                 field.setValue(valueExpression);
             }

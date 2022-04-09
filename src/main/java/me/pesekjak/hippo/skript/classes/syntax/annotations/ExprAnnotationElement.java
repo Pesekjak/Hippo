@@ -7,6 +7,7 @@ import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.Constant;
+import me.pesekjak.hippo.classes.ConstantArray;
 import me.pesekjak.hippo.classes.contents.annotation.AnnotationElement;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
@@ -17,17 +18,25 @@ public class ExprAnnotationElement extends SimpleExpression<AnnotationElement> {
 
     static {
         Skript.registerExpression(ExprAnnotationElement.class, AnnotationElement.class, ExpressionType.COMBINED,
-                "<[a-zA-Z0-9]*> = %-constant%"
+                "<[a-zA-Z0-9]*> = (%-constant%|%-constantarray%)"
         );
     }
 
     private String name;
     private Expression<Constant> constantExpression;
+    private Expression<ConstantArray> constantArrayExpression;
 
     @Override
     protected AnnotationElement @NotNull [] get(@NotNull Event event) {
-        Constant constant = constantExpression.getSingle(event);
-        AnnotationElement annotationElement = new AnnotationElement(name, constant);
+        AnnotationElement annotationElement = null;
+        if(constantExpression != null) {
+            Constant constant = constantExpression.getSingle(event);
+            annotationElement = new AnnotationElement(name, constant);
+        }
+        if(constantArrayExpression != null) {
+            ConstantArray constantArray = constantArrayExpression.getSingle(event);
+            annotationElement = new AnnotationElement(name, constantArray);
+        }
         return new AnnotationElement[] { annotationElement };
     }
 
@@ -49,6 +58,7 @@ public class ExprAnnotationElement extends SimpleExpression<AnnotationElement> {
     @Override
     public boolean init(Expression<?>[] expressions, int i, Kleenean kleenean, SkriptParser.ParseResult parseResult) {
         constantExpression = SkriptUtils.defendExpression(expressions[0]);
+        constantArrayExpression = SkriptUtils.defendExpression(expressions[1]);
         name = parseResult.regexes.get(0).group();
         return getParser().isCurrentEvent(NewSkriptClassEvent.class);
     }

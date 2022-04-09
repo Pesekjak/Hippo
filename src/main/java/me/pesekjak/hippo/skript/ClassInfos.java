@@ -113,6 +113,13 @@ public class ClassInfos {
                 .description("Special type used for constant values.")
                 .since("1.0-BETA.1")
         );
+
+        Classes.registerClass(new ClassInfo<>(ConstantArray.class, "constantarray")
+                .user("constantarrays?")
+                .name("Constant Array")
+                .description("Array of constants.")
+                .since("1.0-BETA.1")
+        );
     }
 
 }

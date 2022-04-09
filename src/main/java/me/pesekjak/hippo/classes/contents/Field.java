@@ -12,6 +12,7 @@ public class Field extends Annotatable {
     private final String name;
     private Expression<?> value;
     private Constant constant;
+    private ConstantArray constantArray;
 
     public Field(@NotNull PrimitiveType primitive, @Nullable Type type, @NotNull String name) {
         this.primitiveType = primitive;
@@ -45,6 +46,14 @@ public class Field extends Annotatable {
 
     public void setConstant(Constant constant) {
         this.constant = constant;
+    }
+
+    public ConstantArray getConstantArray() {
+        return constantArray;
+    }
+
+    public void setConstantArray(ConstantArray constantArray) {
+        this.constantArray = constantArray;
     }
 
     public String getDescriptor() {
