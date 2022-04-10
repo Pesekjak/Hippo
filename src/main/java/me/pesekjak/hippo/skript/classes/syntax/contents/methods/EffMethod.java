@@ -23,7 +23,7 @@ public class EffMethod extends Effect {
 
     static {
         Skript.registerEffect(EffMethod.class,
-                "%javamodifiers% %pair% \\([%-pairs%]\\) [throws %-asmtypes%] [default %-constant%]"
+                "%javamodifiers% %pair%\\([%-pairs%]\\) [throws %-asmtypes%] [default %-constant%]"
         );
     }
 

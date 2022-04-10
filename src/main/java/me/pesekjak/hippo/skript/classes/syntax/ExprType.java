@@ -22,7 +22,7 @@ public class ExprType extends SimpleExpression<Type> {
 
     static {
         Skript.registerExpression(ExprType.class, Type.class, ExpressionType.COMBINED,
-                "%javatype%(1¦$|2¦<^(\\[\\])*>)(3¦|4¦\\.\\.\\.)",
+                "%javatype%<^(\\[\\])*>(1¦|2¦\\.\\.\\.)",
                 "%javatype%\\.\\.\\."
         );
     }
@@ -38,12 +38,10 @@ public class ExprType extends SimpleExpression<Type> {
         Type type = SkriptClassBuilder.getTypeFromExpression(javaTypeExpression);
         if(type == null) return new Type[0];
         if(pattern == 0) {
-            if (parseMark == 1 || parseMark == 6) {
-                for (int i = 0; i < arraySize; ++i) {
-                    type = type.arrayType();
-                }
+            for (int i = 0; i < arraySize; ++i) {
+                type = type.arrayType();
             }
-            if(parseMark == 5 || parseMark == 6) type = type.varArgType();
+            if(parseMark == 2) type = type.varArgType();
         } else {
             type = type.arrayType();
         }

@@ -23,7 +23,7 @@ public class SecMethod extends Section {
 
     static {
         Skript.registerSection(SecMethod.class,
-                "%javamodifiers% %pair% \\([%-pairs%]\\) [throws %-asmtypes%]"
+                "%javamodifiers% %pair%\\([%-pairs%]\\) [throws %-asmtypes%]"
         );
     }
 
