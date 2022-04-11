@@ -92,7 +92,23 @@ public class Method extends Annotatable {
         this.trigger = trigger;
     }
 
-    public String toJavaCode(SkriptClass skriptClass) {
-        return null;
+    public boolean hasVarArg() {
+        if(arguments.size() == 0) return false;
+        Argument last = arguments.get(arguments.size() - 1);
+        if(last.getType() != null) {
+            return last.getType().isVarArg();
+        } else if(last.getPrimitiveType() != null) {
+            return last.getPrimitiveType().isVarArg();
+        }
+        return false;
+    }
+
+    public String getDescriptor() {
+        String returnDescriptor = this.getType() != null ? this.getType().getDescriptor() : this.getPrimitiveType().getDescriptor();
+        StringBuilder argumentsDescriptor = new StringBuilder();
+        for(Argument argument : arguments) {
+            argumentsDescriptor.append(argument.getType() != null ? argument.getType().getDescriptor() : argument.getPrimitiveType().getDescriptor());
+        }
+        return "(" + argumentsDescriptor + ")" + returnDescriptor;
     }
 }

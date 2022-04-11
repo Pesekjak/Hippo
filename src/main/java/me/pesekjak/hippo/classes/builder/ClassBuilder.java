@@ -3,9 +3,11 @@ package me.pesekjak.hippo.classes.builder;
 import me.pesekjak.hippo.classes.*;
 import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.classes.contents.Field;
+import me.pesekjak.hippo.classes.contents.Method;
 import me.pesekjak.hippo.classes.contents.annotation.Annotation;
 import me.pesekjak.hippo.classes.contents.annotation.AnnotationElement;
 import me.pesekjak.hippo.classes.registry.SkriptClassRegistry;
+import me.pesekjak.hippo.hooks.SkriptReflectHook;
 import org.objectweb.asm.*;
 
 import java.io.DataOutputStream;
@@ -69,11 +71,18 @@ public class ClassBuilder {
         // Add fields
         skriptClass.getFields().values().forEach(this::addField);
 
+        // Add methods
+        skriptClass.getMethods().values().forEach(this::addMethod);
+
         // Handles init method
         generateInit();
 
         // End :)
         cw.visitEnd();
+
+        // Define the class
+        if(SkriptReflectHook.getLibraryLoader() == null) SkriptReflectHook.setupReflectLoader();
+        SkriptReflectHook.getLibraryLoader().loadClass(skriptClass.getClassName(), cw.toByteArray());
 
         // Debug
         try {
@@ -114,6 +123,22 @@ public class ClassBuilder {
         FieldVisitor fv = cw.visitField(sumModifiers(field), field.getName(), descriptor, null, null);
         field.getAnnotations().forEach(annotation -> setupFieldAnnotation(fv, annotation));
         fv.visitEnd();
+        cw.visitEnd();
+    }
+
+    private void addMethod(Method method) {
+        String descriptor = method.getDescriptor();
+        List<String> exceptions = new ArrayList<>();
+        for(Type exceptionType : method.getExceptions()) {
+            exceptions.add(exceptionType.getInternalName());
+        }
+        int modifiers = sumModifiers(method);
+        if(method.hasVarArg()) {
+            modifiers =+ Opcodes.ACC_VARARGS;
+        }
+        MethodVisitor mv = cw.visitMethod(modifiers, method.getName(), descriptor, null, exceptions.size() > 0 ? exceptions.toArray(new String[0]) : null);
+        method.getAnnotations().forEach(annotation -> setupMethodAnnotation(mv, annotation));
+        mv.visitEnd();
         cw.visitEnd();
     }
 
@@ -175,7 +200,7 @@ public class ClassBuilder {
         mv.visitFieldInsn(Opcodes.GETSTATIC, REGISTRY_TYPE.getInternalName(), "REGISTRY", REGISTRY_TYPE.getDescriptor());
         mv.visitLdcInsn(skriptClass.getClassName());
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, REGISTRY_TYPE.getInternalName(), "getSkriptClass", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/SkriptClass;", false);
-        mv.visitLdcInsn(field.getName());
+        mv.visitLdcInsn(field.getName() + ":" + field.getDescriptor());
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/SkriptClass", "getField", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/contents/Field;", false);
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/contents/Field", "getValue", "()Lch/njol/skript/lang/Expression;", false);
         mv.visitFieldInsn(Opcodes.GETSTATIC, REGISTRY_TYPE.getInternalName(), "REGISTRY", REGISTRY_TYPE.getDescriptor());
@@ -183,12 +208,34 @@ public class ClassBuilder {
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, REGISTRY_TYPE.getInternalName(), "getSkriptClass", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/SkriptClass;", false);
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/SkriptClass", "getDefineEvent", "()Lorg/bukkit/event/Event;", false);
         mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "ch/njol/skript/lang/Expression", "getSingle", "(Lorg/bukkit/event/Event;)Ljava/lang/Object;", true);
+        mv.visitVarInsn(Opcodes.ASTORE, 1);
+        mv.visitVarInsn(Opcodes.ALOAD, 1);
+        mv.visitTypeInsn(Opcodes.INSTANCEOF, "com/btk5h/skriptmirror/ObjectWrapper");
+        Label label = new Label();
+        mv.visitJumpInsn(Opcodes.IFEQ, label);
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitVarInsn(Opcodes.ALOAD, 1);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
         mv.visitTypeInsn(Opcodes.CHECKCAST, field.getType().getInternalName());
         mv.visitFieldInsn(Opcodes.PUTFIELD, internalName, field.getName(), descriptor);
+        Label end = new Label();
+        mv.visitJumpInsn(Opcodes.GOTO, end);
+        mv.visitLabel(label);
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitVarInsn(Opcodes.ALOAD, 1);
+        mv.visitTypeInsn(Opcodes.CHECKCAST, field.getType().getInternalName());
+        mv.visitFieldInsn(Opcodes.PUTFIELD, internalName, field.getName(), descriptor);
+        mv.visitLabel(end);
     }
 
     private void setupFieldAnnotation(FieldVisitor fv, Annotation annotation) {
         AnnotationVisitor av = fv.visitAnnotation(annotation.getType().getDescriptor(), true);
+        setupAnnotation(av, annotation);
+        av.visitEnd();
+    }
+
+    private void setupMethodAnnotation(MethodVisitor mv, Annotation annotation) {
+        AnnotationVisitor av = mv.visitAnnotation(annotation.getType().getDescriptor(), true);
         setupAnnotation(av, annotation);
         av.visitEnd();
     }
