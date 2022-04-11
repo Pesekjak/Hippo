@@ -55,7 +55,7 @@ public class EffField extends Effect {
         }
         SkriptClassBuilder.getStackedAnnotations().forEach(field::addAnnotation);
         SkriptClassBuilder.clearStackedAnnotations();
-        SkriptClassBuilder.getRegisteringClass().addField(pair.getName(), field);
+        SkriptClassBuilder.getRegisteringClass().addField(pair.getName() + ":" + field.getDescriptor(), field);
     }
 
     @Override

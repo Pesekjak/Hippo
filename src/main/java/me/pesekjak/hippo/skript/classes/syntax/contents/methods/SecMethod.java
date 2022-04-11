@@ -65,7 +65,7 @@ public class SecMethod extends Section {
         }
         SkriptClassBuilder.getStackedAnnotations().forEach(method::addAnnotation);
         SkriptClassBuilder.clearStackedAnnotations();
-        SkriptClassBuilder.getRegisteringClass().addMethod(pair.getName(), method);
+        SkriptClassBuilder.getRegisteringClass().addMethod(pair.getName() + ":" + method.getDescriptor(), method);
         return super.walk(event, false);
     }
 

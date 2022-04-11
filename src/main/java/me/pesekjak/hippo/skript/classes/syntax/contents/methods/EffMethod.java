@@ -56,7 +56,7 @@ public class EffMethod extends Effect {
         }
         SkriptClassBuilder.getStackedAnnotations().forEach(method::addAnnotation);
         SkriptClassBuilder.clearStackedAnnotations();
-        SkriptClassBuilder.getRegisteringClass().addMethod(pair.getName(), method);
+        SkriptClassBuilder.getRegisteringClass().addMethod(pair.getName() + ":" + method.getDescriptor(), method);
     }
 
     @Override
