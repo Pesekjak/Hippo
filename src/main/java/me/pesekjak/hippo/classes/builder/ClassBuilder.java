@@ -177,7 +177,7 @@ public class ClassBuilder {
         String descriptor = field.getDescriptor();
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitIntInsn(Opcodes.BIPUSH, field.getConstantArray().getConstants().size());
-        mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/Object");
+        mv.visitTypeInsn(Opcodes.ANEWARRAY, field.getType().getInternalName());
         int i = 0;
         for(Constant constant : field.getConstantArray().getConstants()) {
             mv.visitInsn(Opcodes.DUP);
@@ -190,7 +190,6 @@ public class ClassBuilder {
             mv.visitInsn(Opcodes.AASTORE);
             i++;
         }
-        mv.visitTypeInsn(Opcodes.CHECKCAST, descriptor);
         mv.visitFieldInsn(Opcodes.PUTFIELD, internalName, field.getName(), descriptor);
     }
 
