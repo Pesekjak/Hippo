@@ -165,7 +165,7 @@ public class ClassBuilder {
         String descriptor = field.getDescriptor();
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         if(field.getConstant().getConstantObject() != null) {
-            mv.visitLdcInsn(field.getConstant().getConstantObject());
+            mv.visitLdcInsn(field.getConstant().getConstantObject(field));
         } else {
             mv.visitFieldInsn(Opcodes.GETSTATIC, field.getConstant().getType().getInternalName(), field.getConstant().getPath(), field.getConstant().getType().getDescriptor());
             mv.visitTypeInsn(Opcodes.CHECKCAST, descriptor);
@@ -177,13 +177,14 @@ public class ClassBuilder {
         String descriptor = field.getDescriptor();
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitIntInsn(Opcodes.BIPUSH, field.getConstantArray().getConstants().size());
-        mv.visitTypeInsn(Opcodes.ANEWARRAY, field.getType().getInternalName());
+        String typeInternalName = field.getType() != null ? field.getType().getInternalName() : field.getPrimitiveType().getPrimitive().getPrimitive();
+        mv.visitTypeInsn(Opcodes.ANEWARRAY, typeInternalName);
         int i = 0;
         for(Constant constant : field.getConstantArray().getConstants()) {
             mv.visitInsn(Opcodes.DUP);
             mv.visitIntInsn(Opcodes.BIPUSH, i);
             if(constant.getConstantObject() != null) {
-                mv.visitLdcInsn(constant.getConstantObject());
+                mv.visitLdcInsn(constant.getConstantObject(field));
             } else {
                 mv.visitFieldInsn(Opcodes.GETSTATIC, constant.getType().getInternalName(), constant.getPath(), constant.getType().getDescriptor());
             }
@@ -195,6 +196,7 @@ public class ClassBuilder {
 
     private void setupValueField(MethodVisitor mv, Field field) {
         String descriptor = field.getDescriptor();
+        String typeInternalName = field.getType() != null ? field.getType().getInternalName() : field.getPrimitiveType().getPrimitive().getPrimitive();
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitFieldInsn(Opcodes.GETSTATIC, REGISTRY_TYPE.getInternalName(), "REGISTRY", REGISTRY_TYPE.getDescriptor());
         mv.visitLdcInsn(skriptClass.getClassName());
@@ -215,14 +217,14 @@ public class ClassBuilder {
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitVarInsn(Opcodes.ALOAD, 1);
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
-        mv.visitTypeInsn(Opcodes.CHECKCAST, field.getType().getInternalName());
+        mv.visitTypeInsn(Opcodes.CHECKCAST, typeInternalName);
         mv.visitFieldInsn(Opcodes.PUTFIELD, internalName, field.getName(), descriptor);
         Label end = new Label();
         mv.visitJumpInsn(Opcodes.GOTO, end);
         mv.visitLabel(label);
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitVarInsn(Opcodes.ALOAD, 1);
-        mv.visitTypeInsn(Opcodes.CHECKCAST, field.getType().getInternalName());
+        mv.visitTypeInsn(Opcodes.CHECKCAST, typeInternalName);
         mv.visitFieldInsn(Opcodes.PUTFIELD, internalName, field.getName(), descriptor);
         mv.visitLabel(end);
     }
