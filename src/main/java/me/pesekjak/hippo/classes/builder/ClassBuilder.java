@@ -165,7 +165,7 @@ public class ClassBuilder {
         String descriptor = field.getDescriptor();
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         if(field.getConstant().getConstantObject() != null) {
-            mv.visitLdcInsn(field.getConstant().getConstantObject(field));
+            mv.visitLdcInsn(field.getConstant().getConstantObject(field.getPrimitiveType().getPrimitive()));
         } else {
             mv.visitFieldInsn(Opcodes.GETSTATIC, field.getConstant().getType().getInternalName(), field.getConstant().getPath(), field.getConstant().getType().getDescriptor());
             mv.visitTypeInsn(Opcodes.CHECKCAST, descriptor);
@@ -176,19 +176,32 @@ public class ClassBuilder {
     private void setupConstantArrayField(MethodVisitor mv, Field field) {
         String descriptor = field.getDescriptor();
         mv.visitVarInsn(Opcodes.ALOAD, 0);
-        mv.visitIntInsn(Opcodes.BIPUSH, field.getConstantArray().getConstants().size());
-        String typeInternalName = field.getType() != null ? field.getType().getInternalName() : field.getPrimitiveType().getPrimitive().getPrimitive();
-        mv.visitTypeInsn(Opcodes.ANEWARRAY, typeInternalName);
+        pushValue(mv, field.getConstantArray().getConstants().size());
+        if(field.getType() != null) {
+            mv.visitTypeInsn(Opcodes.ANEWARRAY, field.getType().getInternalName());
+        } else {
+            mv.visitIntInsn(Opcodes.NEWARRAY, field.getPrimitiveType().getPrimitive().getTypeValue());
+        }
         int i = 0;
         for(Constant constant : field.getConstantArray().getConstants()) {
             mv.visitInsn(Opcodes.DUP);
-            mv.visitIntInsn(Opcodes.BIPUSH, i);
+            pushValue(mv, i);
             if(constant.getConstantObject() != null) {
-                mv.visitLdcInsn(constant.getConstantObject(field));
+                pushValue(mv, constant.getConstantObject(field.getPrimitiveType().getPrimitive()));
             } else {
                 mv.visitFieldInsn(Opcodes.GETSTATIC, constant.getType().getInternalName(), constant.getPath(), constant.getType().getDescriptor());
             }
-            mv.visitInsn(Opcodes.AASTORE);
+            int storeCode = Opcodes.AASTORE;
+            switch (field.getPrimitiveType().getPrimitive()) {
+                case BOOLEAN, BYTE -> storeCode = Opcodes.BASTORE;
+                case CHAR -> storeCode = Opcodes.CASTORE;
+                case SHORT -> storeCode = Opcodes.SASTORE;
+                case INT -> storeCode = Opcodes.IASTORE;
+                case FLOAT -> storeCode = Opcodes.FASTORE;
+                case LONG -> storeCode = Opcodes.LASTORE;
+                case DOUBLE -> storeCode = Opcodes.DASTORE;
+            }
+            mv.visitInsn(storeCode);
             i++;
         }
         mv.visitFieldInsn(Opcodes.PUTFIELD, internalName, field.getName(), descriptor);
@@ -239,6 +252,28 @@ public class ClassBuilder {
         AnnotationVisitor av = mv.visitAnnotation(annotation.getType().getDescriptor(), true);
         setupAnnotation(av, annotation);
         av.visitEnd();
+    }
+
+    private void pushValue(MethodVisitor mv, Object value) {
+        double number = 0;
+        if(value instanceof Boolean) {
+            if(!(Boolean) value) number = 0;
+            if((Boolean) value) number = 1;
+        } else if(value instanceof Character) {
+            number = (Character) value;
+        } else if(value instanceof Number){
+            number = ((Number) value).doubleValue();
+        } else {
+            mv.visitLdcInsn(value);
+            return;
+        }
+        if(0 <= number && number <= 5 && number % 1 == 0) {
+            mv.visitInsn(((Number) (Opcodes.ICONST_0 + number)).intValue());
+        } else if(Byte.MIN_VALUE <= number && number <= Byte.MAX_VALUE) {
+            mv.visitIntInsn(Opcodes.BIPUSH, ((Number) value).intValue());
+        } else if(Short.MIN_VALUE <= number && number <= Short.MAX_VALUE) {
+            mv.visitIntInsn(Opcodes.SIPUSH, ((Number) value).intValue());
+        }
     }
 
 }

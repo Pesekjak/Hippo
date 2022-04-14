@@ -1,23 +1,27 @@
 package me.pesekjak.hippo.classes;
 
+import org.objectweb.asm.Opcodes;
+
 public enum Primitive {
-    BOOLEAN("boolean", "Z"),
-    CHAR("char", "C"),
-    BYTE("byte", "B"),
-    SHORT("short", "S"),
-    INT("int", "I"),
-    FLOAT("float", "F"),
-    LONG("long", "J"),
-    DOUBLE("double", "D"),
-    VOID("void", "V"),
-    NONE(null, null);
+    BOOLEAN("boolean", "Z", Opcodes.T_BOOLEAN),
+    CHAR("char", "C", Opcodes.T_CHAR),
+    BYTE("byte", "B", Opcodes.T_BYTE),
+    SHORT("short", "S", Opcodes.T_SHORT),
+    INT("int", "I", Opcodes.T_INT),
+    FLOAT("float", "F", Opcodes.T_FLOAT),
+    LONG("long", "J", Opcodes.T_LONG),
+    DOUBLE("double", "D", Opcodes.T_DOUBLE),
+    VOID("void", "V", 0),
+    NONE(null, null, 0);
 
     private final String primitive;
     private final String descriptor;
+    private final int typeValue;
 
-    Primitive(String primitive, String descriptor) {
+    Primitive(String primitive, String descriptor, int typeValue) {
         this.primitive = primitive;
         this.descriptor = descriptor;
+        this.typeValue = typeValue;
     }
 
     public static Primitive fromDescriptor(String descriptor) {
@@ -41,5 +45,9 @@ public enum Primitive {
 
     public String getDescriptor() {
         return descriptor;
+    }
+
+    public int getTypeValue() {
+        return typeValue;
     }
 }
