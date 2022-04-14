@@ -1,6 +1,5 @@
 package me.pesekjak.hippo.classes;
 
-import me.pesekjak.hippo.classes.contents.Field;
 import org.jetbrains.annotations.Nullable;
 
 public class Constant {
@@ -27,10 +26,10 @@ public class Constant {
         return constant;
     }
 
-    public Object getConstantObject(Field field) {
-        if(field.getType() != null) return constant;
+    public Object getConstantObject(Primitive primitive) {
+        if(primitive == Primitive.NONE) return constant;
         Object primitiveValue = constant;
-        switch (field.getPrimitiveType().getPrimitive()) {
+        switch (primitive) {
             case BOOLEAN -> primitiveValue = ((Boolean) constant).booleanValue();
             case CHAR -> ((Character) constant).charValue();
             case BYTE ->  ((Number) constant).byteValue();
