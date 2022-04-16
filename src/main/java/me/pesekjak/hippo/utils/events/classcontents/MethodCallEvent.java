@@ -12,7 +12,7 @@ public class MethodCallEvent extends Event {
 
     private final Object instance;
     private final String methodName;
-    private final HashMap<String, Object> arguments;
+    private final HashMap<Number, Object> arguments;
     private Object output;
 
     public MethodCallEvent(Object instance, String className) {
@@ -29,17 +29,17 @@ public class MethodCallEvent extends Event {
         return methodName;
     }
 
-    public HashMap<String, Object> getArguments() {
+    public HashMap<Number, Object> getArguments() {
         return arguments;
     }
 
-    public Object getArgument(String argumentName) {
-        return arguments.get(argumentName);
+    public Object getArgument(Number argumentIndex) {
+        return arguments.get(argumentIndex);
     }
 
-    public void addArgument(String argumentName, Object argument) {
-        arguments.putIfAbsent(argumentName, argument);
-        arguments.replace(argumentName, argument);
+    public void addArgument(Number argumentIndex, Object argument) {
+        arguments.putIfAbsent(argumentIndex, argument);
+        arguments.replace(argumentIndex, argument);
     }
 
     public Object getOutput() {

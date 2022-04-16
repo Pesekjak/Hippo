@@ -51,7 +51,7 @@ public class ClassBuilder {
     public void build() {
 
         // Handles attributes for class
-        int modifiers = skriptClass.getClassType().getValue() + sumModifiers(skriptClass);
+        int modifiers = classType.getValue() + sumModifiers(skriptClass);
         internalName = skriptClass.getType().getInternalName();
         String superName = "java/lang/Object";
         if(skriptClass.getExtendingTypes().size() != 0) superName = skriptClass.getExtendingTypes().get(0).getInternalName();
@@ -138,6 +138,59 @@ public class ClassBuilder {
         }
         MethodVisitor mv = cw.visitMethod(modifiers, method.getName(), descriptor, null, exceptions.size() > 0 ? exceptions.toArray(new String[0]) : null);
         method.getAnnotations().forEach(annotation -> setupMethodAnnotation(mv, annotation));
+        if(method.isRunnable()) {
+            mv.visitTypeInsn(Opcodes.NEW, "me/pesekjak/hippo/utils/events/classcontents/MethodCallEvent");
+            mv.visitInsn(Opcodes.DUP);
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            mv.visitLdcInsn(method.getName() + ":" + method.getDescriptor());
+            mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "me/pesekjak/hippo/utils/events/classcontents/MethodCallEvent", "<init>", "(Ljava/lang/Object;Ljava/lang/String;)V", false);
+            int eventIndex = method.getArguments().size() + 1;
+            mv.visitVarInsn(Opcodes.ASTORE, eventIndex);
+            mv.visitVarInsn(Opcodes.ALOAD, eventIndex);
+            int i = 0;
+            for(Argument argument : method.getArguments()) {
+                i++;
+                pushValue(mv, i);
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+                int loadCode = Opcodes.ALOAD;
+                switch (argument.getPrimitiveType().getPrimitive()) {
+                    case BOOLEAN, BYTE, CHAR, SHORT, INT -> loadCode = Opcodes.ILOAD;
+                    case LONG -> loadCode = Opcodes.LLOAD;
+                    case FLOAT -> loadCode = Opcodes.FLOAD;
+                    case DOUBLE -> loadCode = Opcodes.DLOAD;
+                }
+                mv.visitVarInsn(loadCode, i);
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/MethodCallEvent", "addArgument", "(Ljava/lang/Number;Ljava/lang/Object;)V", false);
+            }
+            mv.visitFieldInsn(Opcodes.GETSTATIC, REGISTRY_TYPE.getInternalName(), "REGISTRY", REGISTRY_TYPE.getDescriptor());
+            mv.visitLdcInsn(skriptClass.getClassName());
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, REGISTRY_TYPE.getInternalName(), "getSkriptClass", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/SkriptClass;", false);
+            mv.visitLdcInsn(method.getName() + ":" + method.getDescriptor());
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/SkriptClass", "getMethod", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/contents/Method;", false);
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/contents/Method", "getTrigger", "()Lch/njol/skript/lang/Trigger;", false);
+            mv.visitVarInsn(Opcodes.ASTORE, eventIndex + 1);
+            mv.visitVarInsn(Opcodes.ALOAD, eventIndex + 1);
+            mv.visitVarInsn(Opcodes.ALOAD, eventIndex);
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "ch/njol/skript/lang/TriggerItem", "walk", "(Lch/njol/skript/lang/TriggerItem;Lorg/bukkit/event/Event;)Z", false);
+            mv.visitInsn(Opcodes.POP);
+            mv.visitVarInsn(Opcodes.ALOAD, eventIndex);
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/MethodCallEvent", "getOutput", "()Ljava/lang/Object;", false);
+            if(method.getType() != null) {
+                mv.visitTypeInsn(Opcodes.CHECKCAST, method.getType().getInternalName());
+            } else if(method.getPrimitiveType().getPrimitive() != Primitive.VOID) {
+                pushAsPrimitive(mv, method.getPrimitiveType().getPrimitive());
+            }
+            int returnCode = Opcodes.ARETURN;
+            switch (method.getPrimitiveType().getPrimitive()) {
+                case BOOLEAN, BYTE, CHAR, SHORT, INT -> returnCode = Opcodes.IRETURN;
+                case LONG -> returnCode = Opcodes.LRETURN;
+                case FLOAT -> returnCode = Opcodes.FRETURN;
+                case DOUBLE -> returnCode = Opcodes.DRETURN;
+                case VOID -> returnCode = Opcodes.RETURN;
+            }
+            mv.visitInsn(returnCode);
+        }
+        mv.visitMaxs(0, 0);
         mv.visitEnd();
         cw.visitEnd();
     }
@@ -168,7 +221,6 @@ public class ClassBuilder {
             mv.visitLdcInsn(field.getConstant().getConstantObject(field.getPrimitiveType().getPrimitive()));
         } else {
             mv.visitFieldInsn(Opcodes.GETSTATIC, field.getConstant().getType().getInternalName(), field.getConstant().getPath(), field.getConstant().getType().getDescriptor());
-            mv.visitTypeInsn(Opcodes.CHECKCAST, descriptor);
         }
         mv.visitFieldInsn(Opcodes.PUTFIELD, internalName, field.getName(), descriptor);
     }
@@ -209,7 +261,6 @@ public class ClassBuilder {
 
     private void setupValueField(MethodVisitor mv, Field field) {
         String descriptor = field.getDescriptor();
-        String typeInternalName = field.getType() != null ? field.getType().getInternalName() : field.getPrimitiveType().getPrimitive().getPrimitive();
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitFieldInsn(Opcodes.GETSTATIC, REGISTRY_TYPE.getInternalName(), "REGISTRY", REGISTRY_TYPE.getDescriptor());
         mv.visitLdcInsn(skriptClass.getClassName());
@@ -230,14 +281,22 @@ public class ClassBuilder {
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitVarInsn(Opcodes.ALOAD, 1);
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
-        mv.visitTypeInsn(Opcodes.CHECKCAST, typeInternalName);
+        if(field.getType() != null) {
+            mv.visitTypeInsn(Opcodes.CHECKCAST, field.getType().getInternalName());
+        } else {
+            pushAsPrimitive(mv, field.getPrimitiveType().getPrimitive());
+        }
         mv.visitFieldInsn(Opcodes.PUTFIELD, internalName, field.getName(), descriptor);
         Label end = new Label();
         mv.visitJumpInsn(Opcodes.GOTO, end);
         mv.visitLabel(label);
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitVarInsn(Opcodes.ALOAD, 1);
-        mv.visitTypeInsn(Opcodes.CHECKCAST, typeInternalName);
+        if(field.getType() != null) {
+            mv.visitTypeInsn(Opcodes.CHECKCAST, field.getType().getInternalName());
+        } else {
+            pushAsPrimitive(mv, field.getPrimitiveType().getPrimitive());
+        }
         mv.visitFieldInsn(Opcodes.PUTFIELD, internalName, field.getName(), descriptor);
         mv.visitLabel(end);
     }
@@ -274,6 +333,15 @@ public class ClassBuilder {
         } else if(Short.MIN_VALUE <= number && number <= Short.MAX_VALUE) {
             mv.visitIntInsn(Opcodes.SIPUSH, ((Number) value).intValue());
         }
+    }
+
+    private void pushAsPrimitive(MethodVisitor mv, Primitive primitive) {
+        Type counterType = new Type(primitive.getClassCounterpart());
+        if(Number.class.isAssignableFrom(counterType.findClass())) {
+            counterType = new Type(Number.class);
+        }
+        mv.visitTypeInsn(Opcodes.CHECKCAST, counterType.getInternalName());
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, counterType.getInternalName(), primitive.getPrimitive() + "Value", "()" + primitive.getDescriptor(), false);
     }
 
 }

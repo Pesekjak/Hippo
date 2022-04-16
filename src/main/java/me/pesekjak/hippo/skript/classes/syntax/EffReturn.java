@@ -6,7 +6,6 @@ import ch.njol.skript.sections.SecLoop;
 import ch.njol.skript.sections.SecWhile;
 import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.utils.SkriptUtils;
-import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
 import me.pesekjak.hippo.utils.events.classcontents.MethodCallEvent;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +14,7 @@ public class EffReturn extends Effect {
 
     static {
         Skript.registerEffect(EffReturn.class,
-                "[hippo] return %-object%"
+                "return %-object%"
         );
     }
 
@@ -50,6 +49,6 @@ public class EffReturn extends Effect {
     @Override
     public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult) {
         returnExpression = SkriptUtils.defendExpression(expressions[0]);
-        return (getParser().isCurrentEvent(NewSkriptClassEvent.class) || getParser().isCurrentEvent(MethodCallEvent.class));
+        return (getParser().isCurrentEvent(MethodCallEvent.class));
     }
 }
