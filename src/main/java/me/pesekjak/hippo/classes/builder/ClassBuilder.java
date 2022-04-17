@@ -8,6 +8,7 @@ import me.pesekjak.hippo.classes.contents.annotation.Annotation;
 import me.pesekjak.hippo.classes.contents.annotation.AnnotationElement;
 import me.pesekjak.hippo.classes.registry.SkriptClassRegistry;
 import me.pesekjak.hippo.hooks.SkriptReflectHook;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.*;
 
 import java.io.DataOutputStream;
@@ -175,11 +176,7 @@ public class ClassBuilder {
             mv.visitInsn(Opcodes.POP);
             mv.visitVarInsn(Opcodes.ALOAD, eventIndex);
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/MethodCallEvent", "getOutput", "()Ljava/lang/Object;", false);
-            if(method.getType() != null) {
-                mv.visitTypeInsn(Opcodes.CHECKCAST, method.getType().getInternalName());
-            } else if(method.getPrimitiveType().getPrimitive() != Primitive.VOID) {
-                pushAsPrimitive(mv, method.getPrimitiveType().getPrimitive());
-            }
+            castToType(mv, method.getPrimitiveType(), method.getType());
             int returnCode = Opcodes.ARETURN;
             switch (method.getPrimitiveType().getPrimitive()) {
                 case BOOLEAN, BYTE, CHAR, SHORT, INT -> returnCode = Opcodes.IRETURN;
@@ -281,22 +278,14 @@ public class ClassBuilder {
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitVarInsn(Opcodes.ALOAD, 1);
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
-        if(field.getType() != null) {
-            mv.visitTypeInsn(Opcodes.CHECKCAST, field.getType().getInternalName());
-        } else {
-            pushAsPrimitive(mv, field.getPrimitiveType().getPrimitive());
-        }
+        castToType(mv, field.getPrimitiveType(), field.getType());
         mv.visitFieldInsn(Opcodes.PUTFIELD, internalName, field.getName(), descriptor);
         Label end = new Label();
         mv.visitJumpInsn(Opcodes.GOTO, end);
         mv.visitLabel(label);
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitVarInsn(Opcodes.ALOAD, 1);
-        if(field.getType() != null) {
-            mv.visitTypeInsn(Opcodes.CHECKCAST, field.getType().getInternalName());
-        } else {
-            pushAsPrimitive(mv, field.getPrimitiveType().getPrimitive());
-        }
+        castToType(mv, field.getPrimitiveType(), field.getType());
         mv.visitFieldInsn(Opcodes.PUTFIELD, internalName, field.getName(), descriptor);
         mv.visitLabel(end);
     }
@@ -342,6 +331,19 @@ public class ClassBuilder {
         }
         mv.visitTypeInsn(Opcodes.CHECKCAST, counterType.getInternalName());
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, counterType.getInternalName(), primitive.getPrimitive() + "Value", "()" + primitive.getDescriptor(), false);
+    }
+
+    private void castToType(MethodVisitor mv, PrimitiveType primitiveType, @Nullable Type type) {
+        boolean isArray = (type != null) ? type.isArray() : primitiveType.isArray();
+        if(!isArray) {
+            if (type != null) {
+                mv.visitTypeInsn(Opcodes.CHECKCAST, type.getInternalName());
+            } else if (primitiveType.getPrimitive() != Primitive.VOID) {
+                pushAsPrimitive(mv, primitiveType.getPrimitive());
+            }
+        } else {
+            mv.visitTypeInsn(Opcodes.CHECKCAST, (type != null) ? type.getDescriptor() : primitiveType.getDescriptor());
+        }
     }
 
 }
