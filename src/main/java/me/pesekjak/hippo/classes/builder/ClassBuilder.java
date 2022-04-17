@@ -178,12 +178,14 @@ public class ClassBuilder {
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/MethodCallEvent", "getOutput", "()Ljava/lang/Object;", false);
             castToType(mv, method.getPrimitiveType(), method.getType());
             int returnCode = Opcodes.ARETURN;
-            switch (method.getPrimitiveType().getPrimitive()) {
-                case BOOLEAN, BYTE, CHAR, SHORT, INT -> returnCode = Opcodes.IRETURN;
-                case LONG -> returnCode = Opcodes.LRETURN;
-                case FLOAT -> returnCode = Opcodes.FRETURN;
-                case DOUBLE -> returnCode = Opcodes.DRETURN;
-                case VOID -> returnCode = Opcodes.RETURN;
+            if(!((method.getType() != null) ? method.getType().isArray() : method.getPrimitiveType().isArray())) {
+                switch (method.getPrimitiveType().getPrimitive()) {
+                    case BOOLEAN, BYTE, CHAR, SHORT, INT -> returnCode = Opcodes.IRETURN;
+                    case LONG -> returnCode = Opcodes.LRETURN;
+                    case FLOAT -> returnCode = Opcodes.FRETURN;
+                    case DOUBLE -> returnCode = Opcodes.DRETURN;
+                    case VOID -> returnCode = Opcodes.RETURN;
+                }
             }
             mv.visitInsn(returnCode);
         }
