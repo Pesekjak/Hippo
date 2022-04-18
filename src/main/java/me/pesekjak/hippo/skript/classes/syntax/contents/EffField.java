@@ -1,7 +1,6 @@
 package me.pesekjak.hippo.skript.classes.syntax.contents;
 
 import ch.njol.skript.Skript;
-import ch.njol.skript.config.Node;
 import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
@@ -32,13 +31,27 @@ public class EffField extends Effect {
     private Expression<Modifier> modifierExpression;
     private Expression<Pair> pairExpression;
     private Expression<?> valueExpression;
-    private Node node;
 
     @Override
     protected void execute(@NotNull Event event) {
-        ((NewSkriptClassEvent) event).setCurrentTriggerItem(this);
-        ((NewSkriptClassEvent) event).setCurrentNode(node);
-        if(!SkriptClassBuilder.validate(event)) return;
+    }
+
+    @Override
+    public @NotNull String toString(Event event, boolean b) {
+        return "new field";
+    }
+
+    @Override
+    public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult) {
+        modifierExpression = SkriptUtils.defendExpression(expressions[0]);
+        pairExpression = SkriptUtils.defendExpression(expressions[1]);
+        valueExpression = SkriptUtils.defendExpression(expressions[2]);
+        if (!getParser().isCurrentEvent(NewSkriptClassEvent.class)) return false;
+        build(SkriptClassBuilder.getCurrentEvent());
+        return true;
+    }
+
+    protected void build(@NotNull Event event) {
         Pair pair = pairExpression.getSingle(event);
         Field field = new Field(pair.getPrimitiveType(), pair.getType(), pair.getName());
         if(modifierExpression != null) {
@@ -53,22 +66,8 @@ public class EffField extends Effect {
                 field.setValue(valueExpression);
             }
         }
-        SkriptClassBuilder.getStackedAnnotations().forEach(field::addAnnotation);
-        SkriptClassBuilder.clearStackedAnnotations();
+        ((NewSkriptClassEvent) event).getStackedAnnotations().forEach(field::addAnnotation);
+        ((NewSkriptClassEvent) event).clearStackedAnnotations();
         SkriptClassBuilder.getRegisteringClass().addField(pair.getName() + ":" + field.getDescriptor(), field);
-    }
-
-    @Override
-    public @NotNull String toString(Event event, boolean b) {
-        return "new field";
-    }
-
-    @Override
-    public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult) {
-        modifierExpression = SkriptUtils.defendExpression(expressions[0]);
-        pairExpression = SkriptUtils.defendExpression(expressions[1]);
-        valueExpression = SkriptUtils.defendExpression(expressions[2]);
-        node = getParser().getNode();
-        return getParser().isCurrentEvent(NewSkriptClassEvent.class);
     }
 }

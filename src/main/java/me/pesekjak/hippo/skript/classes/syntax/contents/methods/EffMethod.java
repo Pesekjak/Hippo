@@ -1,7 +1,6 @@
 package me.pesekjak.hippo.skript.classes.syntax.contents.methods;
 
 import ch.njol.skript.Skript;
-import ch.njol.skript.config.Node;
 import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
@@ -32,13 +31,29 @@ public class EffMethod extends Effect {
     private Expression<Pair> argumentExpression;
     private Expression<Type> exceptionExpression;
     private Expression<Constant> constantExpression;
-    private Node node;
 
     @Override
     protected void execute(@NotNull Event event) {
-        ((NewSkriptClassEvent) event).setCurrentTriggerItem(this);
-        ((NewSkriptClassEvent) event).setCurrentNode(node);
-        if(!SkriptClassBuilder.validate(event)) return;
+    }
+
+    @Override
+    public @NotNull String toString(Event event, boolean b) {
+        return "new not code running method";
+    }
+
+    @Override
+    public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult) {
+        modifierExpression = SkriptUtils.defendExpression(expressions[0]);
+        pairExpression = SkriptUtils.defendExpression(expressions[1]);
+        argumentExpression = SkriptUtils.defendExpression(expressions[2]);
+        exceptionExpression = SkriptUtils.defendExpression(expressions[3]);
+        constantExpression = SkriptUtils.defendExpression(expressions[4]);
+        if (!getParser().isCurrentEvent(NewSkriptClassEvent.class)) return false;
+        build(SkriptClassBuilder.getCurrentEvent());
+        return true;
+    }
+
+    protected void build(@NotNull Event event) {
         Pair pair = pairExpression.getSingle(event);
         Method method = new Method(pair.getPrimitiveType(), pair.getType(), pair.getName());
         method.setRunnable(false);
@@ -54,24 +69,8 @@ public class EffMethod extends Effect {
         if(constantExpression != null) {
             method.setDefaultConstant(constantExpression.getSingle(event));
         }
-        SkriptClassBuilder.getStackedAnnotations().forEach(method::addAnnotation);
-        SkriptClassBuilder.clearStackedAnnotations();
+        ((NewSkriptClassEvent) event).getStackedAnnotations().forEach(method::addAnnotation);
+        ((NewSkriptClassEvent) event).clearStackedAnnotations();
         SkriptClassBuilder.getRegisteringClass().addMethod(pair.getName() + ":" + method.getDescriptor(), method);
-    }
-
-    @Override
-    public @NotNull String toString(Event event, boolean b) {
-        return "new not code running method";
-    }
-
-    @Override
-    public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult) {
-        modifierExpression = SkriptUtils.defendExpression(expressions[0]);
-        pairExpression = SkriptUtils.defendExpression(expressions[1]);
-        argumentExpression = SkriptUtils.defendExpression(expressions[2]);
-        exceptionExpression = SkriptUtils.defendExpression(expressions[3]);
-        constantExpression = SkriptUtils.defendExpression(expressions[4]);
-        node = getParser().getNode();
-        return getParser().isCurrentEvent(NewSkriptClassEvent.class);
     }
 }

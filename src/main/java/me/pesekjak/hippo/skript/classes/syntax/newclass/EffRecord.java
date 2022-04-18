@@ -1,17 +1,14 @@
 package me.pesekjak.hippo.skript.classes.syntax.newclass;
 
 import ch.njol.skript.Skript;
-import ch.njol.skript.config.Node;
 import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.SkriptClass;
-import me.pesekjak.hippo.classes.classtypes.TypeRecord;
-import me.pesekjak.hippo.classes.registry.SkriptClassRegistry;
-import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
+import me.pesekjak.hippo.classes.classtypes.TypeRecord;;
 import me.pesekjak.hippo.skript.classes.Pair;
-import me.pesekjak.hippo.utils.Logger;
+import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
 import org.bukkit.event.Event;
@@ -26,21 +23,9 @@ public class EffRecord extends Effect {
     }
 
     private Expression<Pair> pairExpression;
-    private Node node;
 
     @Override
     protected void execute(@NotNull Event event) {
-        ((NewSkriptClassEvent) event).setCurrentTriggerItem(this);
-        ((NewSkriptClassEvent) event).setCurrentNode(node);
-        if(!SkriptClassBuilder.validate(event)) return;
-        SkriptClass skriptClass = SkriptClassRegistry.REGISTRY.getSkriptClass(((NewSkriptClassEvent) event).getClassName());
-        if(!(skriptClass instanceof TypeRecord)) {
-            Logger.severe("You can't set record property for class '" + ((NewSkriptClassEvent) event).getClassName() + "' because type of the class isn't record: " + ((NewSkriptClassEvent) event).getCurrentNode().toString());
-            return;
-        }
-        for(Pair pair : pairExpression.getAll(event)) {
-            ((TypeRecord) skriptClass).addRecordConstructorArgument(pair.asArgument());
-        }
     }
 
     @Override
@@ -51,7 +36,19 @@ public class EffRecord extends Effect {
     @Override
     public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult) {
         pairExpression = SkriptUtils.defendExpression(expressions[0]);
-        node = getParser().getNode();
-        return getParser().isCurrentEvent(NewSkriptClassEvent.class) && SkriptUtils.canInit(pairExpression);
+        if (!getParser().isCurrentEvent(NewSkriptClassEvent.class)) return false;
+        build(SkriptClassBuilder.getCurrentEvent());
+        return true;
+    }
+
+    protected void build(@NotNull Event event) {
+        SkriptClass skriptClass = ((NewSkriptClassEvent) event).getSkriptClass();
+        if(!(skriptClass instanceof TypeRecord)) {
+            Skript.error("You can't set record property for class '" + ((NewSkriptClassEvent) event).getSkriptClass().getClassName() + "' because type of the class isn't record");
+            return;
+        }
+        for(Pair pair : pairExpression.getAll(event)) {
+            ((TypeRecord) skriptClass).addRecordConstructorArgument(pair.asArgument());
+        }
     }
 }

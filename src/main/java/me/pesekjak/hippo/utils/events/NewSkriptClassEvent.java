@@ -2,45 +2,35 @@ package me.pesekjak.hippo.utils.events;
 
 import ch.njol.skript.config.Node;
 import ch.njol.skript.lang.TriggerItem;
+import me.pesekjak.hippo.classes.SkriptClass;
 import me.pesekjak.hippo.classes.Type;
+import me.pesekjak.hippo.classes.contents.annotation.Annotation;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class NewSkriptClassEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
 
-    private final String className;
+    private final SkriptClass skriptClass;
     private TriggerItem currentTriggerItem;
     private Node currentNode;
+    private List<Annotation> stackedAnnotations = new ArrayList<>();
 
-    public NewSkriptClassEvent(String className) {
-        this.className = className;
+    public NewSkriptClassEvent(SkriptClass skriptClass) {
+        this.skriptClass = skriptClass;
     }
 
-    public String getClassName() {
-        return className;
-    }
-
-    public TriggerItem getCurrentTriggerItem() {
-        return currentTriggerItem;
-    }
-
-    public Node getCurrentNode() {
-        return currentNode;
-    }
-
-    public void setCurrentNode(Node currentNode) {
-        this.currentNode = currentNode;
-    }
-
-    public void setCurrentTriggerItem(TriggerItem currentTriggerItem) {
-        this.currentTriggerItem = currentTriggerItem;
+    public SkriptClass getSkriptClass() {
+        return skriptClass;
     }
 
     public Type toType() {
-        return new Type(className);
+        return skriptClass.getType();
     }
 
     public Event getEvent() {
@@ -53,6 +43,18 @@ public class NewSkriptClassEvent extends Event {
 
     public static HandlerList getHandlerList() {
         return handlers;
+    }
+
+    public List<Annotation> getStackedAnnotations() {
+        return stackedAnnotations;
+    }
+
+    public void addStackingAnnotation(Annotation stackedAnnotation) {
+        stackedAnnotations.add(stackedAnnotation);
+    }
+
+    public void clearStackedAnnotations() {
+        stackedAnnotations.clear();
     }
 
 }

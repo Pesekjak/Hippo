@@ -4,11 +4,7 @@ import ch.njol.skript.lang.Expression;
 import me.pesekjak.hippo.classes.SkriptClass;
 import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.classes.contents.annotation.Annotation;
-import me.pesekjak.hippo.classes.registry.SkriptClassRegistry;
 import me.pesekjak.hippo.hooks.SkriptReflectHook;
-import me.pesekjak.hippo.skript.classes.syntax.ExprType;
-import me.pesekjak.hippo.utils.Logger;
-import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
 import org.bukkit.event.Event;
 
 import java.util.ArrayList;
@@ -37,46 +33,11 @@ public class SkriptClassBuilder {
     }
 
     /**
-     * @return Event with which EvtNewSkriptClass was called
+     * @return Event of currently registering Skript Class
      */
-    public static Event getRegisteringEvent() {
-        return registeringEvent;
-    }
-
-    public static void setRegisteringEvent(Event registeringEvent) {
-        SkriptClassBuilder.registeringEvent = registeringEvent;
-    }
 
     public static Event getCurrentEvent() {
-        return registeringClass != null && registeringClass.getDefineEvent() != null ? registeringClass.getDefineEvent() : registeringEvent;
-    }
-
-    /**
-     * @return Annotations that will apply to the next Annotatable class content
-     */
-    public static List<Annotation> getStackedAnnotations() {
-        return stackedAnnotations;
-    }
-
-    public static void addStackingAnnotation(Annotation stackedAnnotation) {
-        stackedAnnotations.add(stackedAnnotation);
-    }
-
-    public static void clearStackedAnnotations() {
-        stackedAnnotations.clear();
-    }
-
-    /**
-     * Checks if provided event is for registering new class if it has assigned class type
-     * @param event Event for check
-     * @return true if event is NewSkriptClassEvent and its class has assigned class type, else false
-     */
-    public static boolean validate(Event event) {
-        if(!(event instanceof NewSkriptClassEvent)) return false;
-        if((SkriptClassRegistry.REGISTRY.getSkriptClass(((NewSkriptClassEvent) event).getClassName())) != null) return true;
-        Logger.severe("You can't set properties of class '" + ((NewSkriptClassEvent) event).getClassName() + "' because type of the class wasn't assigned: " + ((NewSkriptClassEvent) event).getCurrentNode().toString());
-        ((NewSkriptClassEvent) event).getCurrentTriggerItem().setNext(null);
-        return false;
+        return registeringClass.getDefineEvent();
     }
 
     /**

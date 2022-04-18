@@ -1,7 +1,6 @@
 package me.pesekjak.hippo.skript.classes.syntax.contents.methods;
 
 import ch.njol.skript.Skript;
-import ch.njol.skript.config.Node;
 import ch.njol.skript.config.SectionNode;
 import ch.njol.skript.lang.*;
 import ch.njol.util.Kleenean;
@@ -31,7 +30,6 @@ public class SecMethod extends Section {
     private Expression<Pair> pairExpression;
     private Expression<Pair> argumentExpression;
     private Expression<Type> exceptionExpression;
-    private Node node;
     private Trigger methodTrigger;
 
     @Override
@@ -40,16 +38,13 @@ public class SecMethod extends Section {
         pairExpression = SkriptUtils.defendExpression(expressions[1]);
         argumentExpression = SkriptUtils.defendExpression(expressions[2]);
         exceptionExpression = SkriptUtils.defendExpression(expressions[3]);
-        node = getParser().getNode();
         methodTrigger = loadCode(sectionNode, "method", MethodCallEvent.class);
-        return getParser().isCurrentEvent(NewSkriptClassEvent.class);
+        if (!getParser().isCurrentEvent(NewSkriptClassEvent.class)) return false;
+        build(SkriptClassBuilder.getCurrentEvent());
+        return true;
     }
 
-    @Override
-    protected TriggerItem walk(@NotNull Event event) {
-        ((NewSkriptClassEvent) event).setCurrentTriggerItem(this);
-        ((NewSkriptClassEvent) event).setCurrentNode(node);
-        if(!SkriptClassBuilder.validate(event)) return null;
+    protected void build(@NotNull Event event) {
         Pair pair = pairExpression.getSingle(event);
         Method method = new Method(pair.getPrimitiveType(), pair.getType(), pair.getName());
         method.setRunnable(true);
@@ -63,9 +58,13 @@ public class SecMethod extends Section {
         if(exceptionExpression != null) {
             Arrays.stream(exceptionExpression.getAll(event)).toList().forEach(method::addException);
         }
-        SkriptClassBuilder.getStackedAnnotations().forEach(method::addAnnotation);
-        SkriptClassBuilder.clearStackedAnnotations();
+        ((NewSkriptClassEvent) event).getStackedAnnotations().forEach(method::addAnnotation);
+        ((NewSkriptClassEvent) event).clearStackedAnnotations();
         SkriptClassBuilder.getRegisteringClass().addMethod(pair.getName() + ":" + method.getDescriptor(), method);
+    }
+
+    @Override
+    protected TriggerItem walk(@NotNull Event event) {
         return super.walk(event, false);
     }
 

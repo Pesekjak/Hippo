@@ -1,7 +1,6 @@
 package me.pesekjak.hippo.skript.classes.syntax.annotations;
 
 import ch.njol.skript.Skript;
-import ch.njol.skript.config.Node;
 import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
@@ -22,16 +21,9 @@ public class EffStackingAnnotation extends Effect {
     }
 
     private Expression<Annotation> annotationExpression;
-    private Node node;
 
     @Override
     protected void execute(@NotNull Event event) {
-        ((NewSkriptClassEvent) event).setCurrentTriggerItem(this);
-        ((NewSkriptClassEvent) event).setCurrentNode(node);
-        if(!SkriptClassBuilder.validate(event)) return;
-        for(Annotation annotation : annotationExpression.getAll(event)) {
-            SkriptClassBuilder.addStackingAnnotation(annotation);
-        }
     }
 
     @Override
@@ -42,7 +34,14 @@ public class EffStackingAnnotation extends Effect {
     @Override
     public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult) {
         annotationExpression = SkriptUtils.defendExpression(expressions[0]);
-        node = getParser().getNode();
-        return getParser().isCurrentEvent(NewSkriptClassEvent.class) && SkriptUtils.canInit(annotationExpression);
+        if (!getParser().isCurrentEvent(NewSkriptClassEvent.class)) return false;
+        build(SkriptClassBuilder.getCurrentEvent());
+        return true;
+    }
+
+    protected void build(@NotNull Event event) {
+        for(Annotation annotation : annotationExpression.getAll(event)) {
+            ((NewSkriptClassEvent) event).addStackingAnnotation(annotation);
+        }
     }
 }
