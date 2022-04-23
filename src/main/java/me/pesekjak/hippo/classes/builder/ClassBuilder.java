@@ -151,6 +151,7 @@ public class ClassBuilder {
             mv.visitLdcInsn(method.getName() + ":" + method.getDescriptor());
             mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "me/pesekjak/hippo/utils/events/classcontents/MethodCallEvent", "<init>", "(Ljava/lang/Object;Ljava/lang/String;)V", false);
             int eventIndex = method.getArguments().size() + 1;
+            if(method.getModifiers().contains(Modifier.STATIC)) eventIndex -= 1;
             mv.visitVarInsn(Opcodes.ASTORE, eventIndex);
             mv.visitVarInsn(Opcodes.ALOAD, eventIndex);
             int i = 0;
@@ -165,7 +166,11 @@ public class ClassBuilder {
                     case FLOAT -> loadCode = Opcodes.FLOAD;
                     case DOUBLE -> loadCode = Opcodes.DLOAD;
                 }
-                mv.visitVarInsn(loadCode, i);
+                if(!method.getModifiers().contains(Modifier.STATIC)) {
+                    mv.visitVarInsn(loadCode, i);
+                } else {
+                    mv.visitVarInsn(loadCode, i - 1);
+                }
                 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/MethodCallEvent", "addArgument", "(Ljava/lang/Number;Ljava/lang/Object;)V", false);
             }
             mv.visitFieldInsn(Opcodes.GETSTATIC, REGISTRY_TYPE.getInternalName(), "REGISTRY", REGISTRY_TYPE.getDescriptor());
