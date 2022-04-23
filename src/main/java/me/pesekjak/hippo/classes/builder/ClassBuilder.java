@@ -75,8 +75,9 @@ public class ClassBuilder {
         // Add methods
         skriptClass.getMethods().values().forEach(this::addMethod);
 
-        // Handles init method
+        // Handles init and clinit methods
         generateInit();
+        generateClInit();
 
         // End :)
         cw.visitEnd();
@@ -142,7 +143,11 @@ public class ClassBuilder {
         if(method.isRunnable()) {
             mv.visitTypeInsn(Opcodes.NEW, "me/pesekjak/hippo/utils/events/classcontents/MethodCallEvent");
             mv.visitInsn(Opcodes.DUP);
-            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            if(!method.getModifiers().contains(Modifier.STATIC)) {
+                mv.visitVarInsn(Opcodes.ALOAD, 0);
+            } else {
+                mv.visitInsn(Opcodes.ACONST_NULL);
+            }
             mv.visitLdcInsn(method.getName() + ":" + method.getDescriptor());
             mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "me/pesekjak/hippo/utils/events/classcontents/MethodCallEvent", "<init>", "(Ljava/lang/Object;Ljava/lang/String;)V", false);
             int eventIndex = method.getArguments().size() + 1;
@@ -200,6 +205,25 @@ public class ClassBuilder {
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
         for(Field field : skriptClass.getFields().values()) {
+            if(field.getModifiers().contains(Modifier.STATIC)) continue;
+            if(field.getConstant() != null) {
+                setupConstantField(mv, field);
+            } else if(field.getConstantArray() != null) {
+                setupConstantArrayField(mv, field);
+            } else if(field.getValue() != null) {
+                setupValueField(mv, field);
+            }
+        }
+        mv.visitInsn(Opcodes.RETURN);
+        mv.visitMaxs(0, 0);
+        mv.visitEnd();
+    }
+
+    private void generateClInit() {
+        MethodVisitor mv = cw.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null);
+        mv.visitCode();
+        for(Field field : skriptClass.getFields().values()) {
+            if(!field.getModifiers().contains(Modifier.STATIC)) continue;
             if(field.getConstant() != null) {
                 setupConstantField(mv, field);
             } else if(field.getConstantArray() != null) {
@@ -214,19 +238,17 @@ public class ClassBuilder {
     }
 
     private void setupConstantField(MethodVisitor mv, Field field) {
-        String descriptor = field.getDescriptor();
-        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        if(!field.getModifiers().contains(Modifier.STATIC)) mv.visitVarInsn(Opcodes.ALOAD, 0);
         if(field.getConstant().getConstantObject() != null) {
             mv.visitLdcInsn(field.getConstant().getConstantObject(field.getPrimitiveType().getPrimitive()));
         } else {
             mv.visitFieldInsn(Opcodes.GETSTATIC, field.getConstant().getType().getInternalName(), field.getConstant().getPath(), field.getConstant().getType().getDescriptor());
         }
-        mv.visitFieldInsn(Opcodes.PUTFIELD, internalName, field.getName(), descriptor);
+        putField(mv, field);
     }
 
     private void setupConstantArrayField(MethodVisitor mv, Field field) {
-        String descriptor = field.getDescriptor();
-        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        if(!field.getModifiers().contains(Modifier.STATIC)) mv.visitVarInsn(Opcodes.ALOAD, 0);
         pushValue(mv, field.getConstantArray().getConstants().size());
         if(field.getType() != null) {
             mv.visitTypeInsn(Opcodes.ANEWARRAY, field.getType().getInternalName());
@@ -255,12 +277,11 @@ public class ClassBuilder {
             mv.visitInsn(storeCode);
             i++;
         }
-        mv.visitFieldInsn(Opcodes.PUTFIELD, internalName, field.getName(), descriptor);
+        putField(mv, field);
     }
 
     private void setupValueField(MethodVisitor mv, Field field) {
-        String descriptor = field.getDescriptor();
-        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        if(!field.getModifiers().contains(Modifier.STATIC)) mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitFieldInsn(Opcodes.GETSTATIC, REGISTRY_TYPE.getInternalName(), "REGISTRY", REGISTRY_TYPE.getDescriptor());
         mv.visitLdcInsn(skriptClass.getClassName());
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, REGISTRY_TYPE.getInternalName(), "getSkriptClass", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/SkriptClass;", false);
@@ -277,19 +298,24 @@ public class ClassBuilder {
         mv.visitTypeInsn(Opcodes.INSTANCEOF, "com/btk5h/skriptmirror/ObjectWrapper");
         Label label = new Label();
         mv.visitJumpInsn(Opcodes.IFEQ, label);
-        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        if(!field.getModifiers().contains(Modifier.STATIC)) mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitVarInsn(Opcodes.ALOAD, 1);
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
         castToType(mv, field.getPrimitiveType(), field.getType());
-        mv.visitFieldInsn(Opcodes.PUTFIELD, internalName, field.getName(), descriptor);
+        putField(mv, field);
         Label end = new Label();
         mv.visitJumpInsn(Opcodes.GOTO, end);
         mv.visitLabel(label);
-        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        if(!field.getModifiers().contains(Modifier.STATIC)) mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitVarInsn(Opcodes.ALOAD, 1);
         castToType(mv, field.getPrimitiveType(), field.getType());
-        mv.visitFieldInsn(Opcodes.PUTFIELD, internalName, field.getName(), descriptor);
+        putField(mv, field);
         mv.visitLabel(end);
+    }
+
+    public void putField(MethodVisitor mv, Field field) {
+        int opcode = field.getModifiers().contains(Modifier.STATIC) ? Opcodes.PUTSTATIC : Opcodes.PUTFIELD;
+        mv.visitFieldInsn(opcode, internalName, field.getName(), field.getDescriptor());
     }
 
     private void setupFieldAnnotation(FieldVisitor fv, Annotation annotation) {
