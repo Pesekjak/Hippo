@@ -38,7 +38,7 @@ public class EffMethod extends Effect {
 
     @Override
     public @NotNull String toString(Event event, boolean b) {
-        return "new not code running method";
+        return "new method";
     }
 
     @Override

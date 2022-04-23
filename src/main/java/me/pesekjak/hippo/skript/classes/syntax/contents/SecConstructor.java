@@ -42,6 +42,6 @@ public class SecConstructor extends Section {
 
     @Override
     public @NotNull String toString(Event event, boolean b) {
-        return "constructor";
+        return "new constructor";
     }
 }

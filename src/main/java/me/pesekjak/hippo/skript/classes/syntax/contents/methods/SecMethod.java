@@ -70,6 +70,6 @@ public class SecMethod extends Section {
 
     @Override
     public @NotNull String toString(Event event, boolean b) {
-        return "new method";
+        return "new code running method";
     }
 }
