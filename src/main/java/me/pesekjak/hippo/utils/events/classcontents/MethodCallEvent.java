@@ -16,9 +16,9 @@ public class MethodCallEvent extends Event {
     private final HashMap<Number, Object> arguments;
     private Object output;
 
-    public MethodCallEvent(Object instance, String className) {
+    public MethodCallEvent(Object instance, String methodName) {
         this.instance = instance;
-        this.methodName = className;
+        this.methodName = methodName;
         this.arguments = new HashMap<>();
     }
 
