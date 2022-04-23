@@ -1,7 +1,10 @@
 package me.pesekjak.hippo.classes;
 
+import ch.njol.skript.lang.Trigger;
+import ch.njol.skript.lang.TriggerItem;
 import me.pesekjak.hippo.classes.contents.Field;
 import me.pesekjak.hippo.classes.contents.Method;
+import me.pesekjak.hippo.utils.events.classcontents.StaticInitializationEvent;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,6 +22,8 @@ public abstract class SkriptClass extends Annotatable {
 
     private final HashMap<String, Field> fields = new HashMap<>();
     private final HashMap<String, Method> methods = new HashMap<>();
+
+    private Trigger staticTrigger;
 
     private Event defineEvent;
 
@@ -95,6 +100,19 @@ public abstract class SkriptClass extends Annotatable {
 
     public void removeMethod(String name) {
         methods.remove(name);
+    }
+
+    public void setStaticTrigger(Trigger staticTrigger) {
+        this.staticTrigger = staticTrigger;
+    }
+
+    public Trigger getStaticTrigger() {
+        return staticTrigger;
+    }
+
+    public void runStaticInitialization() {
+        if(staticTrigger == null) return;
+        TriggerItem.walk(staticTrigger, new StaticInitializationEvent());
     }
 
     public void setDefineEvent(Event defineEvent) {
