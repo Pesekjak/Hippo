@@ -9,6 +9,7 @@ import me.pesekjak.hippo.classes.Constant;
 import me.pesekjak.hippo.classes.Modifier;
 import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.classes.contents.Method;
+import me.pesekjak.hippo.hooks.SkriptReflectHook;
 import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
 import me.pesekjak.hippo.skript.classes.Pair;
 import me.pesekjak.hippo.utils.SkriptUtils;
@@ -16,20 +17,22 @@ import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class EffMethod extends Effect {
 
     static {
         Skript.registerEffect(EffMethod.class,
-                "%javamodifiers% %pair%\\([%-pairs%]\\) [throws %-asmtypes%] [default %-constant%]"
+                "%javamodifiers% %pair%\\([%-pairs%]\\) [throws %-javatypes%] [default %-constant%]"
         );
     }
 
     private Expression<Modifier> modifierExpression;
     private Expression<Pair> pairExpression;
     private Expression<Pair> argumentExpression;
-    private Expression<Type> exceptionExpression;
+    private Expression<?> exceptionExpression;
     private Expression<Constant> constantExpression;
 
     @Override
@@ -64,7 +67,15 @@ public class EffMethod extends Effect {
             Arrays.stream(argumentExpression.getAll(event)).toList().forEach((argumentPair) -> method.addArgument(argumentPair.asArgument()));
         }
         if(exceptionExpression != null) {
-            Arrays.stream(exceptionExpression.getAll(event)).toList().forEach(method::addException);
+            List<Type> exceptions = new ArrayList<>();
+            for (Object typeObject : exceptionExpression.getAll(event)) {
+                if (typeObject instanceof Type) {
+                    exceptions.add((Type) typeObject);
+                } else {
+                    exceptions.add(new Type(SkriptReflectHook.classOfJavaType(typeObject)));
+                }
+            }
+            exceptions.stream().toList().forEach(method::addException);
         }
         if(constantExpression != null) {
             method.setDefaultConstant(constantExpression.getSingle(event));
