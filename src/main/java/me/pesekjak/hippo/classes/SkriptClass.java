@@ -2,6 +2,7 @@ package me.pesekjak.hippo.classes;
 
 import ch.njol.skript.lang.Trigger;
 import ch.njol.skript.lang.TriggerItem;
+import me.pesekjak.hippo.classes.contents.Constructor;
 import me.pesekjak.hippo.classes.contents.Field;
 import me.pesekjak.hippo.classes.contents.Method;
 import me.pesekjak.hippo.utils.events.classcontents.StaticInitializationEvent;
@@ -22,6 +23,7 @@ public abstract class SkriptClass extends Annotatable {
 
     private final HashMap<String, Field> fields = new HashMap<>();
     private final HashMap<String, Method> methods = new HashMap<>();
+    private final HashMap<String, Constructor> constructors = new HashMap<>();
 
     private Trigger staticTrigger;
 
@@ -100,6 +102,23 @@ public abstract class SkriptClass extends Annotatable {
 
     public void removeMethod(String name) {
         methods.remove(name);
+    }
+
+    public HashMap<String, Constructor> getConstructors() {
+        return constructors;
+    }
+
+    public Constructor getConstructor(String name) {
+        return constructors.get(name);
+    }
+
+    public void addConstructor(String name, Constructor constructor) {
+        constructors.putIfAbsent(name, constructor);
+        constructors.replace(name, constructor);
+    }
+
+    public void removeConstructor(String name) {
+        constructors.remove(name);
     }
 
     public void setStaticTrigger(Trigger staticTrigger) {
