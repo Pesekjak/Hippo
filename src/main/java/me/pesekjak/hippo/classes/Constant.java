@@ -1,5 +1,7 @@
 package me.pesekjak.hippo.classes;
 
+import me.pesekjak.hippo.hooks.SkriptReflectHook;
+import me.pesekjak.hippo.utils.Reflectness;
 import org.jetbrains.annotations.Nullable;
 
 public class Constant {
@@ -48,6 +50,16 @@ public class Constant {
 
     public String getPath() {
         return path;
+    }
+
+    public Object getTypeConstantObject() {
+        Class<?> constantClass = null;
+        try {
+            constantClass = SkriptReflectHook.getLibraryLoader().loadClass(type.getDotPath());
+            return Reflectness.getField(path, constantClass, null);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 }
