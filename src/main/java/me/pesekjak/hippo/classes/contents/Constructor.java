@@ -1,5 +1,6 @@
 package me.pesekjak.hippo.classes.contents;
 
+import ch.njol.skript.lang.Trigger;
 import me.pesekjak.hippo.classes.Argument;
 import me.pesekjak.hippo.classes.Modifier;
 import me.pesekjak.hippo.classes.Primitive;
@@ -11,6 +12,7 @@ import java.util.List;
 public class Constructor extends Method {
 
     private final List<Argument> superArguments;
+    private Trigger postInitTrigger;
 
     public Constructor() {
         super(new PrimitiveType(Primitive.VOID), null, "<init>");
@@ -42,6 +44,14 @@ public class Constructor extends Method {
         Constructor defaultConstructor = new Constructor();
         defaultConstructor.addModifier(Modifier.PUBLIC);
         return defaultConstructor;
+    }
+
+    public Trigger getPostInitTrigger() {
+        return postInitTrigger;
+    }
+
+    public void setPostInitTrigger(Trigger trigger) {
+        this.postInitTrigger = trigger;
     }
 
 }

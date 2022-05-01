@@ -1,4 +1,4 @@
-package me.pesekjak.hippo.skript.classes.syntax.contents;
+package me.pesekjak.hippo.skript.classes.syntax.contents.constructors;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.config.SectionNode;
@@ -31,7 +31,7 @@ public class SecConstructor extends Section {
     private Expression<Pair> argumentExpression;
     private Expression<Object> superExpression;
     private Expression<?> exceptionExpression;
-    private Trigger methodTrigger;
+    private Trigger constructorTrigger;
 
     @Override
     public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult, @NotNull SectionNode sectionNode, @NotNull List<TriggerItem> list) {
@@ -39,7 +39,7 @@ public class SecConstructor extends Section {
         argumentExpression = SkriptUtils.defendExpression(expressions[1]);
         superExpression = SkriptUtils.defendExpression(expressions[2]);
         exceptionExpression = SkriptUtils.defendExpression(expressions[3]);
-        methodTrigger = loadCode(sectionNode, "constructor", ConstructorEvent.class);
+        constructorTrigger = loadCode(sectionNode, "constructor", ConstructorEvent.class);
         String className = SkriptClassBuilder.getRegisteringClass().getType().getSimpleName();
         if (!getParser().isCurrentEvent(NewSkriptClassEvent.class)) return false;
         if(!parseResult.regexes.get(0).group().equalsIgnoreCase(className)) return false;
@@ -49,7 +49,12 @@ public class SecConstructor extends Section {
 
     protected void build(@NotNull Event event) {
         Constructor constructor = new Constructor();
-        constructor.setTrigger(methodTrigger);
+        SkriptClassBuilder.registeringConstructor = constructor;
+        // This section is parsed after SecInit and SecPostInit,
+        // to prevent problems, currently parsed init and post init sections
+        // have to be built here, after registering constructor is updated.
+        SecInit.currentInit.build(event);
+        SecPostInit.currentPostInit.build(event);
         if(modifierExpression != null) {
             Arrays.stream(modifierExpression.getAll(event)).toList().forEach(constructor::addModifier);
         }

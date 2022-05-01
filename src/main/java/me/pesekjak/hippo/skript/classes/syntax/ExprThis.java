@@ -7,6 +7,7 @@ import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.utils.events.classcontents.MethodCallEvent;
+import me.pesekjak.hippo.utils.events.classcontents.constructors.PostInitEvent;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,8 +21,9 @@ public class ExprThis extends SimpleExpression<Object> {
 
     @Override
     protected Object @NotNull [] get(@NotNull Event event) {
-        if(!(event instanceof MethodCallEvent)) return new Object[0];
-        return new Object[] { ((MethodCallEvent) event).getInstance() };
+        if(event instanceof MethodCallEvent) return new Object[] { ((MethodCallEvent) event).getInstance() };
+        if(event instanceof PostInitEvent) return new Object[] { ((PostInitEvent) event).getInstance() };
+        return new Object[0];
     }
 
     @Override
@@ -41,6 +43,6 @@ public class ExprThis extends SimpleExpression<Object> {
 
     @Override
     public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult) {
-        return getParser().isCurrentEvent(MethodCallEvent.class);
+        return getParser().isCurrentEvent(MethodCallEvent.class) || getParser().isCurrentEvent(PostInitEvent.class);
     }
 }

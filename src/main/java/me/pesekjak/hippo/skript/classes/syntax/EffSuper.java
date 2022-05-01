@@ -5,9 +5,8 @@ import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
-import me.pesekjak.hippo.skript.classes.Pair;
 import me.pesekjak.hippo.utils.SkriptUtils;
-import me.pesekjak.hippo.utils.events.classcontents.ConstructorEvent;
+import me.pesekjak.hippo.utils.events.classcontents.constructors.InitEvent;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,7 +26,7 @@ public class EffSuper extends Effect {
         if(argumentExpression == null) return;
         for(Object object : argumentExpression.getAll(event)) {
             i++;
-            ((ConstructorEvent) event).addSuperResult(i, object);
+            ((InitEvent) event).addSuperResult(i, object);
         }
     }
 
@@ -39,6 +38,6 @@ public class EffSuper extends Effect {
     @Override
     public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult) {
         argumentExpression = SkriptUtils.defendExpression(expressions[0]);
-        return getParser().isCurrentEvent(ConstructorEvent.class);
+        return getParser().isCurrentEvent(InitEvent.class);
     }
 }

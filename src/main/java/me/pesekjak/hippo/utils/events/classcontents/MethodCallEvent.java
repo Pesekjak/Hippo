@@ -1,25 +1,21 @@
 package me.pesekjak.hippo.utils.events.classcontents;
 
 import me.pesekjak.hippo.hooks.SkriptReflectHook;
-import org.bukkit.event.Event;
+import me.pesekjak.hippo.utils.events.ArgumentsEvent;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-
-public class MethodCallEvent extends Event {
+public class MethodCallEvent extends ArgumentsEvent {
 
     private static final HandlerList handlers = new HandlerList();
 
     private final Object instance;
     private final String methodName;
-    private final HashMap<Number, Object> arguments;
     private Object output;
 
     public MethodCallEvent(Object instance, String methodName) {
         this.instance = instance;
         this.methodName = methodName;
-        this.arguments = new HashMap<>();
     }
 
     public Object getInstance() {
@@ -28,19 +24,6 @@ public class MethodCallEvent extends Event {
 
     public String getMethodName() {
         return methodName;
-    }
-
-    public HashMap<Number, Object> getArguments() {
-        return arguments;
-    }
-
-    public Object getArgument(Number argumentIndex) {
-        return arguments.get(argumentIndex);
-    }
-
-    public void addArgument(Number argumentIndex, Object argument) {
-        arguments.putIfAbsent(argumentIndex, argument);
-        arguments.replace(argumentIndex, argument);
     }
 
     public Object getOutput() {

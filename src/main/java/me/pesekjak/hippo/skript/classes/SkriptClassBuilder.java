@@ -3,6 +3,7 @@ package me.pesekjak.hippo.skript.classes;
 import ch.njol.skript.lang.Expression;
 import me.pesekjak.hippo.classes.SkriptClass;
 import me.pesekjak.hippo.classes.Type;
+import me.pesekjak.hippo.classes.contents.Constructor;
 import me.pesekjak.hippo.classes.contents.annotation.Annotation;
 import me.pesekjak.hippo.hooks.SkriptReflectHook;
 import org.bukkit.event.Event;
@@ -18,6 +19,7 @@ public class SkriptClassBuilder {
     public static SkriptClass registeringClass;
     public static Event registeringEvent;
     public static List<Annotation> stackedAnnotations = new ArrayList<>();
+    public static Constructor registeringConstructor;
 
     private SkriptClassBuilder() { }
 

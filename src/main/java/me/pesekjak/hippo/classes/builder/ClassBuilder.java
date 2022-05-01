@@ -9,7 +9,6 @@ import me.pesekjak.hippo.classes.contents.annotation.Annotation;
 import me.pesekjak.hippo.classes.contents.annotation.AnnotationElement;
 import me.pesekjak.hippo.classes.registry.SkriptClassRegistry;
 import me.pesekjak.hippo.hooks.SkriptReflectHook;
-import me.pesekjak.hippo.utils.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.*;
 
@@ -182,9 +181,7 @@ public class ClassBuilder {
                 if(argument.getPrimitiveType().getPrimitive() != Primitive.NONE) pushAsType(mv, argument.getPrimitiveType().getPrimitive());
                 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/MethodCallEvent", "addArgument", "(Ljava/lang/Number;Ljava/lang/Object;)V", false);
             }
-            mv.visitFieldInsn(Opcodes.GETSTATIC, REGISTRY_TYPE.getInternalName(), "REGISTRY", REGISTRY_TYPE.getDescriptor());
-            mv.visitLdcInsn(skriptClass.getClassName());
-            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, REGISTRY_TYPE.getInternalName(), "getSkriptClass", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/SkriptClass;", false);
+            pushClassInstance(mv);
             mv.visitLdcInsn(method.getName() + ":" + method.getDescriptor());
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/SkriptClass", "getMethod", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/contents/Method;", false);
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/contents/Method", "getTrigger", "()Lch/njol/skript/lang/Trigger;", false);
@@ -227,10 +224,9 @@ public class ClassBuilder {
         constructor.getAnnotations().forEach(annotation -> setupMethodAnnotation(mv, annotation));
         mv.visitCode();
         int argumentOffset = constructor.getArguments().size();
-        mv.visitTypeInsn(Opcodes.NEW, "me/pesekjak/hippo/utils/events/classcontents/ConstructorEvent");
+        mv.visitTypeInsn(Opcodes.NEW, "me/pesekjak/hippo/utils/events/classcontents/constructors/InitEvent");
         mv.visitInsn(Opcodes.DUP);
-        mv.visitInsn(Opcodes.ACONST_NULL);
-        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "me/pesekjak/hippo/utils/events/classcontents/ConstructorEvent", "<init>", "(Ljava/lang/Object;)V", false);
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "me/pesekjak/hippo/utils/events/classcontents/constructors/InitEvent", "<init>", "()V", false);
         mv.visitVarInsn(Opcodes.ASTORE, 1 + argumentOffset);
         mv.visitVarInsn(Opcodes.ALOAD, 1 + argumentOffset);
         int i = 0;
@@ -247,11 +243,9 @@ public class ClassBuilder {
             }
             mv.visitVarInsn(loadCode, i);
             if(argument.getPrimitiveType().getPrimitive() != Primitive.NONE) pushAsType(mv, argument.getPrimitiveType().getPrimitive());
-            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/ConstructorEvent", "addArgument", "(Ljava/lang/Number;Ljava/lang/Object;)V", false);
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/constructors/InitEvent", "addArgument", "(Ljava/lang/Number;Ljava/lang/Object;)V", false);
         }
-        mv.visitFieldInsn(Opcodes.GETSTATIC, REGISTRY_TYPE.getInternalName(), "REGISTRY", REGISTRY_TYPE.getDescriptor());
-        mv.visitLdcInsn(skriptClass.getClassName());
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, REGISTRY_TYPE.getInternalName(), "getSkriptClass", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/SkriptClass;", false);
+        pushClassInstance(mv);
         mv.visitLdcInsn(constructor.getName() + ":" + constructor.getDescriptor());
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/SkriptClass", "getConstructor", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/contents/Constructor;", false);
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/contents/Constructor", "getTrigger", "()Lch/njol/skript/lang/Trigger;", false);
@@ -267,7 +261,7 @@ public class ClassBuilder {
             i++;
             pushValue(mv, i);
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
-            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/ConstructorEvent", "getSuperResult", "(Ljava/lang/Number;)Ljava/lang/Object;", false);
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/constructors/InitEvent", "getSuperResult", "(Ljava/lang/Number;)Ljava/lang/Object;", false);
             Argument superArgument = constructor.getSuperArguments().get(i - 1);
             castToType(mv, superArgument.getPrimitiveType(), superArgument.getType());
             mv.visitVarInsn(Opcodes.ASTORE, i + 2 + argumentOffset);
@@ -290,6 +284,37 @@ public class ClassBuilder {
                 setupValueField(mv, field, argumentOffset + 2);
             }
         }
+        mv.visitTypeInsn(Opcodes.NEW, "me/pesekjak/hippo/utils/events/classcontents/constructors/PostInitEvent");
+        mv.visitInsn(Opcodes.DUP);
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "me/pesekjak/hippo/utils/events/classcontents/constructors/PostInitEvent", "<init>", "(Ljava/lang/Object;)V", false);
+        mv.visitVarInsn(Opcodes.ASTORE, 3 + argumentOffset);
+        mv.visitVarInsn(Opcodes.ALOAD, 3 + argumentOffset);
+        i = 0;
+        for(Argument argument : constructor.getArguments()) {
+            i++;
+            pushValue(mv, i);
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+            int loadCode = Opcodes.ALOAD;
+            switch (argument.getPrimitiveType().getPrimitive()) {
+                case BOOLEAN, BYTE, CHAR, SHORT, INT -> loadCode = Opcodes.ILOAD;
+                case LONG -> loadCode = Opcodes.LLOAD;
+                case FLOAT -> loadCode = Opcodes.FLOAD;
+                case DOUBLE -> loadCode = Opcodes.DLOAD;
+            }
+            mv.visitVarInsn(loadCode, i);
+            if(argument.getPrimitiveType().getPrimitive() != Primitive.NONE) pushAsType(mv, argument.getPrimitiveType().getPrimitive());
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/constructors/PostInitEvent", "addArgument", "(Ljava/lang/Number;Ljava/lang/Object;)V", false);
+        }
+        pushClassInstance(mv);
+        mv.visitLdcInsn(constructor.getName() + ":" + constructor.getDescriptor());
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/SkriptClass", "getConstructor", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/contents/Constructor;", false);
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/contents/Constructor", "getPostInitTrigger", "()Lch/njol/skript/lang/Trigger;", false);
+        mv.visitVarInsn(Opcodes.ASTORE, 4 + argumentOffset);
+        mv.visitVarInsn(Opcodes.ALOAD, 4 + argumentOffset);
+        mv.visitVarInsn(Opcodes.ALOAD, 3 + argumentOffset);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "ch/njol/skript/lang/TriggerItem", "walk", "(Lch/njol/skript/lang/TriggerItem;Lorg/bukkit/event/Event;)Z", false);
+        mv.visitInsn(Opcodes.POP);
         mv.visitInsn(Opcodes.RETURN);
         mv.visitMaxs(0, 0);
         mv.visitEnd();
@@ -309,9 +334,7 @@ public class ClassBuilder {
                 setupValueField(mv, field, 0);
             }
         }
-        mv.visitFieldInsn(Opcodes.GETSTATIC, REGISTRY_TYPE.getInternalName(), "REGISTRY", REGISTRY_TYPE.getDescriptor());
-        mv.visitLdcInsn(skriptClass.getClassName());
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, REGISTRY_TYPE.getInternalName(), "getSkriptClass", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/SkriptClass;", false);
+        pushClassInstance(mv);
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/SkriptClass", "runStaticInitialization", "()V", false);
         mv.visitInsn(Opcodes.RETURN);
         mv.visitMaxs(0, 0);
@@ -363,15 +386,11 @@ public class ClassBuilder {
 
     private void setupValueField(MethodVisitor mv, Field field, int stackOffset) {
         if(!field.getModifiers().contains(Modifier.STATIC)) mv.visitVarInsn(Opcodes.ALOAD, 0);
-        mv.visitFieldInsn(Opcodes.GETSTATIC, REGISTRY_TYPE.getInternalName(), "REGISTRY", REGISTRY_TYPE.getDescriptor());
-        mv.visitLdcInsn(skriptClass.getClassName());
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, REGISTRY_TYPE.getInternalName(), "getSkriptClass", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/SkriptClass;", false);
+        pushClassInstance(mv);
         mv.visitLdcInsn(field.getName() + ":" + field.getDescriptor());
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/SkriptClass", "getField", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/contents/Field;", false);
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/contents/Field", "getValue", "()Lch/njol/skript/lang/Expression;", false);
-        mv.visitFieldInsn(Opcodes.GETSTATIC, REGISTRY_TYPE.getInternalName(), "REGISTRY", REGISTRY_TYPE.getDescriptor());
-        mv.visitLdcInsn(skriptClass.getClassName());
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, REGISTRY_TYPE.getInternalName(), "getSkriptClass", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/SkriptClass;", false);
+        pushClassInstance(mv);
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/SkriptClass", "getDefineEvent", "()Lorg/bukkit/event/Event;", false);
         mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "ch/njol/skript/lang/Expression", "getSingle", "(Lorg/bukkit/event/Event;)Ljava/lang/Object;", true);
         mv.visitVarInsn(Opcodes.ASTORE, 1 + stackOffset);
@@ -458,6 +477,12 @@ public class ClassBuilder {
         } else {
             mv.visitTypeInsn(Opcodes.CHECKCAST, (type != null) ? type.getDescriptor() : primitiveType.getDescriptor());
         }
+    }
+
+    public void pushClassInstance(MethodVisitor mv) {
+        mv.visitFieldInsn(Opcodes.GETSTATIC, REGISTRY_TYPE.getInternalName(), "REGISTRY", REGISTRY_TYPE.getDescriptor());
+        mv.visitLdcInsn(skriptClass.getClassName());
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, REGISTRY_TYPE.getInternalName(), "getSkriptClass", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/SkriptClass;", false);
     }
 
 }
