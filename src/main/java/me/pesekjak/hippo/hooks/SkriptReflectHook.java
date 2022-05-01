@@ -10,12 +10,14 @@ public class SkriptReflectHook {
 
     private static Class<?> javaTypeClass = null;
     private static Class<?> objectWrapperClass = null;
+    private static Class<?> reflectNullClass = null;
     private static DynamicClassLoader libraryLoader = null;
 
     public static boolean setup() {
         try {
             javaTypeClass = Class.forName("com.btk5h.skriptmirror.JavaType");
             objectWrapperClass = Class.forName("com.btk5h.skriptmirror.ObjectWrapper");
+            reflectNullClass = Class.forName("com.btk5h.skriptmirror.Null");
         } catch (Exception ignored) {
             return false;
         }
@@ -39,6 +41,10 @@ public class SkriptReflectHook {
 
     public static Class<?> getObjectWrapperClass() {
         return objectWrapperClass;
+    }
+
+    public static Class<?> getReflectNullClass() {
+        return reflectNullClass;
     }
 
     public static DynamicClassLoader getLibraryLoader() {

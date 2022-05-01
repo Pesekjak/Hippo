@@ -5,6 +5,7 @@ import ch.njol.skript.lang.*;
 import ch.njol.skript.sections.SecLoop;
 import ch.njol.skript.sections.SecWhile;
 import ch.njol.util.Kleenean;
+import me.pesekjak.hippo.hooks.SkriptReflectHook;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.classcontents.MethodCallEvent;
 import org.bukkit.event.Event;
@@ -28,7 +29,8 @@ public class EffReturn extends Effect {
     @Override
     protected TriggerItem walk(@NotNull Event e) {
         if(!(e instanceof MethodCallEvent)) return null;
-        ((MethodCallEvent) e).setOutput(returnExpression.getSingle(e));
+        Object returnObject = returnExpression.getSingle(e);
+        if(!SkriptReflectHook.getReflectNullClass().isInstance(returnObject)) ((MethodCallEvent) e).setOutput(returnObject);
         TriggerSection parent = getParent();
         while (parent != null) {
             if (parent instanceof SecLoop) {
