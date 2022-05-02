@@ -42,7 +42,7 @@ public class EvtPreImport extends SelfRegisteringSkriptEvent {
     public boolean init(Literal<?> @NotNull [] literals, int i, SkriptParser.@NotNull ParseResult parseResult) {
         this.script = getParser().getCurrentScript();
         if(PreImportManager.MANAGER.isPreImporting(script)) {
-            Skript.error("Each script can have only one pre-import section!");
+            Skript.error("Each script can have only one pre-import section");
             return false;
         }
         PreImportManager.MANAGER.addPreImportingScript(script);

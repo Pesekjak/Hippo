@@ -52,12 +52,12 @@ public class EffPreImport extends Effect {
         PreImportManager.PreImporting preImporting = PreImportManager.MANAGER.getPreImporting(script);
 
         if(preImporting.containsAlias(classAlias)) {
-            Skript.error("Alias '" + classAlias + "' is already mapped to different pre-import.");
+            Skript.error("Alias '" + classAlias + "' is already mapped to different pre-import");
             return false;
         }
 
         if(preImporting.containsPreImport(preImport)) {
-            Skript.error("Class '" + preImport.preImportType().getDotPath() + "' is already pre-imported.");
+            Skript.error("Class '" + preImport.preImportType().getDotPath() + "' is already pre-imported");
             return false;
         }
 

@@ -49,11 +49,10 @@ public class EffField extends Effect {
         pairExpression = SkriptUtils.defendExpression(expressions[1]);
         valueExpression = SkriptUtils.defendExpression(expressions[2]);
         if (!getParser().isCurrentEvent(NewSkriptClassEvent.class)) return false;
-        build(SkriptClassBuilder.getCurrentEvent());
-        return true;
+        return build(SkriptClassBuilder.getCurrentEvent());
     }
 
-    protected void build(@NotNull Event event) {
+    protected boolean build(@NotNull Event event) {
         Pair pair = pairExpression.getSingle(event);
         Field field = new Field(pair.getPrimitiveType(), pair.getType(), pair.getName());
         if(modifierExpression != null) {
@@ -68,8 +67,13 @@ public class EffField extends Effect {
                 field.setValue(valueExpression);
             }
         }
+        if(SkriptClassBuilder.getRegisteringClass().getField(pair.getName()) != null) {
+            Skript.error("Field '" + pair.getName() + "' already exists for class '" + SkriptClassBuilder.getRegisteringClass().getClassName() + "'");
+            return false;
+        }
         ((NewSkriptClassEvent) event).getStackedAnnotations().forEach(field::addAnnotation);
         ((NewSkriptClassEvent) event).clearStackedAnnotations();
-        SkriptClassBuilder.getRegisteringClass().addField(pair.getName() + ":" + field.getDescriptor(), field);
+        SkriptClassBuilder.getRegisteringClass().addField(pair.getName(), field);
+        return true;
     }
 }

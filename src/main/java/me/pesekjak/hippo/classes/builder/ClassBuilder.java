@@ -387,7 +387,7 @@ public class ClassBuilder {
     private void setupValueField(MethodVisitor mv, Field field, int stackOffset) {
         if(!field.getModifiers().contains(Modifier.STATIC)) mv.visitVarInsn(Opcodes.ALOAD, 0);
         pushClassInstance(mv);
-        mv.visitLdcInsn(field.getName() + ":" + field.getDescriptor());
+        mv.visitLdcInsn(field.getName());
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/SkriptClass", "getField", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/contents/Field;", false);
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/contents/Field", "getValue", "()Lch/njol/skript/lang/Expression;", false);
         pushClassInstance(mv);

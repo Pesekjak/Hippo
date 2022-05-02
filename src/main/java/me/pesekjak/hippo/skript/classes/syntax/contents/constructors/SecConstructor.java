@@ -43,18 +43,12 @@ public class SecConstructor extends Section {
         String className = SkriptClassBuilder.getRegisteringClass().getType().getSimpleName();
         if (!getParser().isCurrentEvent(NewSkriptClassEvent.class)) return false;
         if(!parseResult.regexes.get(0).group().equalsIgnoreCase(className)) return false;
-        build(SkriptClassBuilder.getCurrentEvent());
-        return true;
+        return build(SkriptClassBuilder.getCurrentEvent());
     }
 
-    protected void build(@NotNull Event event) {
+    protected boolean build(@NotNull Event event) {
         Constructor constructor = new Constructor();
         SkriptClassBuilder.registeringConstructor = constructor;
-        // This section is parsed after SecInit and SecPostInit,
-        // to prevent problems, currently parsed init and post init sections
-        // have to be built here, after registering constructor is updated.
-        SecInit.currentInit.build(event);
-        SecPostInit.currentPostInit.build(event);
         if(modifierExpression != null) {
             Arrays.stream(modifierExpression.getAll(event)).toList().forEach(constructor::addModifier);
         }
@@ -87,9 +81,19 @@ public class SecConstructor extends Section {
             }
             exceptions.stream().toList().forEach(constructor::addException);
         }
+        if(SkriptClassBuilder.getRegisteringClass().getConstructor(constructor.getName() + ":" + constructor.getDescriptor()) != null) {
+            Skript.error("Constructor with descriptor '" + constructor.getDescriptor() + "' already exists for class '" + SkriptClassBuilder.getRegisteringClass().getClassName() + "'");
+            return false;
+        }
+        // This section is parsed after SecInit and SecPostInit,
+        // to prevent problems, currently parsed init and post init sections
+        // have to be built here, after registering constructor is updated.
+        SecInit.currentInit.build(event);
+        SecPostInit.currentPostInit.build(event);
         ((NewSkriptClassEvent) event).getStackedAnnotations().forEach(constructor::addAnnotation);
         ((NewSkriptClassEvent) event).clearStackedAnnotations();
         SkriptClassBuilder.getRegisteringClass().addConstructor(constructor.getName() + ":" + constructor.getDescriptor(), constructor);
+        return true;
     }
 
     @Override

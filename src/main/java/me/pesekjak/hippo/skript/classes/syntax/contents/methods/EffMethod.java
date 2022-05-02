@@ -52,11 +52,10 @@ public class EffMethod extends Effect {
         exceptionExpression = SkriptUtils.defendExpression(expressions[3]);
         constantExpression = SkriptUtils.defendExpression(expressions[4]);
         if (!getParser().isCurrentEvent(NewSkriptClassEvent.class)) return false;
-        build(SkriptClassBuilder.getCurrentEvent());
-        return true;
+        return build(SkriptClassBuilder.getCurrentEvent());
     }
 
-    protected void build(@NotNull Event event) {
+    protected boolean build(@NotNull Event event) {
         Pair pair = pairExpression.getSingle(event);
         Method method = new Method(pair.getPrimitiveType(), pair.getType(), pair.getName());
         method.setRunnable(false);
@@ -80,8 +79,13 @@ public class EffMethod extends Effect {
         if(constantExpression != null) {
             method.setDefaultConstant(constantExpression.getSingle(event));
         }
+        if(SkriptClassBuilder.getRegisteringClass().getMethod(pair.getName() + ":" + method.getDescriptor()) != null) {
+            Skript.error("Method '" + pair.getName() + "' with descriptor '" + method.getDescriptor() + "' already exists for class '" + SkriptClassBuilder.getRegisteringClass().getClassName() + "'");
+            return false;
+        }
         ((NewSkriptClassEvent) event).getStackedAnnotations().forEach(method::addAnnotation);
         ((NewSkriptClassEvent) event).clearStackedAnnotations();
         SkriptClassBuilder.getRegisteringClass().addMethod(pair.getName() + ":" + method.getDescriptor(), method);
+        return true;
     }
 }

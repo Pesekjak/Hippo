@@ -26,12 +26,16 @@ public class SecStatic extends Section {
     public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult, @NotNull SectionNode sectionNode, @NotNull List<TriggerItem> list) {
         staticTrigger = loadCode(sectionNode, "static", StaticInitializationEvent.class);
         if (!getParser().isCurrentEvent(NewSkriptClassEvent.class)) return false;
-        build(SkriptClassBuilder.getCurrentEvent());
-        return true;
+        return build(SkriptClassBuilder.getCurrentEvent());
     }
 
-    protected void build(@NotNull Event event) {
+    protected boolean build(@NotNull Event event) {
+        if(SkriptClassBuilder.getRegisteringClass().getStaticTrigger() != null) {
+            Skript.error("You can't have more than 1 static block for a class");
+            return false;
+        }
         SkriptClassBuilder.getRegisteringClass().setStaticTrigger(staticTrigger);
+        return true;
     }
 
     @Override
