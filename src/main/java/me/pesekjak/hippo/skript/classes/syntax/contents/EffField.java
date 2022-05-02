@@ -9,12 +9,14 @@ import me.pesekjak.hippo.classes.Constant;
 import me.pesekjak.hippo.classes.ConstantArray;
 import me.pesekjak.hippo.classes.Modifier;
 import me.pesekjak.hippo.classes.contents.Field;
+import me.pesekjak.hippo.hooks.SkriptReflectHook;
 import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
 import me.pesekjak.hippo.skript.classes.Pair;
 import me.pesekjak.hippo.skript.classes.syntax.ExprConstant;
 import me.pesekjak.hippo.skript.classes.syntax.ExprConstantArray;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
+import me.pesekjak.hippo.utils.events.classcontents.MethodCallEvent;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
@@ -62,7 +64,7 @@ public class EffField extends Effect {
                 field.setConstant((Constant) valueExpression.getSingle(event));
             } else if(valueExpression instanceof ExprConstantArray) {
                 field.setConstantArray((ConstantArray) valueExpression.getSingle(event));
-            } else {
+            } else if(!SkriptReflectHook.getReflectNullClass().isInstance(valueExpression.getSingle(event))) {
                 field.setValue(valueExpression);
             }
         }
