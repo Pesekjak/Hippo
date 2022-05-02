@@ -88,8 +88,10 @@ public class SecConstructor extends Section {
         // This section is parsed after SecInit and SecPostInit,
         // to prevent problems, currently parsed init and post init sections
         // have to be built here, after registering constructor is updated.
-        SecInit.currentInit.build(event);
-        SecPostInit.currentPostInit.build(event);
+        if(SecInit.currentInit != null) SecInit.currentInit.build(event);
+        if(SecPostInit.currentPostInit != null) SecPostInit.currentPostInit.build(event);
+        SecInit.currentInit = null;
+        SecPostInit.currentPostInit = null;
         ((NewSkriptClassEvent) event).getStackedAnnotations().forEach(constructor::addAnnotation);
         ((NewSkriptClassEvent) event).clearStackedAnnotations();
         SkriptClassBuilder.getRegisteringClass().addConstructor(constructor.getName() + ":" + constructor.getDescriptor(), constructor);
