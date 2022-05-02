@@ -14,7 +14,8 @@ public enum Modifier {
     SYNCHRONIZED("synchronized", Opcodes.ACC_SYNCHRONIZED),
     VOLATILE("volatile", Opcodes.ACC_VOLATILE),
     NATIVE("native", Opcodes.ACC_NATIVE),
-    STRICTFP("strictfp", Opcodes.ACC_STRICT);
+    STRICTFP("strictfp", Opcodes.ACC_STRICT),
+    DEFAULT("default", 0);
 
     public String identifier;
     public int value;
