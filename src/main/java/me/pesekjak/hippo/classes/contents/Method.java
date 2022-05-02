@@ -20,6 +20,7 @@ public class Method extends Annotatable {
     private boolean isRunnable;
 
     private Constant defaultConstant;
+    private ConstantArray defaultConstantArray;
 
     private Trigger trigger;
 
@@ -82,6 +83,14 @@ public class Method extends Annotatable {
 
     public void setDefaultConstant(Constant defaultConstant) {
         this.defaultConstant = defaultConstant;
+    }
+
+    public ConstantArray getDefaultConstantArray() {
+        return defaultConstantArray;
+    }
+
+    public void setDefaultConstantArray(ConstantArray defaultConstantArray) {
+        this.defaultConstantArray = defaultConstantArray;
     }
 
     public Trigger getTrigger() {

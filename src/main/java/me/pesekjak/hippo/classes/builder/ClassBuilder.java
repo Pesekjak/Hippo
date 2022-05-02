@@ -80,9 +80,11 @@ public class ClassBuilder {
         generateClInit();
 
         // Handles init methods
-        if(skriptClass.getConstructors().keySet().size() == 0) skriptClass.addConstructor("<init>:()V", Constructor.getDefault());
-        for(Constructor constructor : skriptClass.getConstructors().values()) {
-            addConstructor(constructor);
+        if(classType != ClassType.INTERFACE && classType != ClassType.ANNOTATION) {
+            if(skriptClass.getConstructors().keySet().size() == 0) skriptClass.addConstructor("<init>:()V", Constructor.getDefault());
+            for(Constructor constructor : skriptClass.getConstructors().values()) {
+                addConstructor(constructor);
+            }
         }
 
         // End :)
@@ -145,8 +147,34 @@ public class ClassBuilder {
         }
         MethodVisitor mv = cw.visitMethod(modifiers, method.getName(), descriptor, null, exceptions.size() > 0 ? exceptions.toArray(new String[0]) : null);
         method.getAnnotations().forEach(annotation -> setupMethodAnnotation(mv, annotation));
-        mv.visitCode();
+        if(classType == ClassType.ANNOTATION) {
+            AnnotationVisitor defaultAV;
+            if(method.getDefaultConstant() != null) {
+                Constant defaultConstant = method.getDefaultConstant();
+                defaultAV = mv.visitAnnotationDefault();
+                if(defaultConstant.getConstantObject() != null) {
+                    defaultAV.visit(null, defaultConstant.getConstantObject());
+                } else {
+                    defaultAV.visitEnum(null, defaultConstant.getType().getDescriptor(), defaultConstant.getPath());
+                }
+                defaultAV.visitEnd();
+            } else if(method.getDefaultConstantArray() != null) {
+                ConstantArray defaultConstantArray = method.getDefaultConstantArray();
+                defaultAV = mv.visitAnnotationDefault();
+                AnnotationVisitor defaultArrayAV = defaultAV.visitArray(null);
+                for(Constant constant : defaultConstantArray.getConstants()) {
+                    if(constant.getConstantObject() != null) {
+                        defaultArrayAV.visit(null, constant.getConstantObject());
+                    } else {
+                        defaultArrayAV.visitEnum(null, constant.getType().getDescriptor(), constant.getPath());
+                    }
+                }
+                defaultArrayAV.visitEnd();
+                defaultAV.visitEnd();
+            }
+        }
         if(method.isRunnable()) {
+            mv.visitCode();
             mv.visitTypeInsn(Opcodes.NEW, "me/pesekjak/hippo/utils/events/classcontents/MethodCallEvent");
             mv.visitInsn(Opcodes.DUP);
             if(!method.getModifiers().contains(Modifier.STATIC)) {
@@ -203,8 +231,8 @@ public class ClassBuilder {
                 }
             }
             mv.visitInsn(returnCode);
+            mv.visitMaxs(0, 0);
         }
-        mv.visitMaxs(0, 0);
         mv.visitEnd();
         cw.visitEnd();
     }

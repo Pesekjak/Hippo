@@ -6,6 +6,7 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.Constant;
+import me.pesekjak.hippo.classes.ConstantArray;
 import me.pesekjak.hippo.classes.Modifier;
 import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.classes.contents.Method;
@@ -25,7 +26,7 @@ public class EffMethod extends Effect {
 
     static {
         Skript.registerEffect(EffMethod.class,
-                "%javamodifiers% %pair%\\([%-pairs%]\\) [throws %-javatypes%] [default %-constant%]"
+                "%javamodifiers% %pair%\\([%-pairs%]\\) [throws %-javatypes%] [default (%-constant%|%-constantarray%)]"
         );
     }
 
@@ -34,6 +35,7 @@ public class EffMethod extends Effect {
     private Expression<Pair> argumentExpression;
     private Expression<?> exceptionExpression;
     private Expression<Constant> constantExpression;
+    private Expression<ConstantArray> constantArrayExpression;
 
     @Override
     protected void execute(@NotNull Event event) {
@@ -51,6 +53,7 @@ public class EffMethod extends Effect {
         argumentExpression = SkriptUtils.defendExpression(expressions[2]);
         exceptionExpression = SkriptUtils.defendExpression(expressions[3]);
         constantExpression = SkriptUtils.defendExpression(expressions[4]);
+        constantArrayExpression = SkriptUtils.defendExpression(expressions[5]);
         if (!getParser().isCurrentEvent(NewSkriptClassEvent.class)) return false;
         return build(SkriptClassBuilder.getCurrentEvent());
     }
@@ -76,9 +79,8 @@ public class EffMethod extends Effect {
             }
             exceptions.stream().toList().forEach(method::addException);
         }
-        if(constantExpression != null) {
-            method.setDefaultConstant(constantExpression.getSingle(event));
-        }
+        if(constantExpression != null) method.setDefaultConstant(constantExpression.getSingle(event));
+        if(constantArrayExpression != null) method.setDefaultConstantArray(constantArrayExpression.getSingle(event));
         if(SkriptClassBuilder.getRegisteringClass().getMethod(pair.getName() + ":" + method.getDescriptor()) != null) {
             Skript.error("Method '" + pair.getName() + "' with descriptor '" + method.getDescriptor() + "' already exists for class '" + SkriptClassBuilder.getRegisteringClass().getClassName() + "'");
             return false;
