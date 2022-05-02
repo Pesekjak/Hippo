@@ -7,6 +7,7 @@ import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
+import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.hooks.SkriptReflectHook;
 import me.pesekjak.hippo.preimport.PreImport;
 import me.pesekjak.hippo.preimport.PreImportManager;
@@ -36,11 +37,17 @@ public class ExprPreImport extends SimpleExpression<Object> {
         PreImport preImport = PreImportManager.MANAGER.getPreImporting(script).getPreImport(classAlias);
         try {
             javaType = SkriptReflectHook.buildJavaType(SkriptReflectHook.getLibraryLoader().loadClass(preImport.getType().getDotPath()));
-        } catch (Exception ignored) { }
-        if(javaType != null) {
-            return new Object[] { javaType };
+        } catch (Exception ignored) {
         }
-        return new Object[] { PreImportManager.MANAGER.getPreImporting(script).getPreImport(classAlias).getType() };
+        if (javaType != null) {
+            return new Object[]{javaType};
+        }
+        Type preImportType = PreImportManager.MANAGER.getPreImporting(script).getPreImport(classAlias).getType();
+        try {
+            Class<?> classFromLoader = SkriptReflectHook.getLibraryLoader().loadClass(preImportType.getDotPath());
+            if(classFromLoader != null) return new Object[] { SkriptReflectHook.buildJavaType(classFromLoader) };
+        } catch (ClassNotFoundException ignored) { }
+        return new Object[]{ preImportType };
     }
 
     @Override

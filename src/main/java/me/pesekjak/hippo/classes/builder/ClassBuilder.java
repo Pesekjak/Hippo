@@ -89,7 +89,6 @@ public class ClassBuilder {
         cw.visitEnd();
 
         // Define the class
-        if(SkriptReflectHook.getLibraryLoader() == null) SkriptReflectHook.setupReflectLoader();
         SkriptReflectHook.getLibraryLoader().loadClass(skriptClass.getClassName(), cw.toByteArray());
 
         // Debug

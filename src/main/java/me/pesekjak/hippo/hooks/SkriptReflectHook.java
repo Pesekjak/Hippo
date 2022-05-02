@@ -18,6 +18,7 @@ public class SkriptReflectHook {
             javaTypeClass = Class.forName("com.btk5h.skriptmirror.JavaType");
             objectWrapperClass = Class.forName("com.btk5h.skriptmirror.ObjectWrapper");
             reflectNullClass = Class.forName("com.btk5h.skriptmirror.Null");
+            SkriptReflectHook.setupReflectLoader();
         } catch (Exception ignored) {
             return false;
         }
