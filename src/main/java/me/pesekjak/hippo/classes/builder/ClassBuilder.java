@@ -199,9 +199,9 @@ public class ClassBuilder {
             int eventIndex = method.getArguments().size() + 1;
             if(method.getModifiers().contains(Modifier.STATIC)) eventIndex -= 1;
             mv.visitVarInsn(Opcodes.ASTORE, eventIndex);
-            mv.visitVarInsn(Opcodes.ALOAD, eventIndex);
             int i = 0;
             for(Argument argument : method.getArguments()) {
+                mv.visitVarInsn(Opcodes.ALOAD, eventIndex);
                 i++;
                 pushValue(mv, i);
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
@@ -260,10 +260,10 @@ public class ClassBuilder {
         mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "me/pesekjak/hippo/utils/events/classcontents/constructors/InitEvent", "<init>", "()V", false);
         mv.visitVarInsn(Opcodes.ASTORE, 1 + argumentOffset);
         int i = 0;
-        mv.visitVarInsn(Opcodes.ALOAD, 1 + argumentOffset);
         for (Argument argument : constructor.getArguments()) {
-            i++;
             if(classType == ClassType.ENUM && (i == 1 || i == 2)) continue;
+            mv.visitVarInsn(Opcodes.ALOAD, 1 + argumentOffset);
+            i++;
             pushValue(mv, (classType != ClassType.ENUM) ? i : i - 2);
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
             int loadCode = getLoadCode(argument.getPrimitiveType().getPrimitive());
@@ -281,9 +281,9 @@ public class ClassBuilder {
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "ch/njol/skript/lang/TriggerItem", "walk", "(Lch/njol/skript/lang/TriggerItem;Lorg/bukkit/event/Event;)Z", false);
         mv.visitInsn(Opcodes.POP);
         if(classType != ClassType.ENUM) { // Enums super is handled separately and automatically
-            mv.visitVarInsn(Opcodes.ALOAD, 1 + argumentOffset);
             i = 0;
             for(Argument argument : constructor.getSuperArguments()) {
+                mv.visitVarInsn(Opcodes.ALOAD, 1 + argumentOffset);
                 i++;
                 pushValue(mv, i);
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
@@ -329,11 +329,11 @@ public class ClassBuilder {
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "me/pesekjak/hippo/utils/events/classcontents/constructors/PostInitEvent", "<init>", "(Ljava/lang/Object;)V", false);
         mv.visitVarInsn(Opcodes.ASTORE, 3 + argumentOffset);
-        mv.visitVarInsn(Opcodes.ALOAD, 3 + argumentOffset);
         i = 0;
         for(Argument argument : constructor.getArguments()) {
-            i++;
             if(classType == ClassType.ENUM && (i == 1 || i == 2)) continue;
+            mv.visitVarInsn(Opcodes.ALOAD, 3 + argumentOffset);
+            i++;
             pushValue(mv, (classType != ClassType.ENUM) ? i : i - 2);
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
             int loadCode = getLoadCode(argument.getPrimitiveType().getPrimitive());
