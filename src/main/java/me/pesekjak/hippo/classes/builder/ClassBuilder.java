@@ -3,6 +3,7 @@ package me.pesekjak.hippo.classes.builder;
 import me.pesekjak.hippo.classes.*;
 import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.classes.contents.Constructor;
+import me.pesekjak.hippo.classes.contents.Enum;
 import me.pesekjak.hippo.classes.contents.Field;
 import me.pesekjak.hippo.classes.contents.Method;
 import me.pesekjak.hippo.classes.contents.annotation.Annotation;
@@ -81,10 +82,21 @@ public class ClassBuilder {
 
         // Handles init methods
         if(classType != ClassType.INTERFACE && classType != ClassType.ANNOTATION) {
-            if(skriptClass.getConstructors().keySet().size() == 0) skriptClass.addConstructor("<init>:()V", Constructor.getDefault());
+            if(skriptClass.getConstructors().keySet().size() == 0) {
+                if(classType != ClassType.ENUM) skriptClass.addConstructor("<init>:()V", Constructor.getDefault());
+                else skriptClass.addConstructor("<init>:(Ljava/lang/String;I)V", Constructor.getDefaultEnumConstructor());
+            }
             for(Constructor constructor : skriptClass.getConstructors().values()) {
                 addConstructor(constructor);
             }
+        }
+
+        if(classType == ClassType.ENUM) {
+            EnumBuilder enumBuilder = new EnumBuilder(this);
+            enumBuilder.setupField$VALUES();
+            enumBuilder.setupMethod$values();
+            enumBuilder.setupMethodValues();
+            enumBuilder.setupMethodValueOf();
         }
 
         // End :)
@@ -129,7 +141,9 @@ public class ClassBuilder {
 
     private void addField(Field field) {
         String descriptor = field.getType() != null ? field.getType().getDescriptor() : field.getPrimitiveType().getDescriptor();
-        FieldVisitor fv = cw.visitField(sumModifiers(field), field.getName(), descriptor, null, null);
+        int modifiers = sumModifiers(field);
+        if(field instanceof Enum) modifiers += Opcodes.ACC_ENUM;
+        FieldVisitor fv = cw.visitField(modifiers, field.getName(), descriptor, null, null);
         field.getAnnotations().forEach(annotation -> setupFieldAnnotation(fv, annotation));
         fv.visitEnd();
         cw.visitEnd();
@@ -142,9 +156,7 @@ public class ClassBuilder {
             exceptions.add(exceptionType.getInternalName());
         }
         int modifiers = sumModifiers(method);
-        if(method.hasVarArg()) {
-            modifiers =+ Opcodes.ACC_VARARGS;
-        }
+        if(method.hasVarArg()) modifiers += Opcodes.ACC_VARARGS;
         MethodVisitor mv = cw.visitMethod(modifiers, method.getName(), descriptor, null, exceptions.size() > 0 ? exceptions.toArray(new String[0]) : null);
         method.getAnnotations().forEach(annotation -> setupMethodAnnotation(mv, annotation));
         if(classType == ClassType.ANNOTATION) {
@@ -193,13 +205,7 @@ public class ClassBuilder {
                 i++;
                 pushValue(mv, i);
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
-                int loadCode = Opcodes.ALOAD;
-                switch (argument.getPrimitiveType().getPrimitive()) {
-                    case BOOLEAN, BYTE, CHAR, SHORT, INT -> loadCode = Opcodes.ILOAD;
-                    case LONG -> loadCode = Opcodes.LLOAD;
-                    case FLOAT -> loadCode = Opcodes.FLOAD;
-                    case DOUBLE -> loadCode = Opcodes.DLOAD;
-                }
+                int loadCode = getLoadCode(argument.getPrimitiveType().getPrimitive());
                 if(!method.getModifiers().contains(Modifier.STATIC)) {
                     mv.visitVarInsn(loadCode, i);
                 } else {
@@ -244,9 +250,7 @@ public class ClassBuilder {
             exceptions.add(exceptionType.getInternalName());
         }
         int modifiers = sumModifiers(constructor);
-        if(constructor.hasVarArg()) {
-            modifiers =+ Opcodes.ACC_VARARGS;
-        }
+        if(constructor.hasVarArg()) modifiers += Opcodes.ACC_VARARGS;
         MethodVisitor mv = cw.visitMethod(modifiers, constructor.getName(), descriptor, null, exceptions.size() > 0 ? exceptions.toArray(new String[0]) : null);
         constructor.getAnnotations().forEach(annotation -> setupMethodAnnotation(mv, annotation));
         mv.visitCode();
@@ -255,19 +259,14 @@ public class ClassBuilder {
         mv.visitInsn(Opcodes.DUP);
         mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "me/pesekjak/hippo/utils/events/classcontents/constructors/InitEvent", "<init>", "()V", false);
         mv.visitVarInsn(Opcodes.ASTORE, 1 + argumentOffset);
-        mv.visitVarInsn(Opcodes.ALOAD, 1 + argumentOffset);
         int i = 0;
-        for(Argument argument : constructor.getArguments()) {
+        mv.visitVarInsn(Opcodes.ALOAD, 1 + argumentOffset);
+        for (Argument argument : constructor.getArguments()) {
             i++;
-            pushValue(mv, i);
+            if(classType == ClassType.ENUM && (i == 1 || i == 2)) continue;
+            pushValue(mv, (classType != ClassType.ENUM) ? i : i - 2);
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
-            int loadCode = Opcodes.ALOAD;
-            switch (argument.getPrimitiveType().getPrimitive()) {
-                case BOOLEAN, BYTE, CHAR, SHORT, INT -> loadCode = Opcodes.ILOAD;
-                case LONG -> loadCode = Opcodes.LLOAD;
-                case FLOAT -> loadCode = Opcodes.FLOAD;
-                case DOUBLE -> loadCode = Opcodes.DLOAD;
-            }
+            int loadCode = getLoadCode(argument.getPrimitiveType().getPrimitive());
             mv.visitVarInsn(loadCode, i);
             if(argument.getPrimitiveType().getPrimitive() != Primitive.NONE) pushAsType(mv, argument.getPrimitiveType().getPrimitive());
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/constructors/InitEvent", "addArgument", "(Ljava/lang/Number;Ljava/lang/Object;)V", false);
@@ -281,26 +280,40 @@ public class ClassBuilder {
         mv.visitVarInsn(Opcodes.ALOAD, 1 + argumentOffset);
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "ch/njol/skript/lang/TriggerItem", "walk", "(Lch/njol/skript/lang/TriggerItem;Lorg/bukkit/event/Event;)Z", false);
         mv.visitInsn(Opcodes.POP);
-        mv.visitVarInsn(Opcodes.ALOAD, 1 + argumentOffset);
-        i = 0;
-        int[] superArgs = new int[constructor.getSuperArguments().size()];
-        for(Argument argument : constructor.getSuperArguments()) {
-            i++;
-            pushValue(mv, i);
-            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
-            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/constructors/InitEvent", "getSuperResult", "(Ljava/lang/Number;)Ljava/lang/Object;", false);
-            Argument superArgument = constructor.getSuperArguments().get(i - 1);
-            castToType(mv, superArgument.getPrimitiveType(), superArgument.getType());
-            mv.visitVarInsn(Opcodes.ASTORE, i + 2 + argumentOffset);
-            superArgs[i - 1] = i + 2;
+        if(classType != ClassType.ENUM) { // Enums super is handled separately and automatically
+            mv.visitVarInsn(Opcodes.ALOAD, 1 + argumentOffset);
+            i = 0;
+            for(Argument argument : constructor.getSuperArguments()) {
+                i++;
+                pushValue(mv, i);
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/constructors/InitEvent", "getSuperResult", "(Ljava/lang/Number;)Ljava/lang/Object;", false);
+                castToType(mv, argument.getPrimitiveType(), argument.getType());
+                int storeCode = Opcodes.ASTORE;
+                switch (argument.getPrimitiveType().getPrimitive()) {
+                    case BOOLEAN, BYTE, CHAR, SHORT, INT -> storeCode = Opcodes.ISTORE;
+                    case LONG -> storeCode = Opcodes.LSTORE;
+                    case FLOAT -> storeCode = Opcodes.FSTORE;
+                    case DOUBLE -> storeCode = Opcodes.DSTORE;
+                }
+                mv.visitVarInsn(storeCode, i + 2 + argumentOffset);
+            }
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            i = 0;
+            for(Argument argument : constructor.getSuperArguments()) {
+                i++;
+                int loadCode = getLoadCode(argument.getPrimitiveType().getPrimitive());
+                mv.visitVarInsn(loadCode, i + 2 + argumentOffset);
+            }
+            String superName = "java/lang/Object";
+            if(skriptClass.getExtendingTypes().size() != 0) superName = skriptClass.getExtendingTypes().get(0).getInternalName();
+            mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superName, "<init>", constructor.getSuperDescriptor(), false);
+        } else {
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            mv.visitVarInsn(Opcodes.ALOAD, 1);
+            mv.visitVarInsn(Opcodes.ILOAD, 2);
+            mv.visitMethodInsn(Opcodes.INVOKESPECIAL,"java/lang/Enum", "<init>", "(Ljava/lang/String;I)V", false);
         }
-        mv.visitVarInsn(Opcodes.ALOAD, 0);
-        for(int superArgIndex : superArgs) {
-            mv.visitVarInsn(Opcodes.ALOAD, superArgIndex + argumentOffset);
-        }
-        String superName = "java/lang/Object";
-        if(skriptClass.getExtendingTypes().size() != 0) superName = skriptClass.getExtendingTypes().get(0).getInternalName();
-        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superName, "<init>", constructor.getSuperDescriptor(), false);
         for(Field field : skriptClass.getFields().values()) {
             if(field.getModifiers().contains(Modifier.STATIC)) continue;
             if(field.getConstant() != null) {
@@ -320,15 +333,10 @@ public class ClassBuilder {
         i = 0;
         for(Argument argument : constructor.getArguments()) {
             i++;
-            pushValue(mv, i);
+            if(classType == ClassType.ENUM && (i == 1 || i == 2)) continue;
+            pushValue(mv, (classType != ClassType.ENUM) ? i : i - 2);
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
-            int loadCode = Opcodes.ALOAD;
-            switch (argument.getPrimitiveType().getPrimitive()) {
-                case BOOLEAN, BYTE, CHAR, SHORT, INT -> loadCode = Opcodes.ILOAD;
-                case LONG -> loadCode = Opcodes.LLOAD;
-                case FLOAT -> loadCode = Opcodes.FLOAD;
-                case DOUBLE -> loadCode = Opcodes.DLOAD;
-            }
+            int loadCode = getLoadCode(argument.getPrimitiveType().getPrimitive());
             mv.visitVarInsn(loadCode, i);
             if(argument.getPrimitiveType().getPrimitive() != Primitive.NONE) pushAsType(mv, argument.getPrimitiveType().getPrimitive());
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/constructors/PostInitEvent", "addArgument", "(Ljava/lang/Number;Ljava/lang/Object;)V", false);
@@ -351,14 +359,20 @@ public class ClassBuilder {
     private void generateClInit() {
         MethodVisitor mv = cw.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null);
         mv.visitCode();
+        int stackOffset = 0;
+        if(classType == ClassType.ENUM) {
+            new EnumBuilder(this).setupEnums(mv);
+            stackOffset += 2;
+        }
         for(Field field : skriptClass.getFields().values()) {
             if(!field.getModifiers().contains(Modifier.STATIC)) continue;
+            if(field instanceof Enum) continue;
             if(field.getConstant() != null) {
                 setupConstantField(mv, field);
             } else if(field.getConstantArray() != null) {
                 setupConstantArrayField(mv, field);
             } else if(field.getValue() != null) {
-                setupValueField(mv, field, 0);
+                setupValueField(mv, field, stackOffset);
             }
         }
         pushClassInstance(mv);
@@ -366,6 +380,7 @@ public class ClassBuilder {
         mv.visitInsn(Opcodes.RETURN);
         mv.visitMaxs(0, 0);
         mv.visitEnd();
+        cw.visitEnd();
     }
 
     private void setupConstantField(MethodVisitor mv, Field field) {
@@ -510,6 +525,137 @@ public class ClassBuilder {
         mv.visitFieldInsn(Opcodes.GETSTATIC, REGISTRY_TYPE.getInternalName(), "REGISTRY", REGISTRY_TYPE.getDescriptor());
         mv.visitLdcInsn(skriptClass.getClassName());
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, REGISTRY_TYPE.getInternalName(), "getSkriptClass", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/SkriptClass;", false);
+    }
+
+    public int getLoadCode(Primitive primitive) {
+        int loadCode = Opcodes.ALOAD;
+        switch (primitive) {
+            case BOOLEAN, BYTE, CHAR, SHORT, INT -> loadCode = Opcodes.ILOAD;
+            case LONG -> loadCode = Opcodes.LLOAD;
+            case FLOAT -> loadCode = Opcodes.FLOAD;
+            case DOUBLE -> loadCode = Opcodes.DLOAD;
+        }
+        return loadCode;
+    }
+
+    private static class EnumBuilder {
+
+        private final ClassBuilder cb;
+
+        private final SkriptClass skriptClass;
+        private final ClassType classType;
+        private String internalName;
+
+        private final ClassWriter cw;
+
+
+        public EnumBuilder(ClassBuilder cb) {
+            this.cb = cb;
+            this.skriptClass = cb.skriptClass;
+            this.classType = cb.classType;
+            this.internalName = cb.internalName;
+            this.cw = cb.cw;
+        }
+
+        public void setupField$VALUES() {
+            int modifiers = Modifier.PRIVATE.value + Modifier.STATIC.value + Modifier.FINAL.value + Opcodes.ACC_SYNTHETIC;
+            FieldVisitor fv = cw.visitField(modifiers, "$VALUES", skriptClass.getType().arrayType().getDescriptor(), null, null);
+            fv.visitEnd();
+            cw.visitEnd();
+        }
+
+        public void setupMethodValues() {
+            int modifiers = Modifier.PUBLIC.value + Modifier.STATIC.value;
+            MethodVisitor mv = cw.visitMethod(modifiers, "values", "()" + skriptClass.getType().arrayType().getDescriptor(), null, null);
+            mv.visitCode();
+            mv.visitFieldInsn(Opcodes.GETSTATIC, internalName, "$VALUES", skriptClass.getType().arrayType().getDescriptor());
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, skriptClass.getType().arrayType().getDescriptor(), "clone", "()Ljava/lang/Object;", false);
+            cb.castToType(mv, new PrimitiveType(Primitive.NONE), skriptClass.getType().arrayType());
+            mv.visitInsn(Opcodes.ARETURN);
+            mv.visitMaxs(0, 0);
+            mv.visitEnd();
+            cw.visitEnd();
+        }
+
+        public void setupMethodValueOf() {
+            int modifiers = Modifier.PUBLIC.value + Modifier.STATIC.value;
+            MethodVisitor mv = cw.visitMethod(modifiers, "valueOf", "(Ljava/lang/String;)" + skriptClass.getType().getDescriptor(), null, null);
+            mv.visitCode();
+            mv.visitLdcInsn(skriptClass.getType().toASMType());
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Enum", "valueOf", "(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Enum;", false);
+            cb.castToType(mv, new PrimitiveType(Primitive.NONE), skriptClass.getType());
+            mv.visitInsn(Opcodes.ARETURN);
+            mv.visitMaxs(0, 0);
+            mv.visitEnd();
+            cw.visitEnd();
+        }
+
+        public void setupMethod$values() {
+            List<Enum> enums = new ArrayList<>();
+            for(Field field : skriptClass.getFields().values()) {
+                if(field instanceof Enum) enums.add((Enum) field);
+            }
+            int modifiers = Modifier.PRIVATE.value + Modifier.STATIC.value + Opcodes.ACC_SYNTHETIC;
+            MethodVisitor mv = cw.visitMethod(modifiers, "$values", "()" + skriptClass.getType().arrayType().getDescriptor(), null, null);
+            mv.visitCode();
+            cb.pushValue(mv, enums.size());
+            mv.visitTypeInsn(Opcodes.ANEWARRAY, internalName);
+            int i = 0;
+            for(Enum enumField : enums) {
+                mv.visitInsn(Opcodes.DUP);
+                cb.pushValue(mv, i);
+                mv.visitFieldInsn(Opcodes.GETSTATIC, internalName, enumField.getName(), enumField.getDescriptor());
+                mv.visitInsn(Opcodes.AASTORE);
+                i++;
+            }
+            mv.visitInsn(Opcodes.ARETURN);
+            mv.visitMaxs(0, 0);
+            mv.visitEnd();
+            cw.visitEnd();
+        }
+
+        // Has to be MethodVisitor for static block
+        public void setupEnums(MethodVisitor mv) {
+            List<Enum> enums = new ArrayList<>();
+            for(Field field : skriptClass.getFields().values()) {
+                if(field instanceof Enum) enums.add((Enum) field);
+            }
+            cb.pushClassInstance(mv);
+            mv.visitVarInsn(Opcodes.ASTORE, 0);
+            int i = 0;
+            for(Enum enumField : enums) {
+                mv.visitVarInsn(Opcodes.ALOAD, 0);
+                mv.visitLdcInsn(enumField.getName());
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/SkriptClass", "getField", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/contents/Field;", false);
+                cb.castToType(mv, new PrimitiveType(Primitive.NONE), new Type(Enum.class));
+                mv.visitVarInsn(Opcodes.ASTORE, 1);
+                mv.visitVarInsn(Opcodes.ALOAD, 1);
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/contents/Enum", "getValue", "()Lch/njol/skript/lang/Expression;", false);
+                mv.visitVarInsn(Opcodes.ASTORE, 2);
+                mv.visitTypeInsn(Opcodes.NEW, internalName);
+                mv.visitInsn(Opcodes.DUP);
+                mv.visitLdcInsn(enumField.getName());
+                cb.pushValue(mv, i);
+                int argumentIndex = 0;
+                for(Argument argument : enumField.getSuperArguments()) {
+                    mv.visitVarInsn(Opcodes.ALOAD, 2);
+                    mv.visitVarInsn(Opcodes.ALOAD, 0);
+                    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/SkriptClass", "getDefineEvent", "()Lorg/bukkit/event/Event;", false);
+                    mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "ch/njol/skript/lang/Expression", "getAll", "(Lorg/bukkit/event/Event;)[Ljava/lang/Object;", true);
+                    cb.pushValue(mv, argumentIndex);
+                    mv.visitInsn(Opcodes.AALOAD);
+                    cb.castToType(mv, argument.getPrimitiveType(), argument.getType());
+                    argumentIndex++;
+                }
+                mv.visitMethodInsn(Opcodes.INVOKESPECIAL, internalName, "<init>", enumField.getSuperDescriptor(), false);
+                mv.visitFieldInsn(Opcodes.PUTSTATIC, internalName, enumField.getName(), enumField.getDescriptor());
+                i++;
+            }
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, internalName, "$values", "()" + skriptClass.getType().arrayType().getDescriptor(), false);
+            mv.visitFieldInsn(Opcodes.PUTSTATIC, internalName, "$VALUES", skriptClass.getType().arrayType().getDescriptor());
+        }
+
     }
 
 }

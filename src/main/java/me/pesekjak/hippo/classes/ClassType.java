@@ -7,7 +7,7 @@ public enum ClassType {
     CLASS("class", 0),
     INTERFACE("interface", Opcodes.ACC_INTERFACE + Opcodes.ACC_ABSTRACT),
     RECORD("record", Opcodes.ACC_RECORD),
-    ENUM("enum", Opcodes.ACC_ENUM),
+    ENUM("enum", Opcodes.ACC_FINAL + Opcodes.ACC_SUPER + Opcodes.ACC_ENUM),
     ANNOTATION("annotation", Opcodes.ACC_ANNOTATION  + Opcodes.ACC_INTERFACE + Opcodes.ACC_ABSTRACT);
 
     public String identifier;

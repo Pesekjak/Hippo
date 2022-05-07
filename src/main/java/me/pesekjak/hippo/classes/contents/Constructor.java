@@ -1,10 +1,7 @@
 package me.pesekjak.hippo.classes.contents;
 
 import ch.njol.skript.lang.Trigger;
-import me.pesekjak.hippo.classes.Argument;
-import me.pesekjak.hippo.classes.Modifier;
-import me.pesekjak.hippo.classes.Primitive;
-import me.pesekjak.hippo.classes.PrimitiveType;
+import me.pesekjak.hippo.classes.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,18 +37,28 @@ public class Constructor extends Method {
         return "(" + argumentsDescriptor + ")V";
     }
 
-    public static Constructor getDefault() {
-        Constructor defaultConstructor = new Constructor();
-        defaultConstructor.addModifier(Modifier.PUBLIC);
-        return defaultConstructor;
-    }
-
     public Trigger getPostInitTrigger() {
         return postInitTrigger;
     }
 
     public void setPostInitTrigger(Trigger trigger) {
         this.postInitTrigger = trigger;
+    }
+
+    public static Constructor getDefault() {
+        Constructor defaultConstructor = new Constructor();
+        defaultConstructor.addModifier(Modifier.PUBLIC);
+        return defaultConstructor;
+    }
+
+    public static Constructor getDefaultEnumConstructor() {
+        Constructor enumConstructor = new Constructor();
+        enumConstructor.addArgument(new Argument(new Type(String.class), "E1"));
+        enumConstructor.addArgument(new Argument(new PrimitiveType(Primitive.INT), "E2"));
+        enumConstructor.addSuperArgument(new Argument(new Type(String.class), "E1"));
+        enumConstructor.addSuperArgument(new Argument(new PrimitiveType(Primitive.INT), "E2"));
+        enumConstructor.addModifier(Modifier.PRIVATE);
+        return enumConstructor;
     }
 
 }

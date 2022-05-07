@@ -49,6 +49,12 @@ public class SecConstructor extends Section {
     protected boolean build(@NotNull Event event) {
         Constructor constructor = new Constructor();
         SkriptClassBuilder.registeringConstructor = constructor;
+        if(SkriptClassBuilder.getRegisteringClass().getClassType() == ClassType.ENUM) {
+            constructor.addArgument(new Argument(new Type(String.class), "E1"));
+            constructor.addArgument(new Argument(new PrimitiveType(Primitive.INT), "E2"));
+            constructor.addSuperArgument(new Argument(new Type(String.class), "E1"));
+            constructor.addSuperArgument(new Argument(new PrimitiveType(Primitive.INT), "E2"));
+        }
         if(modifierExpression != null) {
             Arrays.stream(modifierExpression.getAll(event)).toList().forEach(constructor::addModifier);
         }

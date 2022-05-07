@@ -9,6 +9,7 @@ public class TypeEnum extends SkriptClass {
 
     public TypeEnum(@NotNull Type type) {
         super(type, ClassType.ENUM);
+        this.addExtendingType(new Type(Enum.class));
     }
 
 }
