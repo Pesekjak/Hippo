@@ -69,4 +69,8 @@ public class Type extends IType {
         return null;
     }
 
+    public org.objectweb.asm.Type toASMType() {
+        return org.objectweb.asm.Type.getType(descriptor);
+    }
+
 }
