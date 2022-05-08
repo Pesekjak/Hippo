@@ -288,6 +288,7 @@ public class ClassBuilder {
                 pushValue(mv, i);
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
                 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/constructors/InitEvent", "getSuperResult", "(Ljava/lang/Number;)Ljava/lang/Object;", false);
+                if(argument.getType() != null && Number.class.isAssignableFrom(argument.getType().findClass())) convertNumber(mv, argument.getType());
                 castToType(mv, argument.getPrimitiveType(), argument.getType());
                 int storeCode = Opcodes.ASTORE;
                 switch (argument.getPrimitiveType().getPrimitive()) {
@@ -521,6 +522,19 @@ public class ClassBuilder {
         }
     }
 
+    private void convertNumber(MethodVisitor mv, Type endType) {
+        Primitive counterPrimitive = Primitive.NONE;
+        for(Primitive primitive : Primitive.values()) {
+            if(primitive.getClassCounterpart() == endType.findClass()) {
+                counterPrimitive = primitive;
+                break;
+            }
+        }
+        if(counterPrimitive == Primitive.NONE) return;
+        pushAsPrimitive(mv, counterPrimitive);
+        pushAsType(mv, counterPrimitive);
+    }
+
     public void pushClassInstance(MethodVisitor mv) {
         mv.visitFieldInsn(Opcodes.GETSTATIC, REGISTRY_TYPE.getInternalName(), "REGISTRY", REGISTRY_TYPE.getDescriptor());
         mv.visitLdcInsn(skriptClass.getClassName());
@@ -645,6 +659,7 @@ public class ClassBuilder {
                     mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "ch/njol/skript/lang/Expression", "getAll", "(Lorg/bukkit/event/Event;)[Ljava/lang/Object;", true);
                     cb.pushValue(mv, argumentIndex);
                     mv.visitInsn(Opcodes.AALOAD);
+                    if(argument.getType() != null && Number.class.isAssignableFrom(argument.getType().findClass())) cb.convertNumber(mv, argument.getType());
                     cb.castToType(mv, argument.getPrimitiveType(), argument.getType());
                     argumentIndex++;
                 }
