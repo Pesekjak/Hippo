@@ -261,9 +261,9 @@ public class ClassBuilder {
         mv.visitVarInsn(Opcodes.ASTORE, 1 + argumentOffset);
         int i = 0;
         for (Argument argument : constructor.getArguments()) {
+            i++;
             if(classType == ClassType.ENUM && (i == 1 || i == 2)) continue;
             mv.visitVarInsn(Opcodes.ALOAD, 1 + argumentOffset);
-            i++;
             pushValue(mv, (classType != ClassType.ENUM) ? i : i - 2);
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
             int loadCode = getLoadCode(argument.getPrimitiveType().getPrimitive());
@@ -331,9 +331,9 @@ public class ClassBuilder {
         mv.visitVarInsn(Opcodes.ASTORE, 3 + argumentOffset);
         i = 0;
         for(Argument argument : constructor.getArguments()) {
+            i++;
             if(classType == ClassType.ENUM && (i == 1 || i == 2)) continue;
             mv.visitVarInsn(Opcodes.ALOAD, 3 + argumentOffset);
-            i++;
             pushValue(mv, (classType != ClassType.ENUM) ? i : i - 2);
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
             int loadCode = getLoadCode(argument.getPrimitiveType().getPrimitive());
