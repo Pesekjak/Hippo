@@ -5,7 +5,9 @@ import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
+import me.pesekjak.hippo.classes.ClassType;
 import me.pesekjak.hippo.hooks.SkriptReflectHook;
+import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.classcontents.constructors.InitEvent;
 import org.bukkit.event.Event;
@@ -40,6 +42,11 @@ public class EffSuper extends Effect {
     @Override
     public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult) {
         argumentExpression = SkriptUtils.defendExpression(expressions[0]);
-        return getParser().isCurrentEvent(InitEvent.class);
+        if(!getParser().isCurrentEvent(InitEvent.class)) return false;
+        if(SkriptClassBuilder.getRegisteringClass().getClassType() == ClassType.ENUM) {
+            Skript.error("You can't call super for enum class");
+            return false;
+        }
+        return true;
     }
 }

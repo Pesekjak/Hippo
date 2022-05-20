@@ -49,6 +49,10 @@ public class SecConstructor extends Section {
     protected boolean build(@NotNull Event event) {
         Constructor constructor = new Constructor();
         SkriptClassBuilder.registeringConstructor = constructor;
+        if(SkriptClassBuilder.getRegisteringClass().getClassType() == ClassType.INTERFACE) {
+            Skript.error("You can't create a constructor for interface class");
+            return false;
+        }
         if(SkriptClassBuilder.getRegisteringClass().getClassType() == ClassType.ENUM) {
             constructor.addArgument(new Argument(new Type(String.class), "E1"));
             constructor.addArgument(new Argument(new PrimitiveType(Primitive.INT), "E2"));
@@ -61,7 +65,7 @@ public class SecConstructor extends Section {
         if(argumentExpression != null) {
             Arrays.stream(argumentExpression.getAll(event)).toList().forEach((argumentPair) -> constructor.addArgument(argumentPair.asArgument()));
         }
-        if(superExpression != null) {
+        if(superExpression != null && SkriptClassBuilder.getRegisteringClass().getClassType() != ClassType.ENUM) {
             int i = 0;
             for(Object superArgumentObject : superExpression.getAll(event)) {
                 i++;
@@ -72,7 +76,9 @@ public class SecConstructor extends Section {
                 } else if(superArgumentObject instanceof Primitive) {
                     constructor.addSuperArgument(new Argument(new PrimitiveType((Primitive) superArgumentObject), "A" + i));
                 } else {
-                    constructor.addSuperArgument(new Argument(new Type(SkriptReflectHook.classOfJavaType(superArgumentObject)), "A" + i));
+                    Class<?> classInstance = SkriptReflectHook.classOfJavaType(superArgumentObject);
+                    if(classInstance == null) return false;
+                    constructor.addSuperArgument(new Argument(new Type(classInstance), "A" + i));
                 }
             }
         }

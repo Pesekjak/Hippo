@@ -70,7 +70,9 @@ public class EffEnum extends Effect {
                 } else if(superArgumentObject instanceof Primitive) {
                     enumField.addSuperArgument(new Argument(new PrimitiveType((Primitive) superArgumentObject), "A" + i));
                 } else {
-                    enumField.addSuperArgument(new Argument(new Type(SkriptReflectHook.classOfJavaType(superArgumentObject)), "A" + i));
+                    Class<?> classInstance = SkriptReflectHook.classOfJavaType(superArgumentObject);
+                    if(classInstance == null) return false;
+                    enumField.addSuperArgument(new Argument(new Type(classInstance), "A" + i));
                 }
             }
         }
