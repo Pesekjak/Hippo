@@ -1,6 +1,5 @@
 package me.pesekjak.hippo.utils.events.classcontents;
 
-import me.pesekjak.hippo.hooks.SkriptReflectHook;
 import me.pesekjak.hippo.utils.events.ArgumentsEvent;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +26,7 @@ public class MethodCallEvent extends ArgumentsEvent {
     }
 
     public Object getOutput() {
-        return SkriptReflectHook.unwrap(output);
+        return output;
     }
 
     public void setOutput(Object output) {

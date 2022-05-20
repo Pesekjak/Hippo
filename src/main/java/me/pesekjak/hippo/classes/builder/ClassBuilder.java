@@ -225,7 +225,19 @@ public class ClassBuilder {
             mv.visitInsn(Opcodes.POP);
             mv.visitVarInsn(Opcodes.ALOAD, eventIndex);
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/MethodCallEvent", "getOutput", "()Ljava/lang/Object;", false);
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+            Label nullLabel = new Label();
+            mv.visitJumpInsn(Opcodes.IFNULL, nullLabel);
+            mv.visitVarInsn(Opcodes.ALOAD, eventIndex);
+            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/MethodCallEvent", "getOutput", "()Ljava/lang/Object;", false);
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+            if(method.getType() != null && Number.class.isAssignableFrom(method.getType().findClass())) convertNumber(mv, method.getType());
             castToType(mv, method.getPrimitiveType(), method.getType());
+            Label end = new Label();
+            mv.visitJumpInsn(Opcodes.GOTO, end);
+            mv.visitLabel(nullLabel);
+            mv.visitInsn(Opcodes.ACONST_NULL);
+            mv.visitLabel(end);
             int returnCode = Opcodes.ARETURN;
             if(!((method.getType() != null) ? method.getType().isArray() : method.getPrimitiveType().isArray())) {
                 switch (method.getPrimitiveType().getPrimitive()) {
@@ -288,8 +300,21 @@ public class ClassBuilder {
                 pushValue(mv, i);
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
                 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/constructors/InitEvent", "getSuperResult", "(Ljava/lang/Number;)Ljava/lang/Object;", false);
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+                Label nullLabel = new Label();
+                mv.visitJumpInsn(Opcodes.IFNULL, nullLabel);
+                mv.visitVarInsn(Opcodes.ALOAD, 1 + argumentOffset);
+                pushValue(mv, i);
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/constructors/InitEvent", "getSuperResult", "(Ljava/lang/Number;)Ljava/lang/Object;", false);
+                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
                 if(argument.getType() != null && Number.class.isAssignableFrom(argument.getType().findClass())) convertNumber(mv, argument.getType());
                 castToType(mv, argument.getPrimitiveType(), argument.getType());
+                Label end = new Label();
+                mv.visitJumpInsn(Opcodes.GOTO, end);
+                mv.visitLabel(nullLabel);
+                mv.visitInsn(Opcodes.ACONST_NULL);
+                mv.visitLabel(end);
                 int storeCode = Opcodes.ASTORE;
                 switch (argument.getPrimitiveType().getPrimitive()) {
                     case BOOLEAN, BYTE, CHAR, SHORT, INT -> storeCode = Opcodes.ISTORE;
@@ -438,20 +463,20 @@ public class ClassBuilder {
         mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "ch/njol/skript/lang/Expression", "getSingle", "(Lorg/bukkit/event/Event;)Ljava/lang/Object;", true);
         mv.visitVarInsn(Opcodes.ASTORE, 1 + stackOffset);
         mv.visitVarInsn(Opcodes.ALOAD, 1 + stackOffset);
-        mv.visitTypeInsn(Opcodes.INSTANCEOF, "com/btk5h/skriptmirror/ObjectWrapper");
-        Label label = new Label();
-        mv.visitJumpInsn(Opcodes.IFEQ, label);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+        Label nullLabel = new Label();
+        mv.visitJumpInsn(Opcodes.IFNULL, nullLabel);
         if(!field.getModifiers().contains(Modifier.STATIC)) mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitVarInsn(Opcodes.ALOAD, 1 + stackOffset);
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+        if(field.getType() != null && Number.class.isAssignableFrom(field.getType().findClass())) convertNumber(mv, field.getType());
         castToType(mv, field.getPrimitiveType(), field.getType());
         putField(mv, field);
         Label end = new Label();
         mv.visitJumpInsn(Opcodes.GOTO, end);
-        mv.visitLabel(label);
+        mv.visitLabel(nullLabel);
         if(!field.getModifiers().contains(Modifier.STATIC)) mv.visitVarInsn(Opcodes.ALOAD, 0);
-        mv.visitVarInsn(Opcodes.ALOAD, 1 + stackOffset);
-        castToType(mv, field.getPrimitiveType(), field.getType());
+        mv.visitInsn(Opcodes.ACONST_NULL);
         putField(mv, field);
         mv.visitLabel(end);
     }
@@ -644,24 +669,37 @@ public class ClassBuilder {
                 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/SkriptClass", "getField", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/contents/Field;", false);
                 cb.castToType(mv, new PrimitiveType(Primitive.NONE), new Type(Enum.class));
                 mv.visitVarInsn(Opcodes.ASTORE, 1);
-                mv.visitVarInsn(Opcodes.ALOAD, 1);
-                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/contents/Enum", "getValue", "()Lch/njol/skript/lang/Expression;", false);
-                mv.visitVarInsn(Opcodes.ASTORE, 2);
                 mv.visitTypeInsn(Opcodes.NEW, internalName);
                 mv.visitInsn(Opcodes.DUP);
                 mv.visitLdcInsn(enumField.getName());
                 cb.pushValue(mv, i);
                 int argumentIndex = 0;
                 for(Argument argument : enumField.getSuperArguments()) {
-                    mv.visitVarInsn(Opcodes.ALOAD, 2);
+                    argumentIndex++;
+                    mv.visitVarInsn(Opcodes.ALOAD, 1);
                     mv.visitVarInsn(Opcodes.ALOAD, 0);
                     mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/SkriptClass", "getDefineEvent", "()Lorg/bukkit/event/Event;", false);
-                    mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "ch/njol/skript/lang/Expression", "getAll", "(Lorg/bukkit/event/Event;)[Ljava/lang/Object;", true);
-                    cb.pushValue(mv, argumentIndex);
+                    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/classes/contents/Enum", "getAllFromExpression", "(Lorg/bukkit/event/Event;)[Ljava/lang/Object;", false);
+                    cb.pushValue(mv, argumentIndex - 1);
                     mv.visitInsn(Opcodes.AALOAD);
+                    mv.visitVarInsn(Opcodes.ASTORE, 1 + argumentIndex);
+                }
+                argumentIndex = 0;
+                for(Argument argument : enumField.getSuperArguments()) {
+                    argumentIndex++;
+                    mv.visitVarInsn(Opcodes.ALOAD, 1 + argumentIndex);
+                    mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+                    Label nullLabel = new Label();
+                    mv.visitJumpInsn(Opcodes.IFNULL, nullLabel);
+                    mv.visitVarInsn(Opcodes.ALOAD, 1 + argumentIndex);
+                    mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
                     if(argument.getType() != null && Number.class.isAssignableFrom(argument.getType().findClass())) cb.convertNumber(mv, argument.getType());
                     cb.castToType(mv, argument.getPrimitiveType(), argument.getType());
-                    argumentIndex++;
+                    Label end = new Label();
+                    mv.visitJumpInsn(Opcodes.GOTO, end);
+                    mv.visitLabel(nullLabel);
+                    mv.visitInsn(Opcodes.ACONST_NULL);
+                    mv.visitLabel(end);
                 }
                 mv.visitMethodInsn(Opcodes.INVOKESPECIAL, internalName, "<init>", enumField.getSuperDescriptor(), false);
                 mv.visitFieldInsn(Opcodes.PUTSTATIC, internalName, enumField.getName(), enumField.getDescriptor());

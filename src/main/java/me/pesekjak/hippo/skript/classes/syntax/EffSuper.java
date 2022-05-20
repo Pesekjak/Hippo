@@ -5,6 +5,7 @@ import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
+import me.pesekjak.hippo.hooks.SkriptReflectHook;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.classcontents.constructors.InitEvent;
 import org.bukkit.event.Event;
@@ -26,6 +27,7 @@ public class EffSuper extends Effect {
         if(argumentExpression == null) return;
         for(Object object : argumentExpression.getAll(event)) {
             i++;
+            if(SkriptReflectHook.getReflectNullClass().isInstance(object)) object = null;
             ((InitEvent) event).addSuperResult(i, object);
         }
     }

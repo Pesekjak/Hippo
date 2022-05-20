@@ -25,7 +25,7 @@ public class EffEnum extends Effect {
     }
 
     private String enumName;
-    private Expression<Object> argumentsExpression;
+    private Expression<Object> argumentExpression;
     private Expression<Object> superExpression;
 
     @Override
@@ -42,7 +42,7 @@ public class EffEnum extends Effect {
     public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult) {
         enumName = parseResult.regexes.get(0).group();
         if(i == 0) {
-            argumentsExpression = SkriptUtils.defendExpression(expressions[0]);
+            argumentExpression = SkriptUtils.defendExpression(expressions[0]);
             superExpression = SkriptUtils.defendExpression(expressions[1]);
         }
         if (!getParser().isCurrentEvent(NewSkriptClassEvent.class)) return false;
@@ -56,8 +56,8 @@ public class EffEnum extends Effect {
             return false;
         }
         Enum enumField = new Enum(skriptClass.getType(), enumName);
-        if(argumentsExpression != null) {
-            enumField.setValue(argumentsExpression);
+        if(argumentExpression != null) {
+            enumField.setValue(argumentExpression);
         }
         if(superExpression != null) {
             int i = 0;
