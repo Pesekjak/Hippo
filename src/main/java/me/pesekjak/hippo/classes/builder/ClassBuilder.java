@@ -227,7 +227,7 @@ public class ClassBuilder {
             mv.visitVarInsn(Opcodes.ALOAD, eventIndex);
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/MethodCallEvent", "getOutput", "()Ljava/lang/Object;", false);
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
-            if(method.getPrimitiveType().getPrimitive() == Primitive.NONE) {
+            if(method.getPrimitiveType().getPrimitive() == Primitive.NONE && !method.getType().isArray()) {
                 Label nullLabel = new Label();
                 mv.visitJumpInsn(Opcodes.IFNULL, nullLabel);
                 mv.visitVarInsn(Opcodes.ALOAD, eventIndex);
@@ -306,7 +306,7 @@ public class ClassBuilder {
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
                 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/constructors/InitEvent", "getSuperResult", "(Ljava/lang/Number;)Ljava/lang/Object;", false);
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
-                if(argument.getPrimitiveType().getPrimitive() == Primitive.NONE) {
+                if(argument.getPrimitiveType().getPrimitive() == Primitive.NONE && !argument.getType().isArray()) {
                     Label nullLabel = new Label();
                     mv.visitJumpInsn(Opcodes.IFNULL, nullLabel);
                     mv.visitVarInsn(Opcodes.ALOAD, 1 + argumentOffset);
@@ -479,7 +479,7 @@ public class ClassBuilder {
         mv.visitVarInsn(Opcodes.ALOAD, 1 + stackOffset);
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
         Label end = null;
-        if(field.getPrimitiveType().getPrimitive() == Primitive.NONE) {
+        if(field.getPrimitiveType().getPrimitive() == Primitive.NONE && !field.getType().isArray()) {
             if (field.getType() != null && Number.class.isAssignableFrom(field.getType().findClass())) convertNumber(mv, field.getType());
             castToType(mv, field.getPrimitiveType(), field.getType());
             putField(mv, field);
@@ -703,7 +703,7 @@ public class ClassBuilder {
                     argumentIndex++;
                     mv.visitVarInsn(Opcodes.ALOAD, 1 + argumentIndex);
                     mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
-                    if(argument.getPrimitiveType().getPrimitive() == Primitive.NONE) {
+                    if(argument.getPrimitiveType().getPrimitive() == Primitive.NONE && !argument.getType().isArray()) {
                         Label nullLabel = new Label();
                         mv.visitJumpInsn(Opcodes.IFNULL, nullLabel);
                         mv.visitVarInsn(Opcodes.ALOAD, 1 + argumentIndex);
