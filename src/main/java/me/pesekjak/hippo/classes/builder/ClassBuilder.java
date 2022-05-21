@@ -2,6 +2,7 @@ package me.pesekjak.hippo.classes.builder;
 
 import me.pesekjak.hippo.classes.*;
 import me.pesekjak.hippo.classes.Type;
+import me.pesekjak.hippo.classes.classtypes.TypeEnum;
 import me.pesekjak.hippo.classes.contents.Constructor;
 import me.pesekjak.hippo.classes.contents.Enum;
 import me.pesekjak.hippo.classes.contents.Field;
@@ -645,10 +646,7 @@ public class ClassBuilder {
         }
 
         public void setupMethod$values() {
-            List<Enum> enums = new ArrayList<>();
-            for(Field field : skriptClass.getFields().values()) {
-                if(field instanceof Enum) enums.add((Enum) field);
-            }
+            List<Enum> enums = ((TypeEnum) skriptClass).getEnumFields();
             int modifiers = Modifier.PRIVATE.value + Modifier.STATIC.value + Opcodes.ACC_SYNTHETIC;
             MethodVisitor mv = cw.visitMethod(modifiers, "$values", "()" + skriptClass.getType().arrayType().getDescriptor(), null, null);
             mv.visitCode();
@@ -670,10 +668,7 @@ public class ClassBuilder {
 
         // Has to be MethodVisitor for static block
         public void setupEnums(MethodVisitor mv) {
-            List<Enum> enums = new ArrayList<>();
-            for(Field field : skriptClass.getFields().values()) {
-                if(field instanceof Enum) enums.add((Enum) field);
-            }
+            List<Enum> enums = ((TypeEnum) skriptClass).getEnumFields();
             cb.pushClassInstance(mv);
             mv.visitVarInsn(Opcodes.ASTORE, 0);
             int i = 0;
