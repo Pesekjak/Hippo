@@ -25,6 +25,7 @@ public abstract class IType {
     }
 
     public boolean isArray() {
+        if(descriptor == null) return false;
         return descriptor.startsWith("[");
     }
 
