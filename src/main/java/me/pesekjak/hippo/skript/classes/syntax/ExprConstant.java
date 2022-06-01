@@ -45,7 +45,11 @@ public class ExprConstant extends SimpleExpression<Constant> {
         } else if (typeExpression != null) {
             Type type = SkriptClassBuilder.getTypeFromExpression(typeExpression);
             if(type == null) return new Constant[0];
-            constant = new Constant(type, constantPath);
+            if(constantPath.equals("class")) {
+                constant = new Constant(type.toASMType());
+            } else {
+                constant = new Constant(type, constantPath);
+            }
         }
 
         return new Constant[] { constant };
