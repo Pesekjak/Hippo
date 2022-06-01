@@ -14,6 +14,7 @@ public class TypeEnum extends SkriptClass {
 
     public TypeEnum(@NotNull Type type) {
         super(type, ClassType.ENUM);
+        this.getExtendingTypes().clear();
         this.addExtendingType(new Type(java.lang.Enum.class));
     }
 
