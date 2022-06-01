@@ -5,6 +5,7 @@ import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
+import me.pesekjak.hippo.classes.ClassType;
 import me.pesekjak.hippo.classes.Constant;
 import me.pesekjak.hippo.classes.ConstantArray;
 import me.pesekjak.hippo.classes.Modifier;
@@ -16,7 +17,6 @@ import me.pesekjak.hippo.skript.classes.syntax.ExprConstant;
 import me.pesekjak.hippo.skript.classes.syntax.ExprConstantArray;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
-import me.pesekjak.hippo.utils.events.classcontents.MethodCallEvent;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
@@ -57,6 +57,12 @@ public class EffField extends Effect {
         Field field = new Field(pair.getPrimitiveType(), pair.getType(), pair.getName());
         if(modifierExpression != null) {
             Arrays.stream(modifierExpression.getAll(event)).toList().forEach(field::addModifier);
+        }
+        if(SkriptClassBuilder.getRegisteringClass().getClassType() == ClassType.RECORD) {
+            if(modifierExpression != null && !(Arrays.stream(modifierExpression.getAll(event)).toList().contains(Modifier.STATIC))) {
+                Skript.error("You can't add non-static fields for class '" + ((NewSkriptClassEvent) event).getSkriptClass().getClassName() + "' because they are not supported by " + SkriptClassBuilder.getRegisteringClass().getClassType().getIdentifier());
+                return false;
+            }
         }
         if(valueExpression != null) {
             if(valueExpression instanceof ExprConstant) {

@@ -3,6 +3,7 @@ package me.pesekjak.hippo.classes.builder;
 import me.pesekjak.hippo.classes.*;
 import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.classes.classtypes.TypeEnum;
+import me.pesekjak.hippo.classes.classtypes.TypeRecord;
 import me.pesekjak.hippo.classes.contents.Constructor;
 import me.pesekjak.hippo.classes.contents.Enum;
 import me.pesekjak.hippo.classes.contents.Field;
@@ -11,7 +12,6 @@ import me.pesekjak.hippo.classes.contents.annotation.Annotation;
 import me.pesekjak.hippo.classes.contents.annotation.AnnotationElement;
 import me.pesekjak.hippo.classes.registry.SkriptClassRegistry;
 import me.pesekjak.hippo.hooks.SkriptReflectHook;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.*;
 
@@ -76,6 +76,22 @@ public class ClassBuilder {
         // Add fields
         skriptClass.getFields().values().forEach(this::addField);
 
+        // Handles records
+        if(skriptClass instanceof TypeRecord recordClass) {
+            for(Argument argument : recordClass.getRecordConstructorArguments()) {
+                String descriptor = argument.getType() != null ? argument.getType().getDescriptor() : argument.getPrimitiveType().getDescriptor();
+                cw.visitRecordComponent(argument.getName(), descriptor, null).visitEnd();
+                Field field = new Field(argument.getPrimitiveType(), argument.getType(), argument.getName());
+                field.addModifier(Modifier.PRIVATE);
+                field.addModifier(Modifier.FINAL);
+                addField(field);
+            }
+            RecordBuilder recordBuilder = new RecordBuilder(this);
+            recordBuilder.setupConstructor();
+            recordBuilder.setupRecordMethods();
+            recordBuilder.generateObjectMethods();
+        }
+
         // Add methods
         skriptClass.getMethods().values().forEach(this::addMethod);
 
@@ -83,7 +99,7 @@ public class ClassBuilder {
         generateClInit();
 
         // Handles init methods
-        if(classType != ClassType.INTERFACE && classType != ClassType.ANNOTATION) {
+        if(classType != ClassType.INTERFACE && classType != ClassType.ANNOTATION && classType != ClassType.RECORD) {
             if(skriptClass.getConstructors().keySet().size() == 0) {
                 if(classType != ClassType.ENUM) skriptClass.addConstructor("<init>:()V", Constructor.getDefault());
                 else skriptClass.addConstructor("<init>:(Ljava/lang/String;I)V", Constructor.getDefaultEnumConstructor());
@@ -207,7 +223,7 @@ public class ClassBuilder {
                 i++;
                 pushValue(mv, i);
                 mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
-                int loadCode = getLoadCode(argument.getPrimitiveType().getPrimitive());
+                int loadCode = getLoadCode(argument.getPrimitiveType());
                 if(!method.getModifiers().contains(Modifier.STATIC)) {
                     mv.visitVarInsn(loadCode, i);
                 } else {
@@ -284,7 +300,7 @@ public class ClassBuilder {
             mv.visitVarInsn(Opcodes.ALOAD, 1 + argumentOffset);
             pushValue(mv, (classType != ClassType.ENUM) ? i : i - 2);
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
-            int loadCode = getLoadCode(argument.getPrimitiveType().getPrimitive());
+            int loadCode = getLoadCode(argument.getPrimitiveType());
             mv.visitVarInsn(loadCode, i);
             if(argument.getPrimitiveType().getPrimitive() != Primitive.NONE) pushAsType(mv, argument.getPrimitiveType().getPrimitive());
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/constructors/InitEvent", "addArgument", "(Ljava/lang/Number;Ljava/lang/Object;)V", false);
@@ -326,11 +342,13 @@ public class ClassBuilder {
                     castToType(mv, argument.getPrimitiveType(), argument.getType());
                 }
                 int storeCode = Opcodes.ASTORE;
-                switch (argument.getPrimitiveType().getPrimitive()) {
-                    case BOOLEAN, BYTE, CHAR, SHORT, INT -> storeCode = Opcodes.ISTORE;
-                    case LONG -> storeCode = Opcodes.LSTORE;
-                    case FLOAT -> storeCode = Opcodes.FSTORE;
-                    case DOUBLE -> storeCode = Opcodes.DSTORE;
+                if(!((argument.getType() != null) ? argument.getType().isArray() : argument.getPrimitiveType().isArray())) {
+                    switch (argument.getPrimitiveType().getPrimitive()) {
+                        case BOOLEAN, BYTE, CHAR, SHORT, INT -> storeCode = Opcodes.ISTORE;
+                        case LONG -> storeCode = Opcodes.LSTORE;
+                        case FLOAT -> storeCode = Opcodes.FSTORE;
+                        case DOUBLE -> storeCode = Opcodes.DSTORE;
+                    }
                 }
                 mv.visitVarInsn(storeCode, i + 2 + argumentOffset);
             }
@@ -338,7 +356,7 @@ public class ClassBuilder {
             i = 0;
             for(Argument argument : constructor.getSuperArguments()) {
                 i++;
-                int loadCode = getLoadCode(argument.getPrimitiveType().getPrimitive());
+                int loadCode = getLoadCode(argument.getPrimitiveType());
                 mv.visitVarInsn(loadCode, i + 2 + argumentOffset);
             }
             String superName = "java/lang/Object";
@@ -372,7 +390,7 @@ public class ClassBuilder {
             mv.visitVarInsn(Opcodes.ALOAD, 3 + argumentOffset);
             pushValue(mv, (classType != ClassType.ENUM) ? i : i - 2);
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
-            int loadCode = getLoadCode(argument.getPrimitiveType().getPrimitive());
+            int loadCode = getLoadCode(argument.getPrimitiveType());
             mv.visitVarInsn(loadCode, i);
             if(argument.getPrimitiveType().getPrimitive() != Primitive.NONE) pushAsType(mv, argument.getPrimitiveType().getPrimitive());
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "me/pesekjak/hippo/utils/events/classcontents/constructors/PostInitEvent", "addArgument", "(Ljava/lang/Number;Ljava/lang/Object;)V", false);
@@ -581,13 +599,15 @@ public class ClassBuilder {
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, REGISTRY_TYPE.getInternalName(), "getSkriptClass", "(Ljava/lang/String;)Lme/pesekjak/hippo/classes/SkriptClass;", false);
     }
 
-    public int getLoadCode(Primitive primitive) {
+    public int getLoadCode(PrimitiveType primitiveType) {
         int loadCode = Opcodes.ALOAD;
-        switch (primitive) {
-            case BOOLEAN, BYTE, CHAR, SHORT, INT -> loadCode = Opcodes.ILOAD;
-            case LONG -> loadCode = Opcodes.LLOAD;
-            case FLOAT -> loadCode = Opcodes.FLOAD;
-            case DOUBLE -> loadCode = Opcodes.DLOAD;
+        if(!primitiveType.isArray()) {
+            switch (primitiveType.getPrimitive()) {
+                case BOOLEAN, BYTE, CHAR, SHORT, INT -> loadCode = Opcodes.ILOAD;
+                case LONG -> loadCode = Opcodes.LLOAD;
+                case FLOAT -> loadCode = Opcodes.FLOAD;
+                case DOUBLE -> loadCode = Opcodes.DLOAD;
+            }
         }
         return loadCode;
     }
@@ -721,6 +741,128 @@ public class ClassBuilder {
             }
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, internalName, "$values", "()" + skriptClass.getType().arrayType().getDescriptor(), false);
             mv.visitFieldInsn(Opcodes.PUTSTATIC, internalName, "$VALUES", skriptClass.getType().arrayType().getDescriptor());
+        }
+
+    }
+
+    private static class RecordBuilder {
+
+        private final ClassBuilder cb;
+
+        private final SkriptClass skriptClass;
+        private final ClassType classType;
+        private String internalName;
+
+        private final ClassWriter cw;
+
+        public RecordBuilder(ClassBuilder cb) {
+            this.cb = cb;
+            this.skriptClass = cb.skriptClass;
+            this.classType = cb.classType;
+            this.internalName = cb.internalName;
+            this.cw = cb.cw;
+        }
+
+        public void setupConstructor() {
+            Constructor constructor = Constructor.getDefault();
+            ((TypeRecord)skriptClass).getRecordConstructorArguments().forEach(constructor::addArgument);
+            MethodVisitor mv = cw.visitMethod(Modifier.PUBLIC.getValue(), constructor.getName(), constructor.getDescriptor(), null, null);
+            mv.visitCode();
+            mv.visitVarInsn(Opcodes.ALOAD, 0);
+            mv.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/Record", "<init>", "()V", false);
+            int i = 0;
+            for(Argument argument : ((TypeRecord)skriptClass).getRecordConstructorArguments()) {
+                mv.visitVarInsn(Opcodes.ALOAD, 0);
+                i++;
+                int loadCode = cb.getLoadCode(argument.getPrimitiveType());
+                mv.visitVarInsn(loadCode, i);
+                String descriptor = argument.getType() != null ? argument.getType().getDescriptor() : argument.getPrimitiveType().getDescriptor();
+                mv.visitFieldInsn(Opcodes.PUTFIELD, internalName, argument.getName(), descriptor);
+            }
+            mv.visitInsn(Opcodes.RETURN);
+            mv.visitMaxs(0, 0);
+            mv.visitEnd();
+            cw.visitEnd();
+        }
+
+        public void setupRecordMethods() {
+            int i = 0;
+            for(Argument argument : ((TypeRecord)skriptClass).getRecordConstructorArguments()) {
+                Method method = new Method(argument.getPrimitiveType(), argument.getType(), argument.getName());
+                MethodVisitor mv = cw.visitMethod(Modifier.PUBLIC.getValue(), method.getName(), method.getDescriptor(), null, null);
+                mv.visitCode();
+                mv.visitVarInsn(Opcodes.ALOAD, 0);
+                String descriptor = argument.getType() != null ? argument.getType().getDescriptor() : argument.getPrimitiveType().getDescriptor();
+                mv.visitFieldInsn(Opcodes.GETFIELD, internalName, argument.getName(), descriptor);
+                int returnCode = Opcodes.ARETURN;
+                if(!((method.getType() != null) ? method.getType().isArray() : method.getPrimitiveType().isArray())) {
+                    switch (method.getPrimitiveType().getPrimitive()) {
+                        case BOOLEAN, BYTE, CHAR, SHORT, INT -> returnCode = Opcodes.IRETURN;
+                        case LONG -> returnCode = Opcodes.LRETURN;
+                        case FLOAT -> returnCode = Opcodes.FRETURN;
+                        case DOUBLE -> returnCode = Opcodes.DRETURN;
+                        case VOID -> returnCode = Opcodes.RETURN;
+                    }
+                }
+                mv.visitInsn(returnCode);
+                mv.visitMaxs(0, 0);
+                mv.visitEnd();
+                cw.visitEnd();
+            }
+        }
+
+        public void generateObjectMethods() {
+            int modifiers = Modifier.PUBLIC.getValue() + Modifier.FINAL.getValue();
+            Method equalsMethod = new Method(new PrimitiveType(Primitive.BOOLEAN), null, "equals");
+            equalsMethod.addArgument(new Argument(new Type(Object.class), "obj"));
+            Method hashCodeMethod = new Method(new PrimitiveType(Primitive.INT), null, "hashCode");
+            Method toStringMethod = new Method(new PrimitiveType(Primitive.NONE), new Type(String.class), "toString");
+            for(Method method : new Method[]{equalsMethod, hashCodeMethod, toStringMethod}) {
+                MethodVisitor mv = cw.visitMethod(modifiers, method.getName(), method.getDescriptor(), null, null);
+                mv.visitCode();
+                mv.visitVarInsn(Opcodes.ALOAD, 0);
+                int i = 0;
+                for(Argument argument : method.getArguments()) {
+                    i++;
+                    mv.visitVarInsn(cb.getLoadCode(argument.getPrimitiveType()), i);
+                }
+                String dynamicDescriptor = "(L" + internalName + ";" + method.getDescriptor().replaceFirst("\\(", "");
+                mv.visitInvokeDynamicInsn(method.getName(), dynamicDescriptor, getBootstrapHandle(), getBootstrapMethodArgs());
+                int returnCode = Opcodes.ARETURN;
+                if(!((method.getType() != null) ? method.getType().isArray() : method.getPrimitiveType().isArray())) {
+                    switch (method.getPrimitiveType().getPrimitive()) {
+                        case BOOLEAN, BYTE, CHAR, SHORT, INT -> returnCode = Opcodes.IRETURN;
+                        case LONG -> returnCode = Opcodes.LRETURN;
+                        case FLOAT -> returnCode = Opcodes.FRETURN;
+                        case DOUBLE -> returnCode = Opcodes.DRETURN;
+                        case VOID -> returnCode = Opcodes.RETURN;
+                    }
+                }
+                mv.visitInsn(returnCode);
+                mv.visitMaxs(0, 0);
+                mv.visitEnd();
+                cw.visitEnd();
+            }
+        }
+
+        public Handle getBootstrapHandle() {
+            return new Handle(Opcodes.H_INVOKESTATIC, "java/lang/runtime/ObjectMethods", "bootstrap",
+                    "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/TypeDescriptor;Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/invoke/MethodHandle;)Ljava/lang/Object;",
+                    false);
+        }
+
+        public Object[] getBootstrapMethodArgs() {
+            List<Object> args = new ArrayList<>();
+            args.add(skriptClass.getType().toASMType());
+            List<String> parameterNames = new ArrayList<>();
+            ((TypeRecord)skriptClass).getRecordConstructorArguments().forEach(argument -> parameterNames.add(argument.getName()));
+            args.add(String.join(";", parameterNames));
+            for(Argument argument : ((TypeRecord)skriptClass).getRecordConstructorArguments()) {
+                String descriptor = argument.getType() != null ? argument.getType().getDescriptor() : argument.getPrimitiveType().getDescriptor();
+                Handle handle = new Handle(Opcodes.H_GETFIELD, internalName, argument.getName(), descriptor, false);
+                args.add(handle);
+            }
+            return args.toArray();
         }
 
     }

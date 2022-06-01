@@ -49,8 +49,8 @@ public class SecConstructor extends Section {
     protected boolean build(@NotNull Event event) {
         Constructor constructor = new Constructor();
         SkriptClassBuilder.registeringConstructor = constructor;
-        if(SkriptClassBuilder.getRegisteringClass().getClassType() == ClassType.INTERFACE) {
-            Skript.error("You can't create a constructor for interface class");
+        if(SkriptClassBuilder.getRegisteringClass().getClassType() == ClassType.INTERFACE || SkriptClassBuilder.getRegisteringClass().getClassType() == ClassType.RECORD) {
+            Skript.error("You can't add constructors for class '" + ((NewSkriptClassEvent) event).getSkriptClass().getClassName() + "' because they are not supported by " + SkriptClassBuilder.getRegisteringClass().getClassType().getIdentifier());
             return false;
         }
         if(SkriptClassBuilder.getRegisteringClass().getClassType() == ClassType.ENUM) {

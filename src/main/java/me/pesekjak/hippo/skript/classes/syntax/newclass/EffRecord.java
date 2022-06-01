@@ -37,18 +37,18 @@ public class EffRecord extends Effect {
     public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult) {
         pairExpression = SkriptUtils.defendExpression(expressions[0]);
         if (!getParser().isCurrentEvent(NewSkriptClassEvent.class)) return false;
-        build(SkriptClassBuilder.getCurrentEvent());
-        return true;
+        return build(SkriptClassBuilder.getCurrentEvent());
     }
 
-    protected void build(@NotNull Event event) {
+    protected boolean build(@NotNull Event event) {
         SkriptClass skriptClass = ((NewSkriptClassEvent) event).getSkriptClass();
         if(!(skriptClass instanceof TypeRecord)) {
-            Skript.error("You can't set record property for class '" + ((NewSkriptClassEvent) event).getSkriptClass().getClassName() + "' because type of the class isn't record");
-            return;
+            Skript.error("You can't set record components for class '" + ((NewSkriptClassEvent) event).getSkriptClass().getClassName() + "' because they are not supported by " + SkriptClassBuilder.getRegisteringClass().getClassType().getIdentifier());
+            return false;
         }
         for(Pair pair : pairExpression.getAll(event)) {
             ((TypeRecord) skriptClass).addRecordConstructorArgument(pair.asArgument());
         }
+        return true;
     }
 }
