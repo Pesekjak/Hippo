@@ -79,7 +79,7 @@ public class ClassBuilder {
         // Handles records
         if(skriptClass instanceof TypeRecord recordClass) {
             for(Argument argument : recordClass.getRecordConstructorArguments()) {
-                String descriptor = argument.getType() != null ? argument.getType().getDescriptor() : argument.getPrimitiveType().getDescriptor();
+                String descriptor = argument.getDescriptor();
                 cw.visitRecordComponent(argument.getName(), descriptor, null).visitEnd();
                 Field field = new Field(argument.getPrimitiveType(), argument.getType(), argument.getName());
                 field.addModifier(Modifier.PRIVATE);
@@ -776,7 +776,7 @@ public class ClassBuilder {
                 i++;
                 int loadCode = cb.getLoadCode(argument.getPrimitiveType());
                 mv.visitVarInsn(loadCode, i);
-                String descriptor = argument.getType() != null ? argument.getType().getDescriptor() : argument.getPrimitiveType().getDescriptor();
+                String descriptor = argument.getDescriptor();
                 mv.visitFieldInsn(Opcodes.PUTFIELD, internalName, argument.getName(), descriptor);
             }
             mv.visitInsn(Opcodes.RETURN);
@@ -792,7 +792,7 @@ public class ClassBuilder {
                 MethodVisitor mv = cw.visitMethod(Modifier.PUBLIC.getValue(), method.getName(), method.getDescriptor(), null, null);
                 mv.visitCode();
                 mv.visitVarInsn(Opcodes.ALOAD, 0);
-                String descriptor = argument.getType() != null ? argument.getType().getDescriptor() : argument.getPrimitiveType().getDescriptor();
+                String descriptor = argument.getDescriptor();
                 mv.visitFieldInsn(Opcodes.GETFIELD, internalName, argument.getName(), descriptor);
                 int returnCode = Opcodes.ARETURN;
                 if(!((method.getType() != null) ? method.getType().isArray() : method.getPrimitiveType().isArray())) {
@@ -858,7 +858,7 @@ public class ClassBuilder {
             ((TypeRecord)skriptClass).getRecordConstructorArguments().forEach(argument -> parameterNames.add(argument.getName()));
             args.add(String.join(";", parameterNames));
             for(Argument argument : ((TypeRecord)skriptClass).getRecordConstructorArguments()) {
-                String descriptor = argument.getType() != null ? argument.getType().getDescriptor() : argument.getPrimitiveType().getDescriptor();
+                String descriptor = argument.getDescriptor();
                 Handle handle = new Handle(Opcodes.H_GETFIELD, internalName, argument.getName(), descriptor, false);
                 args.add(handle);
             }

@@ -38,4 +38,8 @@ public class Argument {
         this.type = type;
     }
 
+    public String getDescriptor() {
+        return this.getType() != null ? this.getType().getDescriptor() : this.getPrimitiveType().getDescriptor();
+    }
+
 }
