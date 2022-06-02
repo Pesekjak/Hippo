@@ -18,7 +18,7 @@ public class ExprConstant extends SimpleExpression<Constant> {
 
     static {
         Skript.registerExpression(ExprConstant.class, Constant.class, ExpressionType.COMBINED,
-                "\\!(%-number%|%-boolean%|%-string%|%-character%|%-javatype%\\:<([a-zA-Z_$][a-zA-Z\\d_$]*\\.)*[a-zA-Z_$][a-zA-Z\\d_$]*>)"
+                "\\!(%-number%[(1¦B|2¦S|3¦I|4¦L|5¦F|6¦D)]|%-boolean%|%-string%|%-character%|%-javatype%\\:<([a-zA-Z_$][a-zA-Z\\d_$]*\\.)*[a-zA-Z_$][a-zA-Z\\d_$]*>)"
         );
     }
 
@@ -27,6 +27,7 @@ public class ExprConstant extends SimpleExpression<Constant> {
     private Expression<String> stringExpression;
     private Expression<Character> characterExpression;
     private Expression<?> typeExpression;
+    private int parseMark;
 
     private String constantPath;
 
@@ -35,7 +36,16 @@ public class ExprConstant extends SimpleExpression<Constant> {
         Constant constant = null;
 
         if(numberExpression != null) {
-            constant = new Constant(numberExpression.getSingle(event));
+            Number number = numberExpression.getSingle(event);
+            switch (parseMark) {
+                case 1 -> number = number.byteValue();
+                case 2 -> number = number.shortValue();
+                case 3 -> number = number.intValue();
+                case 4 -> number = number.longValue();
+                case 5 -> number = number.floatValue();
+                case 6 -> number = number.doubleValue();
+            }
+            constant = new Constant(number);
         } else if (booleanExpression != null) {
             constant = new Constant(booleanExpression.getSingle(event));
         } else if (stringExpression != null) {
@@ -77,6 +87,7 @@ public class ExprConstant extends SimpleExpression<Constant> {
         stringExpression = SkriptUtils.defendExpression(expressions[2]);
         characterExpression = SkriptUtils.defendExpression(expressions[3]);
         typeExpression = SkriptUtils.defendExpression(expressions[4]);
+        parseMark = parseResult.mark;
         if(parseResult.regexes.size() > 0) constantPath = parseResult.regexes.get(0).group();
         return getParser().isCurrentEvent(NewSkriptClassEvent.class);
     }

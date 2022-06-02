@@ -440,7 +440,24 @@ public class ClassBuilder {
     private void setupConstantField(MethodVisitor mv, Field field) {
         if(!field.getModifiers().contains(Modifier.STATIC)) mv.visitVarInsn(Opcodes.ALOAD, 0);
         if(field.getConstant().getConstantObject() != null) {
-            mv.visitLdcInsn(field.getConstant().getConstantObject(field.getPrimitiveType().getPrimitive()));
+            if(field.getType() == null) {
+                mv.visitLdcInsn(field.getConstant().getConstantObject(field.getPrimitiveType().getPrimitive()));
+            } else {
+                Object constant = field.getConstant().getConstantObject();
+                mv.visitLdcInsn(constant);
+                if(!(constant instanceof String)) {
+                    Primitive counterPrimitive = Primitive.NONE;
+                    for(Primitive primitive : Primitive.values()) {
+                        if(constant.getClass().isAssignableFrom(primitive.getClassCounterpart())) {
+                            counterPrimitive = primitive;
+                            break;
+                        }
+                    }
+                    pushAsType(mv, counterPrimitive);
+                }
+                if (Number.class.isAssignableFrom(field.getType().findClass())) convertNumber(mv, field.getType());
+                castToType(mv, field.getPrimitiveType(), field.getType());
+            }
         } else {
             mv.visitFieldInsn(Opcodes.GETSTATIC, field.getConstant().getType().getInternalName(), field.getConstant().getPath(), field.getConstant().getType().getDescriptor());
         }
@@ -460,19 +477,38 @@ public class ClassBuilder {
             mv.visitInsn(Opcodes.DUP);
             pushValue(mv, i);
             if(constant.getConstantObject() != null) {
-                pushValue(mv, constant.getConstantObject(field.getPrimitiveType().getPrimitive()));
+                Object constantObject = constant.getConstantObject();
+                if(field.getType() == null) {
+                    mv.visitLdcInsn(constant.getConstantObject(field.getPrimitiveType().getPrimitive()));
+                } else {
+                    mv.visitLdcInsn(constantObject);
+                    if(!(constantObject instanceof String)) {
+                        Primitive counterPrimitive = Primitive.NONE;
+                        for(Primitive primitive : Primitive.values()) {
+                            if(constantObject.getClass().isAssignableFrom(primitive.getClassCounterpart())) {
+                                counterPrimitive = primitive;
+                                break;
+                            }
+                        }
+                        pushAsType(mv, counterPrimitive);
+                    }
+                    if (Number.class.isAssignableFrom(field.getType().findClass())) convertNumber(mv, field.getType());
+                    castToType(mv, new PrimitiveType(Primitive.NONE), new Type(field.getType().getDotPath()));
+                }
             } else {
                 mv.visitFieldInsn(Opcodes.GETSTATIC, constant.getType().getInternalName(), constant.getPath(), constant.getType().getDescriptor());
             }
             int storeCode = Opcodes.AASTORE;
-            switch (field.getPrimitiveType().getPrimitive()) {
-                case BOOLEAN, BYTE -> storeCode = Opcodes.BASTORE;
-                case CHAR -> storeCode = Opcodes.CASTORE;
-                case SHORT -> storeCode = Opcodes.SASTORE;
-                case INT -> storeCode = Opcodes.IASTORE;
-                case FLOAT -> storeCode = Opcodes.FASTORE;
-                case LONG -> storeCode = Opcodes.LASTORE;
-                case DOUBLE -> storeCode = Opcodes.DASTORE;
+            if(field.getType() == null) {
+                switch (field.getPrimitiveType().getPrimitive()) {
+                    case BOOLEAN, BYTE -> storeCode = Opcodes.BASTORE;
+                    case CHAR -> storeCode = Opcodes.CASTORE;
+                    case SHORT -> storeCode = Opcodes.SASTORE;
+                    case INT -> storeCode = Opcodes.IASTORE;
+                    case FLOAT -> storeCode = Opcodes.FASTORE;
+                    case LONG -> storeCode = Opcodes.LASTORE;
+                    case DOUBLE -> storeCode = Opcodes.DASTORE;
+                }
             }
             mv.visitInsn(storeCode);
             i++;
@@ -493,10 +529,12 @@ public class ClassBuilder {
         mv.visitVarInsn(Opcodes.ALOAD, 1 + stackOffset);
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
         Label nullLabel = new Label();
-        mv.visitJumpInsn(Opcodes.IFNULL, nullLabel);
-        if(!field.getModifiers().contains(Modifier.STATIC)) mv.visitVarInsn(Opcodes.ALOAD, 0);
-        mv.visitVarInsn(Opcodes.ALOAD, 1 + stackOffset);
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+        if(field.getPrimitiveType().getPrimitive() == Primitive.NONE) {
+            mv.visitJumpInsn(Opcodes.IFNULL, nullLabel);
+            if(!field.getModifiers().contains(Modifier.STATIC)) mv.visitVarInsn(Opcodes.ALOAD, 0);
+            mv.visitVarInsn(Opcodes.ALOAD, 1 + stackOffset);
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+        }
         Label end = null;
         if(field.getPrimitiveType().getPrimitive() == Primitive.NONE && !field.getType().isArray()) {
             if (field.getType() != null && Number.class.isAssignableFrom(field.getType().findClass())) convertNumber(mv, field.getType());
@@ -508,7 +546,7 @@ public class ClassBuilder {
             if (!field.getModifiers().contains(Modifier.STATIC)) mv.visitVarInsn(Opcodes.ALOAD, 0);
             mv.visitInsn(Opcodes.ACONST_NULL);
         } else {
-            castToType(mv, field.getPrimitiveType(), field.getType());
+            pushAsPrimitive(mv, field.getPrimitiveType().getPrimitive());
         }
         putField(mv, field);
         if(end != null) mv.visitLabel(end);
