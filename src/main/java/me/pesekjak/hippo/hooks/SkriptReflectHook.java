@@ -83,6 +83,10 @@ public class SkriptReflectHook {
         return Reflectness.invoke(Reflectness.getMethod(objectWrapperClass, "unwrapIfNecessary", Object.class), null, object);
     }
 
+    public static Object wrap(Object object) {
+        return Reflectness.invoke(Reflectness.getMethod(objectWrapperClass, "create", Object.class), null, object);
+    }
+
     public static Map<File, Map<String, Object>> getReflectCustomImportsMap() {
         return (Map<File, Map<String, Object>>) Reflectness.getField(Reflectness.getField("imports", customImportClass), null);
     }
