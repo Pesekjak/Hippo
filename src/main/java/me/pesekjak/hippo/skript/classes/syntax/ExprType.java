@@ -5,7 +5,6 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.util.SimpleExpression;
-import ch.njol.skript.lang.util.SimpleLiteral;
 import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
@@ -68,7 +67,6 @@ public class ExprType extends SimpleExpression<Type> {
     public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult) {
         pattern = i;
         javaTypeExpression = SkriptUtils.defendExpression(expressions[0]);
-        if(javaTypeExpression.getClass() == SimpleLiteral.class) return false;
         if(parseResult.regexes.size() > 0) {
             arraySize = parseResult.regexes.get(0).group().length() / 2;
         }
