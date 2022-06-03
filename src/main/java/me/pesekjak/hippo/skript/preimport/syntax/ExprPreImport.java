@@ -37,15 +37,11 @@ public class ExprPreImport extends SimpleExpression<Object> {
         PreImport preImport = PreImportManager.MANAGER.getPreImporting(script).getPreImport(classAlias);
         Type preImportType = preImport.getType();
         try {
-            javaType = SkriptReflectHook.buildJavaType(SkriptReflectHook.getLibraryLoader().loadClass(preImport.getType().getDotPath()));
+            javaType = SkriptReflectHook.buildJavaType(SkriptReflectHook.getLibraryLoader().loadClass(preImportType.getDotPath()));
         } catch (Exception ignored) { }
         if (javaType != null) {
             return new Object[]{javaType};
         }
-        try {
-            Class<?> classFromLoader = SkriptReflectHook.getLibraryLoader().loadClass(preImportType.getDotPath());
-            if(classFromLoader != null) return new Object[] { SkriptReflectHook.buildJavaType(classFromLoader) };
-        } catch (Exception ignored) { }
         return new Object[]{ preImportType };
     }
 
