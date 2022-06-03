@@ -24,7 +24,7 @@ public class ExprPreImport extends SimpleExpression<Object> {
 
     static {
         Skript.registerExpression(ExprPreImport.class, Object.class, ExpressionType.COMBINED,
-                "<[a-zA-Z0-9]*>"
+                "<[a-zA-Z0-9]*>[*]"
         );
     }
 
