@@ -6,6 +6,7 @@ import me.pesekjak.hippo.classes.ClassType;
 import me.pesekjak.hippo.classes.Modifier;
 import me.pesekjak.hippo.classes.SkriptClass;
 import me.pesekjak.hippo.classes.Type;
+import me.pesekjak.hippo.classes.builder.ClassBuilder;
 import me.pesekjak.hippo.classes.classtypes.*;
 import me.pesekjak.hippo.classes.registry.SkriptClassRegistry;
 import me.pesekjak.hippo.hooks.SkriptReflectHook;
@@ -39,7 +40,7 @@ public class EvtNewSkriptClass extends SelfRegisteringSkriptEvent {
 
     @Override
     public void register(@NotNull Trigger trigger) {
-
+        ClassBuilder.forClass(skriptClass).build();
     }
 
     @Override
