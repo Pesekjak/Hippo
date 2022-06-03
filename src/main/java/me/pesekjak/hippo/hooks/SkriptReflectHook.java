@@ -1,6 +1,7 @@
 package me.pesekjak.hippo.hooks;
 
 import me.pesekjak.hippo.Hippo;
+import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.classes.builder.DynamicClassLoader;
 import me.pesekjak.hippo.utils.Logger;
 import me.pesekjak.hippo.utils.Reflectness;
@@ -55,8 +56,13 @@ public class SkriptReflectHook {
 
     public static Class<?> classOfJavaType(Object javaTypeObject) {
         if(!SkriptReflectHook.getJavaTypeClass().isInstance(javaTypeObject)) {
-            Logger.severe(javaTypeObject.toString() + " (" + javaTypeObject.getClass().getName() + ") isn't supported as JavaType by Hippo, make sure that class alias doesn't match with different expression. In that case you can use JavaType Wrapper Expression.");
-            return null;
+            if(javaTypeObject instanceof Type) {
+                Logger.severe("Type " + ((Type) javaTypeObject).getDotPath() + " found at place where JavaType was expected. Make sure your pre-imported classes exist (or were compiled without problems).");
+                return null;
+            } else {
+                Logger.severe(javaTypeObject.toString() + " (" + javaTypeObject.getClass().getName() + ") isn't supported as JavaType by Hippo, make sure that class alias doesn't match with different expression. In that case you can use JavaType Wrapper Expression.");
+                return null;
+            }
         }
         return (Class<?>) Reflectness.invoke(Reflectness.getMethod(javaTypeClass, "getJavaClass"), javaTypeObject);
     }
