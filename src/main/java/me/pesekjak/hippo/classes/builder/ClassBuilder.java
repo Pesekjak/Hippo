@@ -42,14 +42,6 @@ public class ClassBuilder {
         return new ClassBuilder(skriptClass);
     }
 
-    public static int sumModifiers(Modifiable modifiable) {
-        int result = 0;
-        for(Modifier modifier : modifiable.getModifiers()) {
-            result = result + modifier.getValue();
-        }
-        return result;
-    }
-
     public SkriptClass getSkriptClass() {
         return skriptClass;
     }
@@ -123,16 +115,6 @@ public class ClassBuilder {
 
         // Define the class
         SkriptReflectHook.getLibraryLoader().loadClass(skriptClass.getClassName(), cw.toByteArray());
-
-        // Debug
-        try {
-            DataOutputStream outputStream =new DataOutputStream(new FileOutputStream("Generated.class"));
-            outputStream.write(cw.toByteArray());
-            outputStream.flush();
-            outputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
     }
 
@@ -551,6 +533,14 @@ public class ClassBuilder {
         }
         putField(mv, field);
         if(end != null) mv.visitLabel(end);
+    }
+
+    public int sumModifiers(Modifiable modifiable) {
+        int result = 0;
+        for(Modifier modifier : modifiable.getModifiers()) {
+            result = result + modifier.getValue();
+        }
+        return result;
     }
 
     public void putField(MethodVisitor mv, Field field) {
