@@ -26,9 +26,10 @@ public class ClassBuilder {
     private final ClassType classType;
     private String internalName;
 
-    private final ClassWriter cw = new ClassWriter(Opcodes.ASM9 + ClassWriter.COMPUTE_FRAMES + ClassWriter.COMPUTE_MAXS);
+    private final ClassWriter cw = new ClassWriter(ASM_VERSION + ClassWriter.COMPUTE_FRAMES + ClassWriter.COMPUTE_MAXS);
 
-    public final static int JAVA_VERSION = Opcodes.V16;
+    public static int JAVA_VERSION = Opcodes.V16;
+    public static int ASM_VERSION = Opcodes.ASM9;
 
     private final Type REGISTRY_TYPE = new Type(SkriptClassRegistry.class);
 
