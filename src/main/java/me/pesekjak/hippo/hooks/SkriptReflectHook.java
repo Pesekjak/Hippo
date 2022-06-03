@@ -6,13 +6,16 @@ import me.pesekjak.hippo.classes.builder.DynamicClassLoader;
 import me.pesekjak.hippo.utils.Logger;
 import me.pesekjak.hippo.utils.Reflectness;
 
+import java.io.File;
 import java.net.URLClassLoader;
+import java.util.Map;
 
 public class SkriptReflectHook {
 
     private static Class<?> javaTypeClass = null;
     private static Class<?> objectWrapperClass = null;
     private static Class<?> reflectNullClass = null;
+    private static Class<?> customImportClass = null;
     private static DynamicClassLoader libraryLoader = null;
 
     public static boolean setup() {
@@ -20,6 +23,7 @@ public class SkriptReflectHook {
             javaTypeClass = Class.forName("com.btk5h.skriptmirror.JavaType");
             objectWrapperClass = Class.forName("com.btk5h.skriptmirror.ObjectWrapper");
             reflectNullClass = Class.forName("com.btk5h.skriptmirror.Null");
+            customImportClass = Class.forName("com.btk5h.skriptmirror.skript.custom.CustomImport");
             SkriptReflectHook.setupReflectLoader();
         } catch (Exception ignored) {
             return false;
@@ -58,11 +62,10 @@ public class SkriptReflectHook {
         if(!SkriptReflectHook.getJavaTypeClass().isInstance(javaTypeObject)) {
             if(javaTypeObject instanceof Type) {
                 Logger.severe("Type " + ((Type) javaTypeObject).getDotPath() + " found at place where JavaType was expected. Make sure your pre-imported classes exist (or were compiled without problems).");
-                return null;
             } else {
                 Logger.severe(javaTypeObject.toString() + " (" + javaTypeObject.getClass().getName() + ") isn't supported as JavaType by Hippo, make sure that class alias doesn't match with different expression. In that case you can use JavaType Wrapper Expression.");
-                return null;
             }
+            return null;
         }
         return (Class<?>) Reflectness.invoke(Reflectness.getMethod(javaTypeClass, "getJavaClass"), javaTypeObject);
     }
@@ -78,6 +81,10 @@ public class SkriptReflectHook {
 
     public static Object unwrap(Object object) {
         return Reflectness.invoke(Reflectness.getMethod(objectWrapperClass, "unwrapIfNecessary", Object.class), null, object);
+    }
+
+    public static Map<File, Map<String, Object>> getReflectCustomImportsMap() {
+        return (Map<File, Map<String, Object>>) Reflectness.getField(Reflectness.getField("imports", customImportClass), null);
     }
 
 }

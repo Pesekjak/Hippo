@@ -35,4 +35,14 @@ public class DynamicClassLoader extends ClassLoader {
         return defineClass(name, bytecode, 0, bytecode.length);
     }
 
+    public Class<?> tryFindClass(String name) {
+        try { return super.findClass(name);
+        } catch (ClassNotFoundException ignored) {
+            try {
+                return Class.forName(name);
+            } catch (ClassNotFoundException ignored1) { }
+        }
+        return null;
+    }
+
 }

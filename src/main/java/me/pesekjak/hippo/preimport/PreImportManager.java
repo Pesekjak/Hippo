@@ -13,6 +13,10 @@ public class PreImportManager {
         this.preImportingScripts = new HashMap<>();
     }
 
+    public HashMap<String, PreImporting> getPreImportingScripts() {
+        return preImportingScripts;
+    }
+
     public void addPreImportingScript(String path) {
         this.preImportingScripts.putIfAbsent(path, new PreImporting());
         this.preImportingScripts.replace(path, new PreImporting());
@@ -55,6 +59,10 @@ public class PreImportManager {
 
         public PreImporting() {
             this.preImportMap = new HashMap<>();
+        }
+
+        public HashMap<String, PreImport> getPreImportMap() {
+            return preImportMap;
         }
 
         public void addPreImport(String alias, PreImport preImport) {

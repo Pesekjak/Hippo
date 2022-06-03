@@ -12,11 +12,12 @@ import me.pesekjak.hippo.classes.contents.annotation.Annotation;
 import me.pesekjak.hippo.classes.contents.annotation.AnnotationElement;
 import me.pesekjak.hippo.classes.registry.SkriptClassRegistry;
 import me.pesekjak.hippo.hooks.SkriptReflectHook;
+import me.pesekjak.hippo.preimport.PreImport;
+import me.pesekjak.hippo.preimport.PreImportManager;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.*;
 
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -114,7 +115,18 @@ public class ClassBuilder {
         cw.visitEnd();
 
         // Define the class
-        SkriptReflectHook.getLibraryLoader().loadClass(skriptClass.getClassName(), cw.toByteArray());
+        Class<?> compiled = SkriptReflectHook.getLibraryLoader().loadClass(skriptClass.getClassName(), cw.toByteArray());
+        for(String path : PreImportManager.MANAGER.getPreImportingScripts().keySet()) {
+            PreImportManager.PreImporting preImporting = PreImportManager.MANAGER.getPreImporting(path);
+            for(String alias : preImporting.getPreImportMap().keySet()) {
+                PreImport preImport = preImporting.getPreImport(alias);
+                if(!skriptClass.getType().getDotPath().equals(preImport.getType().getDotPath())) {
+                    continue;
+                }
+                SkriptReflectHook.getReflectCustomImportsMap().get(new File(path)).put(alias, SkriptReflectHook.buildJavaType(compiled));
+                break;
+            }
+        }
 
     }
 

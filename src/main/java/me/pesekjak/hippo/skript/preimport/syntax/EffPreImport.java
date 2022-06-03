@@ -7,11 +7,14 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.Type;
+import me.pesekjak.hippo.hooks.SkriptReflectHook;
 import me.pesekjak.hippo.preimport.PreImport;
 import me.pesekjak.hippo.preimport.PreImportManager;
 import me.pesekjak.hippo.utils.events.PreImportEvent;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
 
 public class EffPreImport extends Effect {
 
@@ -62,6 +65,11 @@ public class EffPreImport extends Effect {
         }
 
         preImporting.addPreImport(classAlias, preImport);
+
+        Object javaType = SkriptReflectHook.buildJavaType(SkriptReflectHook.getLibraryLoader().tryFindClass(preImport.getType().getDotPath()));
+        if(javaType != null) {
+            SkriptReflectHook.getReflectCustomImportsMap().get(script.getFile()).put(classAlias, javaType);
+        }
 
         return true;
     }
