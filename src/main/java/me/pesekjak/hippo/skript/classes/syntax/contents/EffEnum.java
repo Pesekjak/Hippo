@@ -64,10 +64,8 @@ public class EffEnum extends Effect {
             for(Object superArgumentObject : superExpression.getAll(event)) {
                 i++;
                 if(superArgumentObject instanceof Type type) {
-                    if(type.isVarArg()) type = type.arrayType();
                     enumField.addSuperArgument(new Argument(type, "A" + i));
                 } else if(superArgumentObject instanceof PrimitiveType type) {
-                    if(type.isVarArg()) type = type.arrayType();
                     enumField.addSuperArgument(new Argument(type, "A" + i));
                 } else if(superArgumentObject instanceof Primitive) {
                     enumField.addSuperArgument(new Argument(new PrimitiveType((Primitive) superArgumentObject), "A" + i));

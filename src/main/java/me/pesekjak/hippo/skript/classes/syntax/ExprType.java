@@ -43,6 +43,7 @@ public class ExprType extends SimpleExpression<Type> {
             }
             if(parseMark == 2) type = type.varArgType();
         } else {
+            type = type.arrayType();
             type = type.varArgType();
         }
         return new Type[] { type };

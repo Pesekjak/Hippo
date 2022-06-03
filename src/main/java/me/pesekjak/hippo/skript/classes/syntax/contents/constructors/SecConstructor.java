@@ -70,10 +70,8 @@ public class SecConstructor extends Section {
             for(Object superArgumentObject : superExpression.getAll(event)) {
                 i++;
                 if(superArgumentObject instanceof Type type) {
-                    if(type.isVarArg()) type = type.arrayType();
                     constructor.addSuperArgument(new Argument(type, "A" + i));
                 } else if(superArgumentObject instanceof PrimitiveType type) {
-                    if(type.isVarArg()) type = type.arrayType();
                     constructor.addSuperArgument(new Argument(type, "A" + i));
                 } else if(superArgumentObject instanceof Primitive) {
                     constructor.addSuperArgument(new Argument(new PrimitiveType((Primitive) superArgumentObject), "A" + i));

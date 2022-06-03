@@ -39,6 +39,7 @@ public class ExprPrimitiveType extends SimpleExpression<PrimitiveType> {
             }
             if(parseMark == 2) type = type.varArgType();
         } else {
+            type = type.arrayType();
             type = type.varArgType();
         }
         return new PrimitiveType[] { type };
