@@ -1,6 +1,9 @@
 package me.pesekjak.hippo.skript.utils.syntax.utils;
 
 import ch.njol.skript.Skript;
+import ch.njol.skript.doc.Description;
+import ch.njol.skript.doc.Name;
+import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.WrapperExpression;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.ExpressionType;
@@ -10,6 +13,9 @@ import me.pesekjak.hippo.hooks.SkriptReflectHook;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
+@Name("Java Type Wrapper")
+@Description("Wrapper expression for Java Types.")
+@Since("1.0-BETA.1")
 public class ExprJavaTypeWrapper extends WrapperExpression<Object> {
 
     static {

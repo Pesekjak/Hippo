@@ -1,6 +1,9 @@
 package me.pesekjak.hippo.skript.classes.syntax.newclass;
 
 import ch.njol.skript.Skript;
+import ch.njol.skript.doc.Description;
+import ch.njol.skript.doc.Name;
+import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.*;
 import me.pesekjak.hippo.classes.ClassType;
 import me.pesekjak.hippo.classes.Modifier;
@@ -20,6 +23,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@Name("New Skript Class")
+@Description("Creates new Hippo Skript Class.")
+@Since("1.0-BETA.1")
 public class EvtNewSkriptClass extends SelfRegisteringSkriptEvent {
 
     static {

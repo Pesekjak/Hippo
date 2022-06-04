@@ -1,6 +1,9 @@
 package me.pesekjak.hippo.skript.classes.syntax;
 
 import ch.njol.skript.Skript;
+import ch.njol.skript.doc.Description;
+import ch.njol.skript.doc.Name;
+import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
@@ -13,6 +16,9 @@ import me.pesekjak.hippo.utils.events.classcontents.constructors.InitEvent;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
+@Name("Super Constructor")
+@Description("Calls a super Constructor defined in the current Constructor.")
+@Since("1.0-BETA.1")
 public class EffSuper extends Effect {
 
     static {

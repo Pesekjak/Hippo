@@ -1,6 +1,9 @@
 package me.pesekjak.hippo.skript.classes.syntax;
 
 import ch.njol.skript.Skript;
+import ch.njol.skript.doc.Description;
+import ch.njol.skript.doc.Name;
+import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser;
@@ -15,6 +18,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 
+@Name("Constant Array")
+@Description("Groups Constants into an special array.")
+@Since("1.0-BETA.1")
 public class ExprConstantArray extends SimpleExpression<ConstantArray> {
 
     static {

@@ -2,6 +2,9 @@ package me.pesekjak.hippo.skript.preimport.syntax;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.config.Config;
+import ch.njol.skript.doc.Description;
+import ch.njol.skript.doc.Name;
+import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
@@ -14,8 +17,9 @@ import me.pesekjak.hippo.utils.events.PreImportEvent;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-
+@Name("PreImport class")
+@Description("Pre-imports a class for the current script.")
+@Since("1.0-BETA.1")
 public class EffPreImport extends Effect {
 
     static {

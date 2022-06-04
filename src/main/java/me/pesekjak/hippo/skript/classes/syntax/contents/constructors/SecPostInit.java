@@ -2,6 +2,9 @@ package me.pesekjak.hippo.skript.classes.syntax.contents.constructors;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.config.SectionNode;
+import ch.njol.skript.doc.Description;
+import ch.njol.skript.doc.Name;
+import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.*;
 import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
@@ -12,6 +15,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+@Name("PostInit")
+@Description("Runs in a Constructor after an object is initialize.")
+@Since("1.0-BETA.1")
 public class SecPostInit extends Section {
 
     static {

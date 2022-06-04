@@ -1,6 +1,9 @@
 package me.pesekjak.hippo.skript.classes.syntax;
 
 import ch.njol.skript.Skript;
+import ch.njol.skript.doc.Description;
+import ch.njol.skript.doc.Name;
+import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser;
@@ -16,6 +19,9 @@ import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
+@Name("Pair")
+@Description("Pairs DataType and String together.")
+@Since("1.0-BETA.1")
 public class ExprPair extends SimpleExpression<Pair> {
 
     static {
