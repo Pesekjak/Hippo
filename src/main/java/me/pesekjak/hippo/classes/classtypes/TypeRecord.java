@@ -1,6 +1,9 @@
 package me.pesekjak.hippo.classes.classtypes;
 
-import me.pesekjak.hippo.classes.*;
+import me.pesekjak.hippo.classes.Argument;
+import me.pesekjak.hippo.classes.ClassType;
+import me.pesekjak.hippo.classes.SkriptClass;
+import me.pesekjak.hippo.classes.Type;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

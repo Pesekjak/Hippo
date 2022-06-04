@@ -9,7 +9,7 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.classes.SkriptClass;
-import me.pesekjak.hippo.classes.classtypes.TypeRecord;;
+import me.pesekjak.hippo.classes.classtypes.TypeRecord;
 import me.pesekjak.hippo.skript.classes.Pair;
 import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
 import me.pesekjak.hippo.utils.SkriptUtils;

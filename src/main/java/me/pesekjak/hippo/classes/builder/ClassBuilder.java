@@ -1,7 +1,7 @@
 package me.pesekjak.hippo.classes.builder;
 
-import me.pesekjak.hippo.classes.*;
 import me.pesekjak.hippo.classes.Type;
+import me.pesekjak.hippo.classes.*;
 import me.pesekjak.hippo.classes.classtypes.TypeEnum;
 import me.pesekjak.hippo.classes.classtypes.TypeRecord;
 import me.pesekjak.hippo.classes.contents.Constructor;
