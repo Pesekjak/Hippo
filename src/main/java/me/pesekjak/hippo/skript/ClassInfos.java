@@ -158,6 +158,28 @@ public class ClassInfos {
                 .name("Primitive")
                 .description("Represents Java Primitive.")
                 .since("1.0-BETA.1")
+                .parser(new Parser<>() {
+                    @Override
+                    public Primitive parse(@NotNull String s, @NotNull ParseContext parseContext) {
+                        try { return Primitive.valueOf(s.toUpperCase(Locale.ROOT)); }
+                        catch (Exception e) { return null; }
+                    }
+
+                    @Override
+                    public boolean canParse(@NotNull ParseContext context) {
+                        return true;
+                    }
+
+                    @Override
+                    public @NotNull String toString(Primitive primitive, int i) {
+                        return primitive.getPrimitive();
+                    }
+
+                    @Override
+                    public @NotNull String toVariableNameString(Primitive primitive) {
+                        return primitive.getPrimitive();
+                    }
+                })
         );
 
         Classes.registerClass(new ClassInfo<>(Constant.class, "constant")

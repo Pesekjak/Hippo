@@ -6,6 +6,8 @@ import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
+import me.pesekjak.hippo.classes.Constant;
+import me.pesekjak.hippo.classes.Primitive;
 import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.hooks.SkriptReflectHook;
 import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
@@ -19,34 +21,48 @@ public class ExprArray extends SimpleExpression<Object> {
 
     static {
         Skript.registerExpression(ExprArray.class, Object.class, ExpressionType.COMBINED,
-                "new array %javatype%<^(\\[\\])*>\\(%number%\\)\\(%-objects%\\)"
+                "new array %primitive%<^(\\[\\])*>\\(%number%\\)\\([%-objects%]\\)",
+        "new array %-javatype%<^(\\[\\])*>\\(%number%\\)\\([%-objects%]\\)"
         );
     }
 
-    private Expression<?> javaTypeExpression;
+    private Expression<?> typeExpression;
     private Expression<Number> sizeExpression;
     private Expression<Object> objectsExpression;
     private int arraySize = 0;
+    private int pattern;
 
     @Override
     protected Object @NotNull [] get(@NotNull Event event) {
-        if(javaTypeExpression == null) return new Object[0];
         if(sizeExpression.getSingle(event) == null) return new Object[0];
-        Type type = SkriptClassBuilder.getTypeFromExpression(javaTypeExpression);
-        if(type == null) return new Object[0];
-        Class<?> typeClass = null;
-        try {
-            typeClass = SkriptReflectHook.getLibraryLoader().loadClass(type.getDotPath());
-        } catch (ClassNotFoundException e) { return new Object[0]; }
+        Class<?> typeClass;
+        Primitive primitive = null;
+        if(pattern == 0) {
+            primitive = (Primitive) typeExpression.getSingle(event);
+            if(primitive == null) return new Object[0];
+            typeClass = primitive.getPrimitiveClass();
+        } else {
+            Type type = SkriptClassBuilder.getTypeFromExpression(typeExpression);
+            if (type == null) return new Object[0];
+            try {
+                typeClass = SkriptReflectHook.getLibraryLoader().loadClass(type.getDotPath());
+            } catch (ClassNotFoundException e) { return new Object[0]; }
+        }
+        if(typeClass == null) return new Object[0];
         if(sizeExpression.getSingle(event) == null) return new Object[0];
         for (int i = 0; i < arraySize - 1; ++i) {
             typeClass = typeClass.arrayType();
         }
         Object array = Array.newInstance(typeClass, sizeExpression.getSingle(event).intValue());
         int i = 0;
-        for(Object object : objectsExpression.getAll(event)) {
-            Array.set(array, i, typeClass.cast(SkriptReflectHook.unwrap(object)));
-            i++;
+        if(objectsExpression != null) {
+            for(Object object : objectsExpression.getAll(event)) {
+                object = SkriptReflectHook.unwrap(object);
+                if(pattern == 0 && arraySize == 1) object = new Constant(object).getConstantObject(primitive);
+                if(primitive == null) object = typeClass.cast(object);
+                Array.set(array, i, object);
+                i++;
+            }
         }
         return new Object[] {SkriptReflectHook.wrap(array)};
     }
@@ -68,7 +84,8 @@ public class ExprArray extends SimpleExpression<Object> {
 
     @Override
     public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult) {
-        javaTypeExpression = SkriptUtils.defendExpression(expressions[0]);
+        pattern = i;
+        typeExpression = SkriptUtils.defendExpression(expressions[0]);
         sizeExpression = SkriptUtils.defendExpression(expressions[1]);
         objectsExpression = SkriptUtils.defendExpression(expressions[2]);
         if(parseResult.regexes.size() > 0) {
