@@ -524,7 +524,7 @@ public class ClassBuilder {
         mv.visitVarInsn(Opcodes.ALOAD, 1 + stackOffset);
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/btk5h/skriptmirror/ObjectWrapper", "unwrapIfNecessary", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
         Label nullLabel = new Label();
-        if(field.getPrimitiveType().getPrimitive() == Primitive.NONE) {
+        if(field.getPrimitiveType().getPrimitive() == Primitive.NONE && !field.getType().isArray()) {
             mv.visitJumpInsn(Opcodes.IFNULL, nullLabel);
             if(!field.getModifiers().contains(Modifier.STATIC)) mv.visitVarInsn(Opcodes.ALOAD, 0);
             mv.visitVarInsn(Opcodes.ALOAD, 1 + stackOffset);
@@ -540,8 +540,10 @@ public class ClassBuilder {
             mv.visitLabel(nullLabel);
             if (!field.getModifiers().contains(Modifier.STATIC)) mv.visitVarInsn(Opcodes.ALOAD, 0);
             mv.visitInsn(Opcodes.ACONST_NULL);
-        } else {
+        } else if(field.getType() == null && !field.getPrimitiveType().isArray()) {
             pushAsPrimitive(mv, field.getPrimitiveType().getPrimitive());
+        } else {
+            castToType(mv, field.getPrimitiveType(), field.getType());
         }
         putField(mv, field);
         if(end != null) mv.visitLabel(end);
