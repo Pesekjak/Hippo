@@ -14,11 +14,13 @@ import me.pesekjak.hippo.classes.Primitive;
 import me.pesekjak.hippo.classes.Type;
 import me.pesekjak.hippo.hooks.SkriptReflectHook;
 import me.pesekjak.hippo.skript.classes.SkriptClassBuilder;
+import me.pesekjak.hippo.utils.Reflectness;
 import me.pesekjak.hippo.utils.SkriptUtils;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 
 @Name("Multidimensional Array")
 @Description("Multidimensional Java Array with defined size and elements.")
@@ -62,10 +64,28 @@ public class ExprArray extends SimpleExpression<Object> {
         Object array = Array.newInstance(typeClass, sizeExpression.getSingle(event).intValue());
         int i = 0;
         if(objectsExpression != null) {
+            Primitive counterPrimitive = Primitive.NONE;
+            Method convertorMethod = null;
+            if(pattern == 1 && Number.class.isAssignableFrom(typeClass)) {
+                for(Primitive aPrimitive : Primitive.values()) {
+                    if(aPrimitive.getClassCounterpart() == typeClass) {
+                        counterPrimitive = aPrimitive;
+                        convertorMethod = Reflectness.getMethod(typeClass, "valueOf", counterPrimitive.getPrimitiveClass());
+                        break;
+                    }
+                }
+            }
             for(Object object : objectsExpression.getAll(event)) {
                 object = SkriptReflectHook.unwrap(object);
                 if(pattern == 0 && arraySize == 1) object = new Constant(object).getConstantObject(primitive);
-                if(primitive == null) object = typeClass.cast(object);
+                if(pattern == 1) {
+                    if(Number.class.isAssignableFrom(typeClass)) {
+                        object = new Constant(object).getConstantObject(counterPrimitive);
+                        object = Reflectness.invoke(convertorMethod, null, object);
+                    } else {
+                        object = typeClass.cast(object);
+                    }
+                }
                 Array.set(array, i, object);
                 i++;
             }
