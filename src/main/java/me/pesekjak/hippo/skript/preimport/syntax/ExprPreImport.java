@@ -71,6 +71,7 @@ public class ExprPreImport extends SimpleExpression<Object> {
     public boolean init(Expression<?> @NotNull [] expressions, int i, @NotNull Kleenean kleenean, SkriptParser.@NotNull ParseResult parseResult) {
         classAlias = parseResult.regexes.get(0).group();
         script = getParser().getCurrentScript();
+        if(script == null) return false;
         if(!PreImportManager.MANAGER.isPreImporting(script)) return false;
         return PreImportManager.MANAGER.getPreImporting(script).containsAlias(classAlias);
     }
