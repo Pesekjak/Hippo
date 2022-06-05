@@ -49,6 +49,10 @@ public class ClassBuilder {
 
     public void build() {
 
+        if(SkriptReflectHook.getLibraryLoader().tryFindClass(skriptClass.getClassName()) != null) {
+            return;
+        }
+
         // Handles attributes for class
         int modifiers = classType.getValue() + sumModifiers(skriptClass);
         internalName = skriptClass.getType().getInternalName();
