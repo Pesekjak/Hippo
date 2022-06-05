@@ -33,9 +33,9 @@ public class Constant {
         Object primitiveValue = constant;
         switch (primitive) {
             case BOOLEAN -> primitiveValue = ((Boolean) constant).booleanValue();
-            case CHAR -> ((Character) constant).charValue();
-            case BYTE ->  ((Number) constant).byteValue();
-            case SHORT -> ((Number) constant).shortValue();
+            case CHAR -> primitiveValue = ((Character) constant).charValue();
+            case BYTE ->  primitiveValue = ((Number) constant).byteValue();
+            case SHORT -> primitiveValue = ((Number) constant).shortValue();
             case INT -> primitiveValue = ((Number) constant).intValue();
             case FLOAT -> primitiveValue = ((Number) constant).floatValue();
             case LONG -> primitiveValue = ((Number) constant).longValue();
