@@ -30,7 +30,7 @@ public class Hippo extends JavaPlugin {
     //                    (____⳹       /
     //                          ⳹      ⳹
     //                           '-'-'-'
-    // MIGHTY HIPPO FROM THE HIPO LAKE
+    // MIGHTY HIPPO FROM THE HIPPO LAKE
 
     private static Hippo instance;
     private static SkriptAddon addonInstance;
