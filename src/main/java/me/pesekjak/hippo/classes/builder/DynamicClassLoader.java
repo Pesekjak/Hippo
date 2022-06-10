@@ -23,13 +23,10 @@ public class DynamicClassLoader extends ClassLoader {
     }
 
     @Override
-    protected Class<?> findClass(String name) {
+    protected Class<?> findClass(String name) throws ClassNotFoundException {
         byte[] bytecode = bytecodeMap.get(name);
-        if(bytecode.length < 1) {
-            try { return super.findClass(name);
-            } catch (ClassNotFoundException ignored) {
-                return null;
-            }
+        if(bytecode == null || bytecode.length < 1) {
+            return super.findClass(name);
         }
         bytecodeMap.remove(name);
         return defineClass(name, bytecode, 0, bytecode.length);
