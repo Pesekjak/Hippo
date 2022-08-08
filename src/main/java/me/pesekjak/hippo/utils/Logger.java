@@ -10,6 +10,10 @@ public class Logger {
     private final static java.util.logging.Logger LOGGER = Bukkit.getLogger();
     private final static String PREFIX = "&3[&7Hippo&3] ";
 
+    private Logger() {
+        throw new UnsupportedOperationException();
+    }
+
     private static String getFormattedString(String message) {
         return ChatColor.translateAlternateColorCodes('&', PREFIX + message);
     }

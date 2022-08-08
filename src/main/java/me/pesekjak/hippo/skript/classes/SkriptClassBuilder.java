@@ -1,72 +1,47 @@
 package me.pesekjak.hippo.skript.classes;
 
-import ch.njol.skript.lang.Expression;
-import me.pesekjak.hippo.classes.SkriptClass;
-import me.pesekjak.hippo.classes.Type;
-import me.pesekjak.hippo.classes.contents.Constructor;
-import me.pesekjak.hippo.classes.contents.annotation.Annotation;
-import me.pesekjak.hippo.hooks.SkriptReflectHook;
-import org.bukkit.event.Event;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import me.pesekjak.hippo.classes.ISkriptClass;
+import me.pesekjak.hippo.classes.content.Annotation;
+import me.pesekjak.hippo.utils.events.NewSkriptClassEvent;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
- * Utility class for easier ClassBuilding out of Skript's expressions
+ * Tracks class that is currently being built, annotations
+ * and classes registered by user.
  */
+@RequiredArgsConstructor
 public class SkriptClassBuilder {
 
-    public static SkriptClass registeringClass;
-    public static Event registeringEvent;
-    public static List<Annotation> stackedAnnotations = new ArrayList<>();
-    public static Constructor registeringConstructor;
+    public static SkriptClassBuilder ACTIVE_BUILDER;
+    public static final Map<String, ISkriptClass> CLASS_REGISTRY = new HashMap<>();
 
-    private SkriptClassBuilder() { }
+    @Getter
+    private final ISkriptClass skriptClass;
+    @Getter @Setter
+    private NewSkriptClassEvent event;
+    @Getter
+    private final List<Annotation> stackedAnnotations = new ArrayList<>();
 
-    /**
-     * @return Class that's currently being registered (code of the class is being run by Skript)
-     */
-    public static SkriptClass getRegisteringClass() {
-        return registeringClass;
+    public static ISkriptClass create(ISkriptClass skriptClass) {
+        ACTIVE_BUILDER = new SkriptClassBuilder(skriptClass);
+        CLASS_REGISTRY.put(skriptClass.getType().dotPath(), skriptClass);
+        return skriptClass;
     }
 
-    public static void setRegisteringClass(SkriptClass registeringClass) {
-        SkriptClassBuilder.registeringClass = registeringClass;
+    public static ISkriptClass getSkriptClass(String name) {
+        return CLASS_REGISTRY.get(name);
     }
 
-    /**
-     * @return Event of currently registering Skript Class
-     */
-
-    public static Event getCurrentEvent() {
-        return registeringClass.getDefineEvent();
+    public void addStackedAnnotations(Annotation... annotations) {
+        stackedAnnotations.addAll(Arrays.asList(annotations));
     }
 
-    /**
-     * Returns Hippo's Type from expressions with return type of Reflect's JavaType
-     * @param typeExpression Expression of Reflect's JavaType
-     * @return Hippo Type out of typeExpression
-     */
-    public static Type getTypeFromExpression(Expression<?> typeExpression) {
-        Type type = null;
-        if(typeExpression != null) {
-            Object typeObject = typeExpression.getSingle(SkriptClassBuilder.getCurrentEvent());
-            if(typeObject == null) return null;
-            if(typeObject instanceof Type) {
-                // In case class doesn't exist yet and expression returned Hippo's type,
-                // happens with PreImported classes
-                type = (Type) typeObject;
-            } else {
-                try {
-                    // In case provided expression is Reflect's JavaType expression or
-                    // different source of JavaType
-                    type = new Type(SkriptReflectHook.classOfJavaType(typeObject));
-                } catch (Exception e) {
-                    return null;
-                }
-            }
-        }
-        return type;
+    public void clearStackedAnnotations() {
+        stackedAnnotations.clear();
     }
 
 }

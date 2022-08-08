@@ -1,65 +1,44 @@
 package me.pesekjak.hippo.classes;
 
-import org.objectweb.asm.Opcodes;
+import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.Type;
 
 public enum Primitive {
-    BOOLEAN("boolean", "Z", Opcodes.T_BOOLEAN, Boolean.class, boolean.class),
-    CHAR("char", "C", Opcodes.T_CHAR, Character.class, char.class),
-    BYTE("byte", "B", Opcodes.T_BYTE, Byte.class, byte.class),
-    SHORT("short", "S", Opcodes.T_SHORT, Short.class, short.class),
-    INT("int", "I", Opcodes.T_INT, Integer.class, int.class),
-    FLOAT("float", "F", Opcodes.T_FLOAT, Float.class, float.class),
-    LONG("long", "J", Opcodes.T_LONG, Long.class, long.class),
-    DOUBLE("double", "D", Opcodes.T_DOUBLE, Double.class, double.class),
-    VOID("void", "V", 0, Void.class, void.class),
-    NONE(null, null, 0, null, null);
 
-    private final String primitive;
-    private final String descriptor;
-    private final int typeValue;
-    private final Class<?> classCounterpart;
+    BOOLEAN(boolean.class, Boolean.class, Type.BOOLEAN_TYPE),
+    CHAR(char.class, Character.class, Type.CHAR_TYPE),
+    BYTE(byte.class, Byte.class, Type.BYTE_TYPE),
+    SHORT(short.class, Short.class, Type.SHORT_TYPE),
+    INT(int.class, Integer.class, Type.INT_TYPE),
+    LONG(long.class, Long.class, Type.LONG_TYPE),
+    FLOAT(float.class, Float.class, Type.FLOAT_TYPE),
+    DOUBLE(double.class, Double.class, Type.DOUBLE_TYPE),
+    VOID(void.class, Void.class, Type.VOID_TYPE);
+
+    @Getter @NotNull
     private final Class<?> primitiveClass;
+    @Getter @NotNull
+    private final Class<?> nonPrimitiveClass;
+    @Getter @NotNull
+    private final String descriptor;
+    @Getter @NotNull
+    private final Type ASMType;
 
-    Primitive(String primitive, String descriptor, int typeValue, Class<?> classCounterpart, Class<?> primitiveClass) {
-        this.primitive = primitive;
-        this.descriptor = descriptor;
-        this.typeValue = typeValue;
-        this.classCounterpart = classCounterpart;
+    Primitive(@NotNull Class<?> primitiveClass, @NotNull Class<?> nonPrimitiveClass, Type ASMType) {
         this.primitiveClass = primitiveClass;
+        this.nonPrimitiveClass = nonPrimitiveClass;
+        this.descriptor = ASMType.getDescriptor();
+        this.ASMType = ASMType;
     }
 
-    public static Primitive fromDescriptor(String descriptor) {
-        return switch (descriptor) {
-            case "Z" -> Primitive.BOOLEAN;
-            case "C" -> Primitive.CHAR;
-            case "B" -> Primitive.BYTE;
-            case "S" -> Primitive.SHORT;
-            case "I" -> Primitive.INT;
-            case "F" -> Primitive.FLOAT;
-            case "J" -> Primitive.LONG;
-            case "D" -> Primitive.DOUBLE;
-            case "V" -> Primitive.VOID;
-            default -> Primitive.NONE;
-        };
+    public static Primitive fromClass(Class<?> primitiveClass) {
+        for(Primitive primitive : Primitive.values()) {
+            if(primitive.getPrimitiveClass() == primitiveClass ||
+                    primitive.getNonPrimitiveClass() == primitiveClass)
+                return primitive;
+        }
+        return null;
     }
 
-    public String getPrimitive() {
-        return primitive;
-    }
-
-    public String getDescriptor() {
-        return descriptor;
-    }
-
-    public int getTypeValue() {
-        return typeValue;
-    }
-
-    public Class<?> getClassCounterpart() {
-        return classCounterpart;
-    }
-
-    public Class<?> getPrimitiveClass() {
-        return primitiveClass;
-    }
 }

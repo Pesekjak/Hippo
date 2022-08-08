@@ -9,18 +9,9 @@ import java.lang.reflect.Method;
 
 public class Reflectness {
 
-    public static Class<?> classForName(String className) {
-        try {
-            return Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            return null;
-        }
+    private Reflectness() {
+        throw new UnsupportedOperationException();
     }
-
-    public static boolean classExists(String className) {
-        return classForName(className) != null;
-    }
-
 
     public static void setField(Field field, Object obj, Object arg) {
         try {
@@ -114,6 +105,5 @@ public class Reflectness {
         }
         return null;
     }
-
 
 }

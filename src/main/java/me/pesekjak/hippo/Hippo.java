@@ -2,9 +2,9 @@ package me.pesekjak.hippo;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.SkriptAddon;
-import me.pesekjak.hippo.hooks.SkriptReflectHook;
+import lombok.Getter;
 import me.pesekjak.hippo.utils.Logger;
-import me.pesekjak.hippo.utils.SkriptUtils;
+import me.pesekjak.hippo.utils.SkriptUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -14,77 +14,60 @@ public class Hippo extends JavaPlugin {
 
     //  .-''''-. _
     // ('    '  '0)-/)
-    // '..____..:    ⳹._
-    //   ⳹u  u (        '-..------._
+    // '..____..:    :._
+    //   .u  u (        '-..------._
     //   |     /      :   '.        '--.
-    //  .nn_nn/ (      :   '            '⳹
-    // ( '' '' /      ;     .             ⳹
-    //  ''----' "⳹          :            : '.
+    //  .nn_nn/ (      :   '            ':
+    // ( '' '' /      ;     .            ':
+    //  ''----' ":          :            : '.
     //         .'/                           '.
     //        / /                             '.
-    //       /_|       )                     .⳹|
-    //         |      /⳹                     . '
+    //       /_|       )                     .\|
+    //         |      /:.                    . '
     //         '--.__|  '--._  ,            /
     //                      /'-,          .'
     //                     /   |        _.'
-    //                    (____⳹       /
-    //                          ⳹      ⳹
+    //                    (____.       /
+    //                          :      :
     //                           '-'-'-'
-    // MIGHTY HIPPO FROM THE HIPO LAKE
+    // MIGHTY SUPER HIPPO FROM THE HIPO LAKE
+    // WHERE HIPPOS, ELEPHANTS, WATER BUFFALO
+    // AND OTHER ANIMALS LIVE.
 
+    @Getter
     private static Hippo instance;
+    @Getter
     private static SkriptAddon addonInstance;
-
-    public Hippo() {
-        instance = this;
-    }
-
-    public static Hippo getInstance() {
-        if (instance == null) throw new IllegalStateException();
-        return instance;
-    }
-
-    public static SkriptAddon getAddonInstance() {
-        if (addonInstance == null) addonInstance = Skript.registerAddon(getInstance());
-        return addonInstance;
-    }
 
     @Override
     public void onEnable() {
-        Logger.info("Hippo is slowly waking up!");
-
-        if (!SkriptUtils.isSkriptRunning()) {
-            Logger.severe("Hippo went to sleep again because Skript is disabled.");
-            Bukkit.getPluginManager().disablePlugin(this);
+        if(!(Bukkit.getPluginManager().isPluginEnabled("Skript") &&
+                Bukkit.getPluginManager().isPluginEnabled("skript-reflect"))) {
+            Logger.severe("Hippo requires Skript and skript-reflect installed to wake up!");
             return;
         }
-
-        if (!SkriptUtils.isSkript2_6()) {
-            Logger.severe("Your version of Skript (" + Skript.getVersion() + ") is unsupported, at least Skript 2.6 is required to wake up Hippo.");
-            Bukkit.getPluginManager().disablePlugin(this);
+        if(!SkriptUtil.isSkript2_6()) {
+            Logger.severe("Hippo requires 2.6 or higher version of Skript to wake up!");
             return;
         }
-
-        if(!SkriptReflectHook.setup()) {
-            Logger.severe("Skript-reflect addon is required for Hippo to wake up.");
+        if(setupAddon())
+            Logger.info("Hippo woke up from his sleep by the hipo lake and is going to help you.");
+        else {
+            Logger.severe("Hippo failed to wake up and will remain in the hipo lake for some time.");
             Bukkit.getPluginManager().disablePlugin(this);
-            return;
         }
+    }
 
+    protected boolean setupAddon() {
+        instance = this;
         addonInstance = Skript.registerAddon(getInstance());
-        setupSyntax();
-        Logger.info("Hippo woke up from his sleep by the lake and is going to help you.");
-    }
-
-    @Override
-    public void onDisable() {
-        Logger.info("The hippo went to sleep by the lake.");
-    }
-
-    public void setupSyntax() {
+        SkriptUtil.registerListeners();
         try {
             getAddonInstance().loadClasses("me.pesekjak.hippo.skript");
-        } catch (IOException exception) { exception.printStackTrace(); }
+            return true;
+        } catch (IOException exception) {
+            return false;
+        }
     }
 
 }

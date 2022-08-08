@@ -4,4 +4,4 @@ description: Skript addon for custom classes
 version: 1.0-BETA.1
 api-version: 1.13
 authors: [Pesek]
-depend: [Skript, skript-reflect]
+softdepend:  [Skript, skript-reflect]

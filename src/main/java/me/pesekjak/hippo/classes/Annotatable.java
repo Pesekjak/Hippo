@@ -1,24 +1,19 @@
 package me.pesekjak.hippo.classes;
 
-import me.pesekjak.hippo.classes.contents.annotation.Annotation;
+import lombok.Getter;
+import me.pesekjak.hippo.classes.content.Annotation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class Annotatable extends Modifiable {
+public class Annotatable {
 
+    @Getter
     private final List<Annotation> annotations = new ArrayList<>();
 
-    public List<Annotation> getAnnotations() {
-        return annotations;
-    }
-
-    public void addAnnotation(Annotation annotation) {
-        if(!annotations.contains(annotation)) annotations.add(annotation);
-    }
-
-    public void removeAnnotation(Annotation annotation) {
-        annotations.remove(annotation);
+    public void addAnnotations(Annotation... annotations) {
+        this.annotations.addAll(Arrays.asList(annotations));
     }
 
 }

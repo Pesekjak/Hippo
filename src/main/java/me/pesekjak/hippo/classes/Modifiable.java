@@ -1,22 +1,18 @@
 package me.pesekjak.hippo.classes;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class Modifiable {
+public class Modifiable extends Annotatable {
 
+    @Getter
     private final List<Modifier> modifiers = new ArrayList<>();
 
-    public List<Modifier> getModifiers() {
-        return modifiers;
-    }
-
-    public void addModifier(Modifier modifier) {
-        if(!modifiers.contains(modifier)) modifiers.add(modifier);
-    }
-
-    public void removeModifier(Modifier modifier) {
-        modifiers.remove(modifier);
+    public void addModifiers(Modifier... modifiers) {
+        this.modifiers.addAll(Arrays.asList(modifiers));
     }
 
 }

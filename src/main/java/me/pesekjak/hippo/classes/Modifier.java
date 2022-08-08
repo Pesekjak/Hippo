@@ -1,36 +1,58 @@
 package me.pesekjak.hippo.classes;
 
+import lombok.Getter;
 import org.objectweb.asm.Opcodes;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public enum Modifier {
 
-    PUBLIC("public", Opcodes.ACC_PUBLIC),
-    PRIVATE("private", Opcodes.ACC_PRIVATE),
-    PROTECTED("protected", Opcodes.ACC_PROTECTED),
-    FINAL("final", Opcodes.ACC_FINAL),
-    STATIC("static", Opcodes.ACC_STATIC),
-    ABSTRACT("abstract", Opcodes.ACC_ABSTRACT),
-    TRANSIENT("transient", Opcodes.ACC_TRANSIENT),
-    SYNCHRONIZED("synchronized", Opcodes.ACC_SYNCHRONIZED),
-    VOLATILE("volatile", Opcodes.ACC_VOLATILE),
-    NATIVE("native", Opcodes.ACC_NATIVE),
-    STRICTFP("strictfp", Opcodes.ACC_STRICT),
-    DEFAULT("default", 0);
+    PUBLIC(Opcodes.ACC_PUBLIC, true),
+    PRIVATE(Opcodes.ACC_PRIVATE, true),
+    PROTECTED(Opcodes.ACC_PROTECTED, true),
+    FINAL(Opcodes.ACC_FINAL, false),
+    STATIC(Opcodes.ACC_STATIC, false),
+    ABSTRACT(Opcodes.ACC_ABSTRACT, false),
+    TRANSIENT(Opcodes.ACC_TRANSIENT, false),
+    SYNCHRONIZED(Opcodes.ACC_SYNCHRONIZED, false),
+    VOLATILE(Opcodes.ACC_VOLATILE, false),
+    NATIVE(Opcodes.ACC_NATIVE, false),
+    STRICTFP(Opcodes.ACC_STRICT, false),
+    DEFAULT(0, true);
 
-    public String identifier;
-    public int value;
+    @Getter
+    private final int value;
+    @Getter
+    private final boolean access;
 
-    Modifier(String identifier, int value) {
-        this.identifier = identifier;
+    Modifier(int value, boolean access) {
         this.value = value;
+        this.access = access;
     }
 
-    public String getIdentifier() {
-        return identifier;
+    /**
+     * Checks if provided list contains more than 1 access modifier.
+     * @param modifiers list of modifiers to check
+     * @return true if list contains more than 1 access modifier
+     */
+    public static boolean accessConflict(List<Modifier> modifiers) {
+        int i = 0;
+        for(Modifier modifier : modifiers) {
+            if(modifier.access) i++;
+        }
+        return i > 1;
     }
 
-    public int getValue() {
-        return value;
+    /**
+     * Checks if provided list has the same modifier more than once.
+     * @param modifiers list of modifiers to check
+     * @return true if list contains the same modifier more than once
+     */
+    public static boolean duplicates(List<Modifier> modifiers) {
+        final Set<Modifier> set = new HashSet<>(modifiers);
+        return modifiers.size() != set.size();
     }
 
 }

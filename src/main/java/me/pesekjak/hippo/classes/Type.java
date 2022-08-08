@@ -1,76 +1,79 @@
 package me.pesekjak.hippo.classes;
 
-import me.pesekjak.hippo.hooks.SkriptReflectHook;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class Type extends IType {
+/**
+ * Represents Hippo Type
+ */
+public interface Type {
 
-    private final String dotPath;
-    private final String internalName;
+    /**
+     * Returns dot path of the Type, can be null if primitive.
+     * @return Dot path of the Type
+     */
+    @Nullable String dotPath();
 
-    public Type(String dotPath, String descriptor, String internalName) {
-        this.dotPath = dotPath;
-        this.descriptor = descriptor;
-        this.internalName = internalName;
-    }
+    /**
+     * Returns descriptor of the Type.
+     * @return descriptor of the Type.
+     */
+    @NotNull String descriptor();
 
-    public Type(String dotPath) {
-        this(dotPath, "L" + dotPath.replace(".", "/") + ";", dotPath.replace(".", "/"));
-    }
+    /**
+     * Returns internal name of the Type, can be null if primitive.
+     * @return internal name of the Type
+     */
+    @Nullable String internalName();
 
-    public Type(Object javaType) {
-        this(SkriptReflectHook.classOfJavaType(javaType).getName());
-    }
+    /**
+     * Returns simple, easy to understand name of the Type used in Skript errors.
+     * @return Simple name of the Type
+     */
+    @NotNull String simpleName();
 
-    public Type(Class<?> classObject) {
-        this(classObject.getName());
-    }
+    /**
+     * Returns array Type of this Type.
+     * @return array Type of this Type.
+     */
+    Type array();
 
-    public String getDotPath() {
-        return dotPath;
-    }
+    boolean isArray();
 
-    @Override
-    public String getDescriptor() {
-        return descriptor;
-    }
+    /**
+     * Returns load OpCode for this Type.
+     * @return load OpCode for this Type
+     */
+    int loadCode();
 
-    public String getInternalName() {
-        return internalName;
-    }
+    /**
+     * Returns store OpCode for this Type.
+     * @return store OpCode of this Type
+     */
+    int storeCode();
 
-    public String getSimpleName() {
-        if (descriptor.startsWith("[")) {
-            return internalName.substring(internalName.lastIndexOf('/') + 1, internalName.length() - 1) + arrayBlocks();
-        }
-        return internalName.substring(internalName.lastIndexOf('/') + 1);
-    }
+    /**
+     * Returns OpCode for returning variable of this Type.
+     * @return OpCode for returning variable of this Type.
+     */
+    int returnCode();
 
-    @Override
-    public String getRawDescriptor() {
-        return descriptor.replace("[", "");
-    }
+    /**
+     * Returns number of slots the datatype requires on the stack.
+     * @return number of slots the datatype requires on the stack
+     */
+    int size();
 
-    @Override
-    public Type arrayType() {
-        return new Type(dotPath, "[" + descriptor, internalName);
-    }
+    /**
+     * Converts Hippo's Type to ASM Type
+     * @return ASM Type of the this Type
+     */
+    org.objectweb.asm.Type toASM();
 
-    @Override
-    public Type varArgType() {
-        Type type = new Type(dotPath, descriptor, internalName);
-        type.setVarArg(true);
-        return type;
-    }
-
-    public Class<?> findClass() {
-        try {
-            return Class.forName(dotPath);
-        } catch (ClassNotFoundException ignored) { }
-        return null;
-    }
-
-    public org.objectweb.asm.Type toASMType() {
-        return org.objectweb.asm.Type.getType(descriptor);
-    }
+    /**
+     * Tries to find the class of this Type, null if doesn't exist.
+     * @return Class of this Type
+     */
+    @Nullable Class<?> findClass();
 
 }
