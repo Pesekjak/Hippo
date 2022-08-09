@@ -129,7 +129,7 @@ public class ClassBuilder implements IClassBuilder {
     public static int sumModifiers(Modifier... modifiers) {
         int result = 0;
         for(Modifier modifier : modifiers) {
-            result = result + modifier.getValue();
+            result = result | modifier.getValue();
         }
         return result;
     }

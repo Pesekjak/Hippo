@@ -396,7 +396,7 @@ public class SkriptEnum extends ISkriptClass {
         Type arrayType = type.array();
 
         // Setups $values() enum method
-        int modifiers = Opcodes.ACC_PRIVATE + Opcodes.ACC_STATIC + Opcodes.ACC_SYNTHETIC;
+        int modifiers = Modifier.PRIVATE.getValue() | Modifier.STATIC.getValue() | Opcodes.ACC_SYNTHETIC;
         MethodVisitor MV = CB.visitor().visitMethod(modifiers, "$values", "()" + arrayType.descriptor(), null, new String[0]);
         MV.visitCode();
 
@@ -422,7 +422,7 @@ public class SkriptEnum extends ISkriptClass {
         CB.visitor().visitEnd();
 
         // Setups valueOf(java.lang.String) enum method
-        modifiers = Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC;
+        modifiers = Modifier.PUBLIC.getValue() | Modifier.STATIC.getValue();
         MV = CB.visitor().visitMethod(modifiers, "valueOf", "(Ljava/lang/String;)" + type.descriptor(), null, new String[0]);
         MV.visitCode();
 
@@ -443,7 +443,7 @@ public class SkriptEnum extends ISkriptClass {
         CB.visitor().visitEnd();
 
         // Setups values() enum method
-        modifiers = Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC;
+        modifiers = Modifier.PUBLIC.getValue() | Modifier.STATIC.getValue();
         MV = CB.visitor().visitMethod(modifiers, "values", "()" + arrayType.descriptor(), null, new String[0]);
         MV.visitCode();
 
@@ -467,7 +467,7 @@ public class SkriptEnum extends ISkriptClass {
         CB.visitor().visitEnd();
 
         // Setups $VALUES field
-        modifiers = Opcodes.ACC_PRIVATE + Opcodes.ACC_STATIC + Opcodes.ACC_FINAL + Opcodes.ACC_SYNTHETIC;
+        modifiers = Modifier.PRIVATE.getValue() | Modifier.STATIC.getValue() | Modifier.FINAL.getValue() | Opcodes.ACC_SYNTHETIC;
         final FieldVisitor FV = CB.visitor().visitField(modifiers, "$VALUES", arrayType.descriptor(), null, null);
         FV.visitEnd();
         CB.visitor().visitEnd();

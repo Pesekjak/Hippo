@@ -134,7 +134,7 @@ public class SkriptRecord extends ISkriptClass {
     }
 
     public void setupDefaultMethods(final IClassBuilder CB) {
-        int modifiers = Modifier.PUBLIC.getValue() + Modifier.FINAL.getValue();
+        int modifiers = Modifier.PUBLIC.getValue() | Modifier.FINAL.getValue();
 
         Method equals = new Method("equals", new BooleanType());
         equals.addArguments(new Pair("obj", new NonPrimitiveType(Object.class)));
