@@ -1,7 +1,7 @@
 main: me.pesekjak.hippo.Hippo
 name: Hippo
 description: Skript addon for custom classes
-version: 1.0-BETA.1
+version: 1.0
 api-version: 1.13
 authors: [Pesek]
 softdepend:  [Skript, skript-reflect]
