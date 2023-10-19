@@ -1,0 +1,22 @@
+[versions]
+checkstyle = "10.3.1"
+jetbrains-kotlin-gradle = "1.7.21"
+jetbrains-annotations = "23.0.0"
+junit = "5.9.1"
+spigot-api = "1.13.2-R0.1-SNAPSHOT"
+skript = "2.7.1"
+asm = "9.5"
+johnrengelman-shadow = "7.1.2"
+
+[libraries]
+jetbrains-kotlin-gradle = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "jetbrains-kotlin-gradle" }
+jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
+junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+junit-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
+spigot-api = { module = "org.spigotmc:spigot-api", version.ref = "spigot-api" }
+skript = { module = "com.github.SkriptLang:Skript", version.ref = "skript" }
+asm = { module = "org.ow2.asm:asm", version.ref = "asm" }
+
+[plugins]
+johnrengelman-shadow = { id = "com.github.johnrengelman.shadow", version.ref = "johnrengelman-shadow" }

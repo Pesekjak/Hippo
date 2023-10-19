@@ -1,0 +1,7 @@
+version: 1.1
+types:
+  modifier: modifier¦s @a
+  annotation: annotation¦s @an
+  parameter: parameter¦s @a
+  preimport: preimport¦s @a
+  character: character¦s @a

@@ -1,12 +1,12 @@
-![HippoBanner](https://github.com/Pesekjak/Hippo/blob/master/hippobanner.png?raw=true)
+![HippoBanner](hippobanner.png)
 
-**Hippo** is a [**Skript**](https://github.com/SkriptLang/Skript) addon, allowing you to compile Java classes running Skript's code during runtime.
+**Hippo** is a [**Skript**](https://github.com/SkriptLang/Skript) addon, allowing you to compile Java classes running Skript code during runtime.
 
 ---
 
 ## Requirements
-* [Skript](https://github.com/SkriptLang/Skript) - version: 2.6+
-* [skript-reflect](https://github.com/TPGamesNL/skript-reflect) - version: 2.2.3+
+* [Skript](https://github.com/SkriptLang/Skript) - version: 2.7+
+* [skript-reflect](https://github.com/SkriptLang/skript-reflect) - version: 2.4+
 
 ---
 
