@@ -1,0 +1,9 @@
+name: $name
+version: '$version'
+main: $mainClass
+
+description: $description
+authors: $authors
+
+api-version: '$apiVersion'
+depend: $dependencies
