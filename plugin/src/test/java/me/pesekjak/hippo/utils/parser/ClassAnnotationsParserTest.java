@@ -6,15 +6,16 @@ import me.pesekjak.hippo.core.annotations.Constant;
 import me.pesekjak.hippo.utils.TypeLookup;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Type;
+import org.skriptlang.skript.lang.script.Script;
 
-import java.io.File;
+import java.util.Collections;
 import java.util.List;
 
 public class ClassAnnotationsParserTest {
 
     @Test
     public void simpleTest() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
         TypeLookup.registerPreImport(script, "Blub", new PreImport(Type.getType(Object.class)));
 
@@ -25,6 +26,11 @@ public class ClassAnnotationsParserTest {
         assert annotation.get(1).getType().getDescriptor().equals(Type.getDescriptor(Object.class));
         assert annotation.get(2).getType().getDescriptor().equals(Type.getDescriptor(Object.class));
         assert annotation.get(3).getType().getDescriptor().equals(Type.getDescriptor(Object.class));
+    }
+
+    @SuppressWarnings("ALL")
+    public static Script getEmptyScript() {
+        return new Script(null, Collections.emptyList());
     }
 
 }

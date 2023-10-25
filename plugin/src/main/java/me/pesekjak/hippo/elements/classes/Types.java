@@ -5,6 +5,7 @@ import ch.njol.skript.classes.Parser;
 import ch.njol.skript.lang.ParseContext;
 import ch.njol.skript.lang.parser.ParserInstance;
 import ch.njol.skript.registrations.Classes;
+import me.pesekjak.hippo.core.ASMUtil;
 import me.pesekjak.hippo.core.NamedParameter;
 import me.pesekjak.hippo.core.PreImport;
 import me.pesekjak.hippo.core.annotations.Annotation;
@@ -16,8 +17,8 @@ import me.pesekjak.hippo.utils.parser.AnnotationParser;
 import me.pesekjak.hippo.utils.parser.NamedParameterParser;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Type;
+import org.skriptlang.skript.lang.script.Script;
 
-import java.io.File;
 
 public final class Types {
 
@@ -55,11 +56,11 @@ public final class Types {
                 .parser(new Parser<>() {
                     @Override
                     public PreImport parse(@NotNull String string, @NotNull ParseContext context) {
-                        File script = SkriptUtil.getCurrentScript(ParserInstance.get());
+                        Script script = SkriptUtil.getCurrentScript(ParserInstance.get());
                         if (script == null) return null;
                         Type type = TypeLookup.lookup(script, string);
                         if (type == null) return null;
-                        if (!type.getDescriptor().startsWith("L")) return null;
+                        if (!ASMUtil.isComplex(type) || ASMUtil.isArray(type)) return null;
                         return new PreImport(type);
                     }
 

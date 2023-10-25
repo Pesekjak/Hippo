@@ -5,16 +5,17 @@ import me.pesekjak.hippo.core.annotations.*;
 import me.pesekjak.hippo.utils.TypeLookup;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Type;
+import org.skriptlang.skript.lang.script.Script;
 
-import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class AnnotationParserTest {
 
     @Test
     public void test() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
 
         Annotation annotation = AnnotationParser.parse("@Blob", script);
@@ -23,7 +24,7 @@ public class AnnotationParserTest {
 
     @Test
     public void stringTest() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
 
         Annotation annotation = AnnotationParser.parse("@Blob(blob = \"blob\", blub = \"blub \"\" <- quote\")", script);
@@ -33,7 +34,7 @@ public class AnnotationParserTest {
 
     @Test
     public void numberTest() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
 
         Annotation annotation = AnnotationParser.parse("@Blob(blob = 15.5d, blub = 10)", script);
@@ -43,7 +44,7 @@ public class AnnotationParserTest {
 
     @Test
     public void nestedTest() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
 
         Annotation annotation = AnnotationParser.parse("@Blob(blob = @Blob(blob = 5), blub = @Blob)", script);
@@ -55,7 +56,7 @@ public class AnnotationParserTest {
 
     @Test
     public void arrayTest() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
 
         Annotation annotation = AnnotationParser.parse("@Blob(blob = [1, 2, 3, \"blob\"], blub = [])", script);
@@ -69,7 +70,7 @@ public class AnnotationParserTest {
 
     @Test
     public void enumTest() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
 
         Annotation annotation = AnnotationParser.parse("@Blob(blob = Blob.BLUB)", script);
@@ -78,7 +79,7 @@ public class AnnotationParserTest {
 
     @Test
     public void classTest() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
 
         Annotation annotation = AnnotationParser.parse("@Blob(blob = Blob.class)", script);
@@ -87,7 +88,7 @@ public class AnnotationParserTest {
 
     @Test
     public void moreNested() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
         TypeLookup.registerPreImport(script, "Blub", new PreImport(Type.getType(Object.class)));
 
@@ -98,7 +99,7 @@ public class AnnotationParserTest {
 
     @Test
     public void cursedStrings() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
 
         Annotation annotation = AnnotationParser.parse("@Blob(blub = @Blob(blob = \"(()\"))", script);
@@ -107,7 +108,7 @@ public class AnnotationParserTest {
 
     @Test
     public void primitiveClassLiteral() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
 
         Annotation annotation = AnnotationParser.parse("@Blob(blub = int.class, blob = boolean.class)", script);
@@ -117,7 +118,7 @@ public class AnnotationParserTest {
 
     @Test
     public void arrayClassLiteral() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
 
         Annotation annotation = AnnotationParser.parse("@Blob(blub = int[].class, blob = Blob[][].class)", script);
@@ -127,7 +128,7 @@ public class AnnotationParserTest {
 
     @Test
     public void characterTest() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
 
         Annotation annotation = AnnotationParser.parse("@Blob(blub = 'a', blob = 'b')", script);
@@ -137,12 +138,17 @@ public class AnnotationParserTest {
 
     @Test
     public void booleanTest() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
 
         Annotation annotation = AnnotationParser.parse("@Blob(blub = true, blob = false)", script);
         assert ((Constant) annotation.getValues().get("blub")).<Boolean>get();
         assert !((Constant) annotation.getValues().get("blob")).<Boolean>get();
+    }
+
+    @SuppressWarnings("ALL")
+    public static Script getEmptyScript() {
+        return new Script(null, Collections.emptyList());
     }
 
 }

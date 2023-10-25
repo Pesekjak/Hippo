@@ -27,6 +27,7 @@ import me.pesekjak.hippo.elements.ClassElement;
 import me.pesekjak.hippo.elements.classes.handles.Modifier;
 import me.pesekjak.hippo.elements.effects.EffAnnotations;
 import me.pesekjak.hippo.skript.ScriptInactiveEvent;
+import me.pesekjak.hippo.utils.DummyEvent;
 import me.pesekjak.hippo.utils.SkriptUtil;
 import me.pesekjak.hippo.utils.UnlockedTrigger;
 import org.bukkit.event.Event;
@@ -55,7 +56,9 @@ public class StructNewClass extends Structure {
     static {
         Skript.registerStructure(
                 StructNewClass.class,
-                "[%-annotations%] %modifiers% (:class|:interface|:enum) %preimport% [extends %-preimport%] [implements %-preimports%]"
+                "[%-annotations%] %modifiers% (:class|:interface|:enum) %preimport% "
+                        + "[extends %-preimport/javatype%] "
+                        + "[implements %-preimports/javatypes%]"
         );
     }
 
@@ -76,16 +79,13 @@ public class StructNewClass extends Structure {
 
         Type superClass;
         if (args[3] != null)
-            superClass = Optional.ofNullable((PreImport) args[3].getSingle()).map(PreImport::type).orElse(Type.getType(Object.class));
+            superClass = SkriptUtil.collectTypes(args[3], new DummyEvent()).stream().findFirst().orElse(Type.getType(Object.class));
         else
             superClass = Type.getType(Object.class);
 
         List<Type> interfaces = new ArrayList<>();
-        if (args[4] != null) {
-            for (Object i : args[4].getAll()) {
-                Optional.ofNullable((PreImport) i).map(PreImport::type).ifPresent(interfaces::add);
-            }
-        }
+        if (args[4] != null)
+            interfaces.addAll(SkriptUtil.collectTypes(args[4], new DummyEvent()));
 
         List<Annotation> annotations = args[0] == null ? Collections.emptyList() : List.of(((Expression<Annotation>) args[0]).getAll(event));
 

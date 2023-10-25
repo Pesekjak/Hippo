@@ -8,6 +8,7 @@ import ch.njol.skript.config.SectionNode;
 import ch.njol.skript.lang.*;
 import ch.njol.skript.lang.parser.ParserInstance;
 import ch.njol.skript.log.SkriptLogger;
+import ch.njol.skript.util.LiteralUtils;
 import ch.njol.skript.variables.Variables;
 import ch.njol.util.Kleenean;
 import com.btk5h.skriptmirror.JavaType;
@@ -15,9 +16,9 @@ import me.pesekjak.hippo.core.PreImport;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
+import org.skriptlang.skript.lang.script.Script;
 import org.skriptlang.skript.lang.structure.Structure;
 
-import java.io.File;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -36,8 +37,8 @@ public final class SkriptUtil {
      * @param parser parser instance
      * @return file
      */
-    public static @Nullable File getCurrentScript(ParserInstance parser) {
-        return parser.isActive() ? parser.getCurrentScript().getConfig().getFile() : null;
+    public static @Nullable Script getCurrentScript(ParserInstance parser) {
+        return parser.isActive() ? parser.getCurrentScript() : null;
     }
 
     /**
@@ -104,7 +105,7 @@ public final class SkriptUtil {
      */
     public static List<Type> collectTypes(@Nullable Expression<?> expression, Event event) {
         if (expression == null) return Collections.emptyList();
-        return Arrays.stream(expression.getAll(event))
+        return Arrays.stream(LiteralUtils.defendExpression(expression).getAll(event))
                 .map(type -> {
                     if (type instanceof PreImport preImport) return preImport.type();
                     if (type instanceof JavaType javaType) return Type.getType(javaType.getJavaClass());

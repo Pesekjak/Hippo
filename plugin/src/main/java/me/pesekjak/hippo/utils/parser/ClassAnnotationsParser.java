@@ -2,8 +2,8 @@ package me.pesekjak.hippo.utils.parser;
 
 import me.pesekjak.hippo.core.annotations.Annotation;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.lang.script.Script;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +19,7 @@ public final class ClassAnnotationsParser {
      * @param script script
      * @return parsed annotations
      */
-    public static List<Annotation> parse(String string, File script) throws ParserException {
+    public static List<Annotation> parse(String string, Script script) throws ParserException {
         if (string.length() == 0) throw new ParserException();
 
         String toParse = string.trim();
@@ -42,7 +42,7 @@ public final class ClassAnnotationsParser {
      * @param script script
      * @return next annotation entry
      */
-    private static AnnotationEntry nextAnnotation(String string, File script) throws ParserException {
+    private static AnnotationEntry nextAnnotation(String string, Script script) throws ParserException {
         Analyzer analyzer = new Analyzer(string);
         while (analyzer.canMove() && analyzer.peek() == ' ')
             analyzer.eat();

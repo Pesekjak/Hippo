@@ -23,8 +23,7 @@ import me.pesekjak.hippo.utils.TypeLookup;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Type;
-
-import java.io.File;
+import org.skriptlang.skript.lang.script.Script;
 
 @Name("Pre-Imported Class")
 @Description("Reference of pre-imported class.")
@@ -89,7 +88,7 @@ public class ExprPreImport extends SimpleExpression<Object> {
                         int matchedPattern,
                         @NotNull Kleenean isDelayed,
                         SkriptParser.@NotNull ParseResult parseResult) {
-        File script = SkriptUtil.getCurrentScript(getParser());
+        Script script = SkriptUtil.getCurrentScript(getParser());
         if (script == null) return false;
         String alias = parseResult.regexes.get(0).group();
         Type type = TypeLookup.lookup(script, alias);

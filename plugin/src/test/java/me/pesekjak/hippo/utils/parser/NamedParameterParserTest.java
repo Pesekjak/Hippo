@@ -6,16 +6,17 @@ import me.pesekjak.hippo.core.annotations.Annotation;
 import me.pesekjak.hippo.utils.TypeLookup;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Type;
+import org.skriptlang.skript.lang.script.Script;
 
-import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class NamedParameterParserTest {
 
     @Test
     public void simpleTest() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
 
         NamedParameter parameter = NamedParameterParser.parse("Blob blob", script);
@@ -25,7 +26,7 @@ public class NamedParameterParserTest {
 
     @Test
     public void arrayTest() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
 
         NamedParameter parameter = NamedParameterParser.parse("Blob[][] blob", script);
@@ -34,7 +35,7 @@ public class NamedParameterParserTest {
 
     @Test
     public void annotationsTest() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
 
         NamedParameter parameter = NamedParameterParser.parse("@Blob(), @Blob(blob = 5.1d) Blob blob", script);
@@ -46,7 +47,7 @@ public class NamedParameterParserTest {
 
     @Test
     public void primitiveTest() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
 
         NamedParameter parameter = NamedParameterParser.parse("@Blob(blob = boolean.class) int blob", script);
@@ -56,11 +57,16 @@ public class NamedParameterParserTest {
 
     @Test
     public void annotationsTest2() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
 
         NamedParameter parameter = NamedParameterParser.parse("@Blob(blob = boolean.class), @Blob, @Blob() int blob", script);
         assert parameter.parameter().getAnnotations().size() == 3;
+    }
+
+    @SuppressWarnings("ALL")
+    public static Script getEmptyScript() {
+        return new Script(null, Collections.emptyList());
     }
 
 }

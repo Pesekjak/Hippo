@@ -1,7 +1,8 @@
 package me.pesekjak.hippo.utils;
 
+import ch.njol.skript.config.Config;
+import ch.njol.skript.registrations.Classes;
 import com.btk5h.skriptmirror.JavaType;
-import com.btk5h.skriptmirror.skript.custom.CustomImport;
 import com.google.common.collect.Table;
 import com.google.common.collect.Tables;
 import me.pesekjak.hippo.core.ASMUtil;
@@ -9,9 +10,12 @@ import me.pesekjak.hippo.core.PreImport;
 import me.pesekjak.hippo.utils.parser.Analyzer;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
+import org.skriptlang.reflect.java.elements.structures.StructImport;
+import org.skriptlang.skript.lang.script.Script;
 
-import java.io.File;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Util class used to parse and manage custom types.
@@ -22,7 +26,7 @@ import java.util.HashMap;
 public final class TypeLookup {
 
     @SuppressWarnings("UnstableApiUsage")
-    private static final Table<File, String, PreImport> PRE_IMPORTS = Tables.newCustomTable(new HashMap<>(), HashMap::new);
+    private static final Table<Script, String, PreImport> PRE_IMPORTS = Tables.newCustomTable(new HashMap<>(), HashMap::new);
 
     private TypeLookup() {
         throw new UnsupportedOperationException();
@@ -35,7 +39,7 @@ public final class TypeLookup {
      * @param identifier type identifier, accepts primitive and array types as well.
      * @return parsed type or null if it can not be found
      */
-    public static @Nullable Type lookup(File script, String identifier) {
+    public static @Nullable Type lookup(Script script, String identifier) {
         String alias = identifier;
         int arrayLevel = 0;
 
@@ -76,13 +80,18 @@ public final class TypeLookup {
 
         JavaType javaType;
         try { // try block because of tests
-            javaType = CustomImport.lookup(script, alias);
+            javaType = StructImport.lookup(script, alias);
         } catch (Throwable exception) {
             javaType = null;
         }
         if (javaType != null) return ASMUtil.getArrayType(javaType.getJavaClass(), arrayLevel);
 
-        return null;
+        try {
+            Class<?> classInfo = Classes.getClass(alias.toLowerCase());
+            return ASMUtil.getArrayType(classInfo, arrayLevel);
+        } catch (Throwable throwable) {
+            return null;
+        }
     }
 
     /**
@@ -93,7 +102,7 @@ public final class TypeLookup {
      * @param preImport pre-import
      * @return whether the import has been registered under given alias
      */
-    public static boolean registerPreImport(File script, String identifier, PreImport preImport) {
+    public static boolean registerPreImport(Script script, String identifier, PreImport preImport) {
         if (PRE_IMPORTS.contains(script, identifier)) return false;
         PRE_IMPORTS.put(script, identifier, preImport);
         return true;
@@ -106,7 +115,7 @@ public final class TypeLookup {
      * @param identifier alias
      * @return whether the import has been unregistered
      */
-    public static boolean unregisterPreImport(File script, String identifier) {
+    public static boolean unregisterPreImport(Script script, String identifier) {
         if (!PRE_IMPORTS.contains(script, identifier)) return false;
         PRE_IMPORTS.remove(script, identifier);
         return true;
@@ -117,9 +126,25 @@ public final class TypeLookup {
      *
      * @param script script to unregister all pre-imports for
      */
-    public static void unregisterPreImports(File script) {
+    public static void unregisterPreImports(Script script) {
         PRE_IMPORTS.row(script).clear();
         PRE_IMPORTS.rowMap().remove(script);
+    }
+
+    /**
+     * Unregisters all pre-imports for given scripts.
+     *
+     * @param configs scripts to unregister all pre-imports for
+     */
+    public static void unregisterPreImports(Collection<Config> configs) {
+        List<Script> toUnregister = PRE_IMPORTS.rowKeySet().stream()
+                .filter(script -> {
+                    for (Config config : configs)
+                        if (config.getFileName().equals(script.getConfig().getFileName())) return true;
+                    return false;
+                })
+                .toList();
+        toUnregister.forEach(TypeLookup::unregisterPreImports);
     }
 
 }

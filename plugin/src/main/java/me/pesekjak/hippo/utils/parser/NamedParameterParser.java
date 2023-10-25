@@ -12,8 +12,8 @@ import me.pesekjak.hippo.utils.TypeLookup;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
+import org.skriptlang.skript.lang.script.Script;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -27,7 +27,8 @@ public final class NamedParameterParser extends Parser<NamedParameter> {
 
     @Override
     public NamedParameter parse(@NotNull String string, @NotNull ParseContext context) {
-        File script = SkriptUtil.getCurrentScript(ParserInstance.get());
+        Script script = SkriptUtil.getCurrentScript(ParserInstance.get());
+        if (script == null) return null;
         try {
             return parse(string, script);
         } catch (Exception exception) {
@@ -56,7 +57,7 @@ public final class NamedParameterParser extends Parser<NamedParameter> {
      * @param script script
      * @return next named parameter
      */
-    public static NamedParameter parse(String string, File script) throws ParserException {
+    public static NamedParameter parse(String string, Script script) throws ParserException {
         if (string.length() == 0) throw new ParserException();
 
         String toParse = string.trim();
@@ -101,7 +102,7 @@ public final class NamedParameterParser extends Parser<NamedParameter> {
      * @param script script
      * @return next annotation entry
      */
-    private static AnnotationEntry nextAnnotation(String string, File script) throws ParserException {
+    private static AnnotationEntry nextAnnotation(String string, Script script) throws ParserException {
         Analyzer analyzer = new Analyzer(string);
         while (analyzer.canMove() && analyzer.peek() == ' ')
             analyzer.eat();

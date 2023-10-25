@@ -5,8 +5,6 @@ import me.pesekjak.hippo.utils.TypeLookup;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-import java.io.File;
-
 /**
  * Implements Bukkit listeners to register.
  */
@@ -21,11 +19,7 @@ public final class BukkitListeners implements Listener {
      */
     @EventHandler
     public void onPreScriptLoad(PreScriptLoadEvent event) {
-        event.getScripts().forEach(config -> {
-            File file = config.getFile();
-            if (file == null) return;
-            TypeLookup.unregisterPreImports(file);
-        });
+        TypeLookup.unregisterPreImports(event.getScripts());
     }
 
 }

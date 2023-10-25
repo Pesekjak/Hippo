@@ -4,15 +4,16 @@ import me.pesekjak.hippo.core.PreImport;
 import me.pesekjak.hippo.utils.TypeLookup;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Type;
+import org.skriptlang.skript.lang.script.Script;
 
-import java.io.File;
+import java.util.Collections;
 import java.util.List;
 
 public class SuperSignatureParserTest {
 
     @Test
     public void test() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
         TypeLookup.registerPreImport(script, "Blub", new PreImport(Type.getType(Object.class)));
 
@@ -28,12 +29,17 @@ public class SuperSignatureParserTest {
 
     @Test
     public void single() throws ParserException {
-        File script = new File("script.sk");
+        Script script = getEmptyScript();
         TypeLookup.registerPreImport(script, "Blob", new PreImport(Type.getType(Object.class)));
 
         List<Type> types = SuperSignatureParser.parse("Blob", script);
         assert types.size() == 1;
         assert types.get(0).getDescriptor().equals(Type.getDescriptor(Object.class));
+    }
+
+    @SuppressWarnings("ALL")
+    public static Script getEmptyScript() {
+        return new Script(null, Collections.emptyList());
     }
 
 }

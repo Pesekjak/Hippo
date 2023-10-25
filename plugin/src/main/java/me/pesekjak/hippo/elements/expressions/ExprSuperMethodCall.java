@@ -22,8 +22,8 @@ import me.pesekjak.hippo.utils.SkriptUtil;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.lang.script.Script;
 
-import java.io.File;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.WrongMethodTypeException;
 import java.lang.reflect.Field;
@@ -64,7 +64,7 @@ public class ExprSuperMethodCall extends SimpleExpression<Object> {
     private @Nullable MethodDescriptor descriptor;
     private boolean catchException;
 
-    private File script;
+    private Script script;
     private Node node;
 
     static {

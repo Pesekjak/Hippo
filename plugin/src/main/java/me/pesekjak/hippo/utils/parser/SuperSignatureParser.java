@@ -4,8 +4,8 @@ import me.pesekjak.hippo.utils.TypeLookup;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.objectweb.asm.Type;
+import org.skriptlang.skript.lang.script.Script;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,7 +26,7 @@ public final class SuperSignatureParser {
      * @param script script
      * @return parsed signature as list of types
      */
-    public static @Unmodifiable List<@Nullable Type> parse(String string, File script) throws ParserException {
+    public static @Unmodifiable List<@Nullable Type> parse(String string, Script script) throws ParserException {
         List<Type> types = new ArrayList<>();
         String toParse = string.trim();
         if (toParse.length() == 0) return Collections.unmodifiableList(types);
@@ -47,7 +47,7 @@ public final class SuperSignatureParser {
      * @param script script
      * @return next type entry
      */
-    private static TypeEntry next(String string, File script) throws ParserException {
+    private static TypeEntry next(String string, Script script) throws ParserException {
         if (string.length() == 0) throw new ParserException();
 
         String toParse = string.trim();

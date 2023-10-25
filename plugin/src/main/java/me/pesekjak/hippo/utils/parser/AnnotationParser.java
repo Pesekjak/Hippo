@@ -9,8 +9,8 @@ import me.pesekjak.hippo.utils.TypeLookup;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
+import org.skriptlang.skript.lang.script.Script;
 
-import java.io.File;
 import java.util.*;
 
 /**
@@ -20,7 +20,7 @@ public final class AnnotationParser extends Parser<Annotation> {
 
     @Override
     public Annotation parse(@NotNull String string, @NotNull ParseContext context) {
-        File script = SkriptUtil.getCurrentScript(ParserInstance.get());
+        Script script = SkriptUtil.getCurrentScript(ParserInstance.get());
         if (script == null) return null;
         try {
             return parse(string, script);
@@ -51,7 +51,7 @@ public final class AnnotationParser extends Parser<Annotation> {
      * @param script script
      * @return parsed annotation
      */
-    public static Annotation parse(String string, File script) throws ParserException {
+    public static Annotation parse(String string, Script script) throws ParserException {
         if (string.length() == 0) throw new ParserException();
         if (string.charAt(0) != '@') throw new ParserException();
 
@@ -81,7 +81,7 @@ public final class AnnotationParser extends Parser<Annotation> {
      * @param script script
      * @return annotation parameters
      */
-    private static Map<String, AnnotationVisitable> parseValues(String string, File script) throws ParserException {
+    private static Map<String, AnnotationVisitable> parseValues(String string, Script script) throws ParserException {
         String toParse = string.trim();
         Map<String, AnnotationVisitable> values = new LinkedHashMap<>();
 
@@ -103,7 +103,7 @@ public final class AnnotationParser extends Parser<Annotation> {
      * @param script script
      * @return next entry
      */
-    private static @Nullable Entry nextEntry(String string, File script) throws ParserException {
+    private static @Nullable Entry nextEntry(String string, Script script) throws ParserException {
         Analyzer analyzer = new Analyzer(string);
         visitEnd(analyzer);
         analyzer.trim();
@@ -129,7 +129,7 @@ public final class AnnotationParser extends Parser<Annotation> {
      * @return next entry
      */
     // Takes only the value part to parse, e.g. '10d' or '"Hello World"'
-    private static Entry nextNamedEntry(@Nullable String name, String string, File script) throws ParserException {
+    private static Entry nextNamedEntry(@Nullable String name, String string, Script script) throws ParserException {
         Analyzer analyzer = new Analyzer(string);
         if (analyzer.peek() == '"') {
             analyzer.eat();

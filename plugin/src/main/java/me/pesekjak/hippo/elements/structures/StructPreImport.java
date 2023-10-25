@@ -17,9 +17,9 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Type;
 import org.skriptlang.skript.lang.entry.EntryContainer;
+import org.skriptlang.skript.lang.script.Script;
 import org.skriptlang.skript.lang.structure.Structure;
 
-import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,7 +37,7 @@ public class StructPreImport extends Structure {
             "(" + SkriptMirrorUtil.PACKAGE + ")(?:\\s+as (" + SkriptMirrorUtil.IDENTIFIER + "))?"
     );
 
-    private File script;
+    private Script script;
 
     static {
         Skript.registerStructure(
@@ -70,10 +70,10 @@ public class StructPreImport extends Structure {
     @Override
     public @NotNull String toString(Event event, boolean debug) {
         if (script == null) return "pre-import";
-        return "pre-import of " + script.getName();
+        return "pre-import of " + script.getConfig().getFileName();
     }
 
-    private void registerPreImport(String rawStatement, File script) {
+    private void registerPreImport(String rawStatement, Script script) {
         Matcher statement = IMPORT_STATEMENT.matcher(ScriptLoader.replaceOptions(rawStatement));
         if (!statement.matches()) {
             Skript.error(rawStatement + " is an invalid import statement.");

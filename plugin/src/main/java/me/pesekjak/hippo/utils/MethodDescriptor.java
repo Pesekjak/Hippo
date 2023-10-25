@@ -4,8 +4,8 @@ import me.pesekjak.hippo.core.ASMUtil;
 import me.pesekjak.hippo.core.loader.DynamicClassLoader;
 import me.pesekjak.hippo.utils.parser.SuperSignatureParser;
 import org.objectweb.asm.Type;
+import org.skriptlang.skript.lang.script.Script;
 
-import java.io.File;
 import java.lang.reflect.Method;
 
 /**
@@ -23,7 +23,7 @@ public record MethodDescriptor(String stringDescriptor) {
      * @param source source of the method
      * @return method
      */
-    public Method get(File script, String methodName, Class<?> source) throws NoSuchMethodException, ClassNotFoundException {
+    public Method get(Script script, String methodName, Class<?> source) throws NoSuchMethodException, ClassNotFoundException {
         String toParse = stringDescriptor.trim();
         if (toParse.length() == 0) {
             return source.getMethod(methodName);
