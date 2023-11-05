@@ -89,7 +89,7 @@ public class EffEnum extends Effect {
 
         int modifier = Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL | Opcodes.ACC_ENUM;
 
-        if (parseResult.regexes.size() == 0) return false;
+        if (parseResult.regexes.isEmpty()) return false;
         String name = parseResult.regexes.get(0).group();
 
         try {

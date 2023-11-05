@@ -29,9 +29,9 @@ public final class SuperSignatureParser {
     public static @Unmodifiable List<@Nullable Type> parse(String string, Script script) throws ParserException {
         List<Type> types = new ArrayList<>();
         String toParse = string.trim();
-        if (toParse.length() == 0) return Collections.unmodifiableList(types);
+        if (toParse.isEmpty()) return Collections.unmodifiableList(types);
 
-        while (toParse.length() != 0) {
+        while (!toParse.isEmpty()) {
             TypeEntry next = next(toParse, script);
             types.add(next.type);
             toParse = next.rest.trim();
@@ -48,7 +48,7 @@ public final class SuperSignatureParser {
      * @return next type entry
      */
     private static TypeEntry next(String string, Script script) throws ParserException {
-        if (string.length() == 0) throw new ParserException();
+        if (string.isEmpty()) throw new ParserException();
 
         String toParse = string.trim();
 
@@ -60,7 +60,7 @@ public final class SuperSignatureParser {
         while (analyzer.canMove() && analyzer.peek() != ' ' && analyzer.peek() != ',')
             typeBuilder.append(analyzer.move());
 
-        Type type = TypeLookup.lookup(script, typeBuilder.toString());
+        Type type = TypeLookup.lookup(script, typeBuilder.toString(), true);
 
         while (analyzer.canMove() && (analyzer.peek() == ' ' || analyzer.peek() == ','))
             analyzer.eat();

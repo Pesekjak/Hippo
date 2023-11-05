@@ -52,10 +52,10 @@ public class SpecClassAnnotations implements Listener {
                 String key = next.getKey();
                 if (key == null) continue;
                 key = key.trim();
-                if (key.length() == 0) continue;
+                if (key.isEmpty()) continue;
 
                 if (key.charAt(0) != '@' || key.charAt(key.length() - 1) == ':') {
-                    if (nextRemoved.size() == 0) continue;
+                    if (nextRemoved.isEmpty()) continue;
                     String toAdd = String.join(", ", nextRemoved.stream().map(node -> node.original.getKey()).toList());
                     next.rename(toAdd + " " + next.getKey());
                     all.addAll(nextRemoved);

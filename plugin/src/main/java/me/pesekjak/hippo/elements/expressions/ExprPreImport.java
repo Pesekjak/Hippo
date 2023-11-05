@@ -91,7 +91,7 @@ public class ExprPreImport extends SimpleExpression<Object> {
         Script script = SkriptUtil.getCurrentScript(getParser());
         if (script == null) return false;
         String alias = parseResult.regexes.get(0).group();
-        Type type = TypeLookup.lookup(script, alias);
+        Type type = TypeLookup.lookup(script, alias, false);
         if (type == null) return false;
         if (!(ASMUtil.isComplex(type) && !ASMUtil.isArray(type))) return false;
         preImport = new PreImport(type);

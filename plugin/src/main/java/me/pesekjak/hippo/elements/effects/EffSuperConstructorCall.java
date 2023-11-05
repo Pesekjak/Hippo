@@ -78,7 +78,7 @@ public class EffSuperConstructorCall extends Effect {
         }
 
         try {
-            if (parseResult.regexes.size() == 0) {
+            if (parseResult.regexes.isEmpty()) {
                 types = Collections.emptyList();
             } else {
                 types = SuperSignatureParser.parse(parseResult.regexes.get(0).group(), SkriptUtil.getCurrentScript(getParser()));

@@ -20,13 +20,13 @@ public final class ClassAnnotationsParser {
      * @return parsed annotations
      */
     public static List<Annotation> parse(String string, Script script) throws ParserException {
-        if (string.length() == 0) throw new ParserException();
+        if (string.isEmpty()) throw new ParserException();
 
         String toParse = string.trim();
 
         List<Annotation> annotations = new ArrayList<>();
         while (true) {
-            if (toParse.length() == 0) break;
+            if (toParse.isEmpty()) break;
             AnnotationEntry annotationEntry = nextAnnotation(toParse, script);
             toParse = annotationEntry.rest.trim();
             if (annotationEntry.annotation == null) break;

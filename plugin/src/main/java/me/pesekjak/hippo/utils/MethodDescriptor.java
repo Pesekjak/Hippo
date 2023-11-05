@@ -25,9 +25,7 @@ public record MethodDescriptor(String stringDescriptor) {
      */
     public Method get(Script script, String methodName, Class<?> source) throws NoSuchMethodException, ClassNotFoundException {
         String toParse = stringDescriptor.trim();
-        if (toParse.length() == 0) {
-            return source.getMethod(methodName);
-        }
+        if (toParse.isEmpty()) return source.getMethod(methodName);
 
         Type[] types;
         try {

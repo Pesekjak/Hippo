@@ -151,7 +151,7 @@ public final class Storage {
      */
     public @Nullable FieldWrapper getField(String name) {
         Collection<ClassContentSkriptWrapper> column = classStorage.row(name).values();
-        if (column.size() == 0) return null;
+        if (column.isEmpty()) return null;
         ClassContentSkriptWrapper next = column.iterator().next();
         return next instanceof FieldWrapper fieldWrapper ? fieldWrapper : null;
     }
@@ -164,7 +164,7 @@ public final class Storage {
      */
     public @Nullable EnumWrapper getEnum(String name) {
         Collection<ClassContentSkriptWrapper> column = classStorage.row(name).values();
-        if (column.size() == 0) return null;
+        if (column.isEmpty()) return null;
         ClassContentSkriptWrapper next = column.iterator().next();
         return next instanceof EnumWrapper enumWrapper ? enumWrapper : null;
     }

@@ -52,7 +52,7 @@ public final class AnnotationParser extends Parser<Annotation> {
      * @return parsed annotation
      */
     public static Annotation parse(String string, Script script) throws ParserException {
-        if (string.length() == 0) throw new ParserException();
+        if (string.isEmpty()) throw new ParserException();
         if (string.charAt(0) != '@') throw new ParserException();
 
         String toParse = string.substring(1);
@@ -66,7 +66,7 @@ public final class AnnotationParser extends Parser<Annotation> {
         String typeIdentifier = toParse;
         if (leftBracket != -1) typeIdentifier = typeIdentifier.substring(0, leftBracket);
 
-        Type type = TypeLookup.lookup(script, typeIdentifier);
+        Type type = TypeLookup.lookup(script, typeIdentifier, true);
         if (type == null) throw new ParserException();
 
         if (leftBracket != -1 && rightBracket - leftBracket > 1)
@@ -90,7 +90,7 @@ public final class AnnotationParser extends Parser<Annotation> {
             if (next == null) break;
             values.put(Objects.requireNonNull(next.name), next.value);
             toParse = next.rest.trim();
-            if (toParse.length() == 0) break;
+            if (toParse.isEmpty()) break;
         } while (true);
 
         return values;
@@ -113,7 +113,7 @@ public final class AnnotationParser extends Parser<Annotation> {
             analyzer.eat();
 
         String name = analyzer.analyzed().trim();
-        if (name.length() == 0) throw new ParserException();
+        if (name.isEmpty()) throw new ParserException();
 
         while (analyzer.canMove() && (analyzer.peek() == ' ' || analyzer.peek() == '='))
             analyzer.eat();
@@ -285,7 +285,7 @@ public final class AnnotationParser extends Parser<Annotation> {
         int lastDot = reference.lastIndexOf('.');
         if (lastDot == -1) throw new ParserException();
         if (lastDot == reference.length() - 1) throw new ParserException();
-        Type type = TypeLookup.lookup(script, reference.substring(0, lastDot));
+        Type type = TypeLookup.lookup(script, reference.substring(0, lastDot), true);
         String value = reference.substring(lastDot + 1);
         if (type == null) throw new ParserException();
         if (value.equals("class"))

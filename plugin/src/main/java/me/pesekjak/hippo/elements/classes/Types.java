@@ -58,7 +58,7 @@ public final class Types {
                     public PreImport parse(@NotNull String string, @NotNull ParseContext context) {
                         Script script = SkriptUtil.getCurrentScript(ParserInstance.get());
                         if (script == null) return null;
-                        Type type = TypeLookup.lookup(script, string);
+                        Type type = TypeLookup.lookup(script, string, true);
                         if (type == null) return null;
                         if (!ASMUtil.isComplex(type) || ASMUtil.isArray(type)) return null;
                         return new PreImport(type);

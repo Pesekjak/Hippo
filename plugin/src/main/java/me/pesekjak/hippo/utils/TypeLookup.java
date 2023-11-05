@@ -37,9 +37,10 @@ public final class TypeLookup {
      *
      * @param script script
      * @param identifier type identifier, accepts primitive and array types as well.
+     * @param lookupClassInfo whether registered class infos should be accepted as types
      * @return parsed type or null if it can not be found
      */
-    public static @Nullable Type lookup(Script script, String identifier) {
+    public static @Nullable Type lookup(Script script, String identifier, boolean lookupClassInfo) {
         String alias = identifier;
         int arrayLevel = 0;
 
@@ -85,6 +86,8 @@ public final class TypeLookup {
             javaType = null;
         }
         if (javaType != null) return ASMUtil.getArrayType(javaType.getJavaClass(), arrayLevel);
+
+        if (!lookupClassInfo) return null;
 
         try {
             Class<?> classInfo = Classes.getClass(alias.toLowerCase());

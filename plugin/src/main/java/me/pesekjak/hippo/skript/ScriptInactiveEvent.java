@@ -13,7 +13,7 @@ public class ScriptInactiveEvent implements ScriptEvent.ScriptInactiveEvent {
 
     @Override
     public void onInactive(@Nullable Script newScript) {
-        if (newScript != null || ClassUpdate.get().getSignatures().size() == 0) return;
+        if (newScript != null || ClassUpdate.get().getSignatures().isEmpty()) return;
         ClassUpdate.enroll();
     }
 

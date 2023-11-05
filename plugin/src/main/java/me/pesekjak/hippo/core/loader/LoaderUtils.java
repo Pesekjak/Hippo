@@ -29,7 +29,7 @@ public final class LoaderUtils {
                 .map(Storage::getSourceClass)
                 .map(ClassWrapper::getWrappedClass)
                 .collect(Collectors.toSet());
-        classes.removeIf(c -> getDependencies(c).size() == 0);
+        classes.removeIf(c -> getDependencies(c).isEmpty());
 
         dependant.add(clazz);
         int previousCycle = 0;

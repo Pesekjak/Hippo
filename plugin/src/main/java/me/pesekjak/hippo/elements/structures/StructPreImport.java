@@ -87,7 +87,7 @@ public class StructPreImport extends Structure {
 
         if (importName == null) importName = simpleName;
 
-        Type type = TypeLookup.lookup(script, importName);
+        Type type = TypeLookup.lookup(script, importName, false);
         if (type != null) {
             Skript.error(importName + " is already mapped to " + type.getClassName() + ". "
                     + "It will not be remapped to " + clazz + ".");

@@ -58,7 +58,7 @@ public final class NamedParameterParser extends Parser<NamedParameter> {
      * @return next named parameter
      */
     public static NamedParameter parse(String string, Script script) throws ParserException {
-        if (string.length() == 0) throw new ParserException();
+        if (string.isEmpty()) throw new ParserException();
 
         String toParse = string.trim();
 
@@ -78,7 +78,7 @@ public final class NamedParameterParser extends Parser<NamedParameter> {
         while (analyzer.canMove() && analyzer.peek() != ' ')
             typeBuilder.append(analyzer.move());
 
-        Type type = TypeLookup.lookup(script, typeBuilder.toString());
+        Type type = TypeLookup.lookup(script, typeBuilder.toString(), true);
         if (type == null) throw new ParserException();
 
         while (analyzer.canMove() && analyzer.peek() == ' ')
