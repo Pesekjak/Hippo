@@ -55,8 +55,6 @@ public class StructPreImport extends Structure {
         if (script == null) return false;
         SectionNode node = entryContainer.getSource();
 
-        if (script == null) return false;
-
         node.forEach(subNode -> registerPreImport(subNode.getKey(), script));
 
         return true;

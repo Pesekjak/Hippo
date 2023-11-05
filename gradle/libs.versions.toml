@@ -4,7 +4,7 @@ jetbrains-kotlin-gradle = "1.7.21"
 jetbrains-annotations = "23.0.0"
 junit = "5.9.1"
 spigot-api = "1.13.2-R0.1-SNAPSHOT"
-skript = "2.7.1"
+skript = "2.7.2"
 asm = "9.5"
 johnrengelman-shadow = "7.1.2"
 

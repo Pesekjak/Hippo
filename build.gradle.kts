@@ -8,7 +8,7 @@ plugins {
 
 allprojects {
     group = "me.pesekjak.hippo"
-    version = "1.1"
+    version = "1.1.1"
 }
 
 dependencies {

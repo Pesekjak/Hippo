@@ -6,7 +6,6 @@ import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
-import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.Literal;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.TriggerItem;
@@ -48,10 +47,19 @@ import java.util.*;
 @Since("1.0.0")
 public class StructNewClass extends Structure {
 
+    public static final Priority PRIORITY = new Priority(1000);
+
     private ClassWrapper classWrapper;
     private NewClassEvent event;
 
     private final LinkedList<EffAnnotations> nextAnnotations = new LinkedList<>();
+
+    private Literal<Annotation> annotations;
+    private Literal<Modifier> modifiers;
+    private Literal<PreImport> type;
+    private Literal<?> superClass;
+    private Literal<?> interfaces;
+    private SkriptParser.ParseResult parseResult;
 
     static {
         Skript.registerStructure(
@@ -68,26 +76,45 @@ public class StructNewClass extends Structure {
                         int matchedPattern,
                         SkriptParser.@NotNull ParseResult parseResult,
                         @NotNull EntryContainer entryContainer) {
-        int modifier = 0;
-        if (args[1] != null)
-            for (Object m : args[1].getAll())
-                modifier |= ((Modifier) m).getValue();
+        annotations = (Literal<Annotation>) args[0];
+        modifiers = (Literal<Modifier>) args[1];
+        type = (Literal<PreImport>) args[2];
+        superClass = args[3];
+        interfaces = args[4];
+        this.parseResult = parseResult;
 
-        if (args[2] == null) return false;
-        Type type = Optional.ofNullable((PreImport) args[2].getSingle()).map(PreImport::type).orElse(null);
+        if (getParser().getCurrentScript().getEvents().stream().noneMatch(listener -> listener instanceof ScriptInactiveEvent))
+            getParser().getCurrentScript().registerEvent(new ScriptInactiveEvent()); // takes care of loading classes
+
+        return true;
+    }
+
+    @Override
+    public @NotNull Priority getPriority() {
+        return PRIORITY;
+    }
+
+    @Override
+    public boolean preLoad() {
+        int modifier = 0;
+        if (modifiers != null)
+            modifier = Modifier.getModifier(modifiers.getAll());
+
+        if (type == null) return false;
+        Type type = Optional.ofNullable(this.type.getSingle()).map(PreImport::type).orElse(null);
         if (type == null) return false;
 
         Type superClass;
-        if (args[3] != null)
-            superClass = SkriptUtil.collectTypes(args[3], new DummyEvent()).stream().findFirst().orElse(Type.getType(Object.class));
+        if (this.superClass != null)
+            superClass = SkriptUtil.collectTypes(this.superClass, new DummyEvent()).stream().findFirst().orElse(Type.getType(Object.class));
         else
             superClass = Type.getType(Object.class);
 
         List<Type> interfaces = new ArrayList<>();
-        if (args[4] != null)
-            interfaces.addAll(SkriptUtil.collectTypes(args[4], new DummyEvent()));
+        if (this.interfaces != null)
+            interfaces.addAll(SkriptUtil.collectTypes(this.interfaces, new DummyEvent()));
 
-        List<Annotation> annotations = args[0] == null ? Collections.emptyList() : List.of(((Expression<Annotation>) args[0]).getAll(event));
+        List<Annotation> annotations = this.annotations == null ? Collections.emptyList() : List.of((this.annotations).getAll(event));
 
         AbstractClass clazz;
 
@@ -97,7 +124,7 @@ public class StructNewClass extends Structure {
             }
 
             else if (parseResult.hasTag("interface")) {
-                if (args[3] != null) {
+                if (this.superClass != null) {
                     Skript.error("Interface classes cannot extend other classes");
                     return false;
                 }
@@ -105,15 +132,16 @@ public class StructNewClass extends Structure {
             }
 
             else if (parseResult.hasTag("enum")) {
-                if (args[3] != null) {
+                if (this.superClass != null) {
                     Skript.error("Enum classes cannot extend other classes");
                     return false;
                 }
                 clazz = new Enum(null, type, interfaces, modifier, annotations);
             }
 
-            else
+            else {
                 throw new IllegalStateException();
+            }
         } catch (Exception exception) {
             if (exception.getMessage() != null) Skript.error(exception.getMessage());
             return false;
@@ -128,6 +156,12 @@ public class StructNewClass extends Structure {
         classWrapper = new ClassWrapper(clazz, (SectionNode) getParser().getNode());
         Storage.create(classWrapper);
 
+        return true;
+    }
+
+    @Override
+    public boolean load() {
+        AbstractClass clazz = classWrapper.getWrappedClass();
         event = new NewClassEvent(classWrapper);
 
         StaticBlock staticBlock = clazz.getStaticBlock();
@@ -151,7 +185,7 @@ public class StructNewClass extends Structure {
         }
 
         if (clazz instanceof Class) {
-            if (clazz.getConstructors().size() == 0 && !superClass.getDescriptor().equals(Type.getDescriptor(Object.class))) {
+            if (clazz.getConstructors().isEmpty() && !clazz.getSuperClass().getDescriptor().equals(Type.getDescriptor(Object.class))) {
                 Skript.error("The class needs to have at least one defined constructor matching the super constructor");
                 Storage.clear(classWrapper);
                 return false;
@@ -159,24 +193,16 @@ public class StructNewClass extends Structure {
         }
 
         else if (clazz instanceof Enum) {
-            if (clazz.getConstructors().size() == 0) {
+            if (clazz.getConstructors().isEmpty()) {
                 Skript.error("The class needs to have at least one defined constructor");
                 Storage.clear(classWrapper);
                 return false;
             }
         }
 
-        if (nextAnnotations.size() != 0)
+        if (!nextAnnotations.isEmpty())
             nextAnnotations.forEach(annotation -> SkriptUtil.warning(annotation.getNode(), "Unused annotations"));
 
-        if (getParser().getCurrentScript().getEvents().stream().noneMatch(listener -> listener instanceof ScriptInactiveEvent))
-            getParser().getCurrentScript().registerEvent(new ScriptInactiveEvent()); // takes care of loading classes
-
-        return true;
-    }
-
-    @Override
-    public boolean load() {
         ClassUpdate.get().add(new ClassSignature(classWrapper.getWrappedClass()));
         return true;
     }
