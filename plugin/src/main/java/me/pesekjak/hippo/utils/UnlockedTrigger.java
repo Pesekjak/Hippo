@@ -37,6 +37,8 @@ public class UnlockedTrigger extends Trigger {
     @Override
     public void setTriggerItems(@NotNull List<TriggerItem> items) {
         super.setTriggerItems(items);
+        this.items.clear();
+        this.items.addAll(items);
     }
 
     /**
