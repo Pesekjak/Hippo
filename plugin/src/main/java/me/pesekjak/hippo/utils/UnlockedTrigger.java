@@ -22,10 +22,11 @@ import java.util.List;
  */
 public class UnlockedTrigger extends Trigger {
 
-    private final List<TriggerItem> items = new ArrayList<>();
+    private List<TriggerItem> items;
 
     public UnlockedTrigger(Script script, String name, SkriptEvent event, List<TriggerItem> items) {
         super(script, name, event, items);
+        this.items = new ArrayList<>();
         this.items.addAll(items);
     }
 
@@ -36,6 +37,7 @@ public class UnlockedTrigger extends Trigger {
 
     @Override
     public void setTriggerItems(@NotNull List<TriggerItem> items) {
+        if (this.items == null) this.items = new ArrayList<>();
         super.setTriggerItems(items);
         this.items.clear();
         this.items.addAll(items);
