@@ -2,10 +2,7 @@ package me.pesekjak.hippo.utils;
 
 import com.btk5h.skriptmirror.Null;
 import com.btk5h.skriptmirror.ObjectWrapper;
-import me.pesekjak.hippo.core.ASMUtil;
-import me.pesekjak.hippo.core.loader.DynamicClassLoader;
 import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.Type;
 
 /**
  * Converter that unwraps reflect objects and use JavaUtil conversion if applicable.
@@ -24,10 +21,9 @@ public final class ReflectConverter {
         return o instanceof Null ? null : o;
     }
 
-    public static @Nullable Object handle(Object o, String targetDescriptor) {
+    public static @Nullable Object handle(Object o, Class<?> target) {
         try {
-            Class<?> found = ASMUtil.getClassFromType(Type.getType(targetDescriptor), DynamicClassLoader.getInstance());
-            if (JavaUtil.canConvert(o, found)) return JavaUtil.convert(o, found);
+            if (JavaUtil.canConvert(o, target)) return JavaUtil.convert(o, target);
         } catch (Throwable ignored) { }
         return nullIfNecessary(unwrapIfNecessary(o));
     }

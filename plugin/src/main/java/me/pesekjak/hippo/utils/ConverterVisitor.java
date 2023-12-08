@@ -79,12 +79,32 @@ public final class ConverterVisitor {
      * @param target target type
      */
     private static void visitReflectConverter(MethodVisitor methodVisitor, Type target) {
-        methodVisitor.visitLdcInsn(target.getDescriptor());
+        if (ASMUtil.isPrimitive(target) && !ASMUtil.isArray(target)) {
+            Type counterPart = switch (target.getDescriptor().charAt(0)) {
+                case 'Z' -> Type.getType(Boolean.class);
+                case 'C' -> Type.getType(Character.class);
+                case 'B' -> Type.getType(Byte.class);
+                case 'S' -> Type.getType(Short.class);
+                case 'I' -> Type.getType(Integer.class);
+                case 'F' -> Type.getType(Float.class);
+                case 'J' -> Type.getType(Long.class);
+                case 'D' -> Type.getType(Double.class);
+                default -> throw new IllegalStateException();
+            };
+            methodVisitor.visitFieldInsn(
+                    Opcodes.GETSTATIC,
+                    counterPart.getInternalName(),
+                    "TYPE",
+                    Type.getType(Class.class).getDescriptor()
+            );
+        } else {
+            methodVisitor.visitLdcInsn(target);
+        }
         methodVisitor.visitMethodInsn(
                 Opcodes.INVOKESTATIC,
                 Type.getType(ReflectConverter.class).getInternalName(),
                 "handle",
-                Type.getMethodDescriptor(Type.getType(Object.class), Type.getType(Object.class), Type.getType(String.class)),
+                Type.getMethodDescriptor(Type.getType(Object.class), Type.getType(Object.class), Type.getType(Class.class)),
                 false
         );
     }
