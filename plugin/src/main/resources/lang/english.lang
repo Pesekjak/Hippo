@@ -1,4 +1,4 @@
-version: 1.1
+version: 1.1.1
 types:
   modifier: modifier¦s @a
   annotation: annotation¦s @an
