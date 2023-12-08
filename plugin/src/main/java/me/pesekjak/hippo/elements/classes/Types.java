@@ -20,8 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Type;
 import org.skriptlang.skript.lang.script.Script;
 
-import java.util.logging.Logger;
-
 
 public final class Types {
 
@@ -32,40 +30,50 @@ public final class Types {
     }
 
     static {
-        register("modifier", Modifier.class, Types::registerModifierType);
-        register("annotation", Annotation.class, Types::registerAnnotationType);
-        register("parameter", NamedParameter.class, Types::registerParameterType);
-        register("preimport", PreImport.class, Types::registerPreImportType);
-        register("character", Character.class, Types::registerCharacterType);
-        if (failed) {
-            Logger logger = Hippo.getInstance().getLogger();
-            logger.warning("Failed to register all types, the addon may not function properly");
-            logger.warning("This is most likely caused by another addon incompatible with Hippo");
+        canRegister("modifier", Modifier.class, true);
+        canRegister("annotation", Annotation.class, true);
+        canRegister("parameter", NamedParameter.class, true);
+        canRegister("preimport", PreImport.class, true);
+        canRegister("character", Character.class, false);
+
+        if (!failed) {
+            tryRegister(Types::registerModifierType);
+            tryRegister(Types::registerAnnotationType);
+            tryRegister(Types::registerParameterType);
+            tryRegister(Types::registerPreImportType);
+            tryRegister(Types::registerCharacterType);
         }
     }
 
-    private static void register(String codeName, Class<?> clazz, Runnable runnable) {
+    public static boolean register() {
+        return !failed;
+    }
+
+    private static void canRegister(String codeName, Class<?> clazz, boolean required) {
+        ClassInfo<?> conflicting = null;
+        String message = "Failed to register type '" + codeName + "'";
+
+        if (Classes.getExactClassInfo(clazz) != null) {
+            conflicting = Classes.getExactClassInfo(clazz);
+            assert conflicting != null;
+            message = message + " because the class '" + conflicting.getC() + "' is already used by a different type";
+        }
+
+        else if (Classes.getClassInfoNoError(codeName) != null) {
+            conflicting = Classes.getClassInfoNoError(codeName);
+            assert conflicting != null;
+            message = message + " because the same codename is already used by type of class '" + conflicting.getC() + "'";
+        }
+
+        if (conflicting == null) return;
+        Hippo.getInstance().getLogger().severe(message);
+        if (required) failed = true;
+    }
+
+    private static void tryRegister(Runnable runnable) {
         try {
             runnable.run();
-        } catch (Exception exception) {
-            ClassInfo<?> conflicting;
-            String message = "Failed to register type '" + codeName + "'";
-
-            if (Classes.getExactClassInfo(clazz) != null) {
-                conflicting = Classes.getExactClassInfo(clazz);
-                assert conflicting != null;
-                message = message + " because the class '" + conflicting.getC() + "' is already used by a different type";
-            }
-
-            else if (Classes.getClassInfoNoError(codeName) != null) {
-                conflicting = Classes.getClassInfoNoError(codeName);
-                assert conflicting != null;
-                message = message + " because the same codename is already used by type of class '" + conflicting.getC() + "'";
-            }
-
-            Hippo.getInstance().getLogger().severe(message);
-            failed = true;
-        }
+        } catch (Exception ignored) { }
     }
 
     private static void registerModifierType() {

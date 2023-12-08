@@ -4,6 +4,7 @@ import ch.njol.skript.Skript;
 import ch.njol.skript.SkriptAddon;
 import me.pesekjak.hippo.bukkit.BukkitListeners;
 import me.pesekjak.hippo.core.loader.DynamicClassLoader;
+import me.pesekjak.hippo.elements.classes.Types;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -11,6 +12,7 @@ import org.objectweb.asm.Opcodes;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
 
 /**
  * Main class handling the logic of a Bukkit plugin.
@@ -61,20 +63,22 @@ public class Hippo extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        if (!Bukkit.getPluginManager().isPluginEnabled("Skript")) {
-            getLogger().severe("Skript could not be found. Disabling Hippo...");
+        addonInstance = Skript.registerAddon(getInstance()).setLanguageFileDirectory("lang");
+
+        if (!Types.register()) {
+            getLogger().severe("Failed to register required types, the addon can not function properly");
+            getLogger().severe("This is most likely caused by another addon incompatible with Hippo");
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
 
         try {
-            addonInstance = Skript.registerAddon(getInstance()).setLanguageFileDirectory("lang");
             addonInstance.loadClasses("me.pesekjak.hippo.elements");
             Class.forName(DynamicClassLoader.class.getName(), true, Hippo.class.getClassLoader());
         } catch (IOException | ClassNotFoundException exception) {
-            getLogger().severe("Failed to load Hippo classes. Disabling Hippo...");
+            getLogger().log(Level.SEVERE, "Failed to load Hippo classes. Disabling Hippo...", exception);
             Bukkit.getPluginManager().disablePlugin(this);
-            throw new RuntimeException(exception);
+            return;
         }
 
         Bukkit.getPluginManager().registerEvents(new BukkitListeners(), this);
