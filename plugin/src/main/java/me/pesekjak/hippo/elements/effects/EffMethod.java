@@ -42,7 +42,7 @@ public class EffMethod extends Effect {
     static {
         Skript.registerEffect(
                 EffMethod.class,
-                "%*modifiers% %parameter%\\([%-parameters%(0¦|1¦\\.\\.\\.)]\\) [throws %-javatypes%]"
+                "%*modifiers% %*parameter%\\([%-*parameters%(0¦|1¦\\.\\.\\.)]\\) [throws %-javatypes%]"
         );
     }
 

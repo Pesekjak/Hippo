@@ -43,7 +43,7 @@ public class SecMethod extends Section {
     static {
         Skript.registerSection(
                 SecMethod.class,
-                "%*modifiers% %parameter%\\([%-parameters%(0¦|1¦\\.\\.\\.)]\\) [throws %-javatypes%]"
+                "%*modifiers% %*parameter%\\([%-*parameters%(0¦|1¦\\.\\.\\.)]\\) [throws %-javatypes%]"
         );
     }
 

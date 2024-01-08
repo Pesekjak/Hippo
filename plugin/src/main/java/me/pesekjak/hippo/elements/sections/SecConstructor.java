@@ -45,7 +45,7 @@ public class SecConstructor extends Section {
     static {
         Skript.registerSection(
                 SecConstructor.class,
-                "%*modifiers% %javatype%\\([%-parameters%(0¦|1¦\\.\\.\\.)]\\) [throws %-javatypes%]"
+                "%*modifiers% %javatype%\\([%-*parameters%(0¦|1¦\\.\\.\\.)]\\) [throws %-javatypes%]"
         );
     }
 

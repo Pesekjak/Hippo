@@ -93,6 +93,8 @@ public final class NamedParameterParser extends Parser<NamedParameter> {
 
         if (!VARIABLE_PATTERN.matcher(nameBuilder.toString()).matches()) throw new ParserException();
 
+        if (analyzer.canMove() && !analyzer.rest().isBlank()) throw new ParserException();
+
         return new NamedParameter(nameBuilder.toString(), new Parameter(type, annotations));
     }
 

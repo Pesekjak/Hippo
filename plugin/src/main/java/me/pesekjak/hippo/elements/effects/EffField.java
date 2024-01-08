@@ -40,7 +40,7 @@ public class EffField extends Effect {
     static {
         Skript.registerEffect(
                 EffField.class,
-                "%*modifiers% %parameter% [= %-object%]"
+                "%*modifiers% %*parameter% [= %-object%]"
         );
     }
 
