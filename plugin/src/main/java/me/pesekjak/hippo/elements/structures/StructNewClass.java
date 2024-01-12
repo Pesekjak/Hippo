@@ -25,7 +25,6 @@ import me.pesekjak.hippo.core.skript.Storage;
 import me.pesekjak.hippo.elements.ClassElement;
 import me.pesekjak.hippo.elements.classes.handles.Modifier;
 import me.pesekjak.hippo.elements.effects.EffAnnotations;
-import me.pesekjak.hippo.skript.ScriptInactiveEvent;
 import me.pesekjak.hippo.utils.DummyEvent;
 import me.pesekjak.hippo.utils.SkriptUtil;
 import me.pesekjak.hippo.utils.UnlockedTrigger;
@@ -47,7 +46,7 @@ import java.util.*;
 @Since("1.0.0")
 public class StructNewClass extends Structure {
 
-    public static final Priority PRIORITY = new Priority(1000);
+    public static final Priority PRIORITY = new Priority(440);
 
     private ClassWrapper classWrapper;
     private NewClassEvent event;
@@ -70,7 +69,7 @@ public class StructNewClass extends Structure {
         );
     }
 
-    @SuppressWarnings({"unchecked", "UnstableApiUsage"})
+    @SuppressWarnings({"unchecked"})
     @Override
     public boolean init(Literal<?> @NotNull [] args,
                         int matchedPattern,
@@ -82,10 +81,6 @@ public class StructNewClass extends Structure {
         superClass = args[3];
         interfaces = args[4];
         this.parseResult = parseResult;
-
-        if (getParser().getCurrentScript().getEvents().stream().noneMatch(listener -> listener instanceof ScriptInactiveEvent))
-            getParser().getCurrentScript().registerEvent(new ScriptInactiveEvent()); // takes care of loading classes
-
         return true;
     }
 

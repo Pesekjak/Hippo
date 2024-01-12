@@ -2,9 +2,11 @@ package me.pesekjak.hippo;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.SkriptAddon;
+import ch.njol.skript.lang.parser.ParserInstance;
 import me.pesekjak.hippo.bukkit.BukkitListeners;
 import me.pesekjak.hippo.core.loader.DynamicClassLoader;
 import me.pesekjak.hippo.elements.classes.Types;
+import me.pesekjak.hippo.skript.ParserData;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -74,6 +76,7 @@ public class Hippo extends JavaPlugin {
 
         try {
             addonInstance.loadClasses("me.pesekjak.hippo.elements");
+            ParserInstance.registerData(ParserData.class, ParserData::new);
             Class.forName(DynamicClassLoader.class.getName(), true, Hippo.class.getClassLoader());
         } catch (IOException | ClassNotFoundException exception) {
             getLogger().log(Level.SEVERE, "Failed to load Hippo classes. Disabling Hippo...", exception);
