@@ -69,7 +69,7 @@ public class StructNewClass extends Structure {
         );
     }
 
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings("unchecked")
     @Override
     public boolean init(Literal<?> @NotNull [] args,
                         int matchedPattern,
