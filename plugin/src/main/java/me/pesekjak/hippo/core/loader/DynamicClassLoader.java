@@ -1,7 +1,6 @@
 package me.pesekjak.hippo.core.loader;
 
 import com.btk5h.skriptmirror.LibraryLoader;
-import me.pesekjak.hippo.Hippo;
 import me.pesekjak.hippo.core.AbstractClass;
 import me.pesekjak.hippo.core.skript.ClassWrapper;
 import me.pesekjak.hippo.core.skript.Storage;
@@ -58,14 +57,14 @@ public class DynamicClassLoader extends ClassLoader {
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
         SingleClassLoader loader = loaders.get(name);
-        if (loader == null) {
-            try {
-                return super.findClass(name);
-            } catch (ClassNotFoundException exception) {
-                return Hippo.class.getClassLoader().loadClass(name);
-            }
+        // finding custom classes
+        if (loader != null) return loader.loadClass(name);
+        try {
+            return super.findClass(name);
+        } catch (ClassNotFoundException exception) {
+            // classes provided by reflect
+            return EMPTY_CLASS_LOADER.loadClass(name);
         }
-        return loader.loadClass(name);
     }
 
     /**
