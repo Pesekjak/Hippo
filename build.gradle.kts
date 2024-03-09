@@ -1,14 +1,8 @@
-import Hippo_library_conventions_gradle.Properties
+import me.pesekjak.hippo.PluginProperties
 
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("hippo.library-conventions")
-    alias(libs.plugins.johnrengelman.shadow)
-}
-
-allprojects {
-    group = "me.pesekjak.hippo"
-    version = "1.1.1"
+    alias(libs.plugins.shadow)
 }
 
 dependencies {
@@ -17,13 +11,13 @@ dependencies {
     implementation(project(":plugin"))
 }
 
-Properties.name = "Hippo"
-Properties.version = version.toString()
-Properties.mainClass = "me.pesekjak.hippo.Hippo"
-Properties.description = "Skript addon for custom classes"
-Properties.authors = "[pesekjak]"
-Properties.apiVersion = "1.13"
-Properties.dependencies = "[Skript, skript-reflect]"
+PluginProperties.name = "Hippo"
+PluginProperties.version = version.toString()
+PluginProperties.mainClass = "me.pesekjak.hippo.Hippo"
+PluginProperties.description = "Skript addon for custom classes"
+PluginProperties.authors = "[pesekjak]"
+PluginProperties.apiVersion = "1.13"
+PluginProperties.dependencies = "[Skript, skript-reflect]"
 
 tasks {
     build {

@@ -1,36 +1,75 @@
+import me.pesekjak.hippo.CheckStyleProvider
+
 plugins {
     java
     `java-library`
     checkstyle
 }
 
-val libs = extensions.getByType(org.gradle.accessors.dm.LibrariesForLibs::class)
+val group: String by project
+setGroup(group)
+
+val version: String by project
+setVersion(version)
+
+val libs = project.rootProject
+    .extensions
+    .getByType(VersionCatalogsExtension::class)
+    .named("libs")
+
+//
+// Repositories and Dependencies
+//
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compileOnly(libs.jetbrains.annotations)
-    testImplementation(libs.junit.api)
-    testRuntimeOnly(libs.junit.engine)
-    testImplementation(libs.junit.params)
+    compileOnly(libs.findLibrary("jetbrains-annotations").get())
+
+    testImplementation(libs.findLibrary("junit-api").get())
+    testRuntimeOnly(libs.findLibrary("junit-engine").get())
+    testImplementation(libs.findLibrary("junit-params").get())
 }
 
-checkstyle {
-    toolVersion = libs.versions.checkstyle.get()
-    configFile = File(rootDir, "code_style.xml")
-}
+//
+// Java configuration
+//
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
+
+
+//
+// Checkstyle configuration
+//
+
+checkstyle {
+    toolVersion = "10.13.0"
+    config = resources.text.fromUri(CheckStyleProvider.get())
+}
+
+dependencies {
+    modules {
+        // Replace old dependency `google-collections` with `guava`
+        // This is required for checkstyle to work
+        module("com.google.collections:google-collections") {
+            replacedBy("com.google.guava:guava", "google-collections is part of guava")
+        }
+    }
+}
+
+//
+// Task configurations
+//
 
 tasks {
     compileJava {
-        options.encoding = Charsets.UTF_8.name()
         options.release.set(17)
-        options.compilerArgs = listOf("-Xlint:unchecked")
+        options.encoding = Charsets.UTF_8.name()
     }
     javadoc {
         options.encoding = Charsets.UTF_8.name()
@@ -41,16 +80,4 @@ tasks {
     test {
         useJUnitPlatform()
     }
-}
-
-object Properties {
-
-    lateinit var name: String
-    lateinit var version: String
-    lateinit var mainClass: String
-    lateinit var description: String
-    lateinit var authors: String
-    lateinit var apiVersion: String
-    lateinit var dependencies: String
-
 }
