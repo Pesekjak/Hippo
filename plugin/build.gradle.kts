@@ -1,5 +1,3 @@
-import me.pesekjak.hippo.PluginProperties
-
 plugins {
     id("hippo.library-conventions")
     alias(libs.plugins.shadow)
@@ -28,20 +26,32 @@ dependencies {
 }
 
 tasks {
+
+    jar {
+        archiveBaseName = "Hippo"
+    }
+
+    //
+    // Modifying the plugin.yml to include the project version.
+    //
     processResources {
-        filteringCharset = Charsets.UTF_8.name() // We want UTF-8 for everything
-        val props = mapOf(
-            "name" to PluginProperties.name,
-            "version" to PluginProperties.version,
-            "mainClass" to PluginProperties.mainClass,
-            "description" to PluginProperties.description,
-            "authors" to PluginProperties.authors,
-            "apiVersion" to PluginProperties.apiVersion,
-            "dependencies" to PluginProperties.dependencies
-        )
+        val props = mapOf("version" to version)
         inputs.properties(props)
         filesMatching("plugin.yml") {
             expand(props)
         }
     }
+
+    //
+    // Shading in the ASM library
+    //
+    build {
+        dependsOn(shadowJar)
+    }
+    shadowJar {
+        archiveBaseName = "Hippo"
+        archiveClassifier = ""
+        relocate("org.objectweb.asm", "me.pesekjak.hippo.asm")
+    }
+
 }

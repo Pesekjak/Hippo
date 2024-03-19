@@ -67,14 +67,11 @@ dependencies {
 //
 
 tasks {
-    compileJava {
+    withType<JavaCompile> {
         options.release.set(17)
         options.encoding = Charsets.UTF_8.name()
     }
-    javadoc {
-        options.encoding = Charsets.UTF_8.name()
-    }
-    processResources {
+    withType<ProcessResources> {
         filteringCharset = Charsets.UTF_8.name()
     }
     test {

@@ -1,9 +1,9 @@
-name: $name
+name: Hippo
 version: '$version'
-main: $mainClass
+main: me.pesekjak.hippo.Hippo
 
-description: $description
-authors: $authors
+description: Skript addon for custom classes
+authors: [pesekjak]
 
-api-version: '$apiVersion'
-depend: $dependencies
+api-version: '1.13'
+depend: [Skript, skript-reflect]
