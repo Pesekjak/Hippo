@@ -32,6 +32,9 @@ public record FieldWrapper(Field field, @Nullable Expression<?> value) implement
         String className = field.getSource().getName();
 
         field.setInitializer((method, methodVisitor) -> {
+            if (!field.isStatic())
+                methodVisitor.visitVarInsn(ALOAD, 0);
+
             methodVisitor.visitLdcInsn(className);
             methodVisitor.visitLdcInsn(field.getName());
             if (!field.isStatic())
@@ -53,14 +56,7 @@ public record FieldWrapper(Field field, @Nullable Expression<?> value) implement
             );
 
             ConverterVisitor.convertTopObject(methodVisitor, field.getType().getType());
-            int opcode;
-            if (!field.isStatic()) {
-                opcode = PUTFIELD;
-                methodVisitor.visitVarInsn(ALOAD, 0);
-                methodVisitor.visitInsn(SWAP);
-            } else {
-                opcode = PUTSTATIC;
-            }
+            int opcode = field.isStatic() ? PUTSTATIC : PUTFIELD;
             methodVisitor.visitFieldInsn(opcode, field.getSource().getType().getInternalName(), field.getName(), field.getDescriptor());
         });
     }
