@@ -6,11 +6,11 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Parser instance data waiting for enrolling next class update after parsing is finished.
+ * Parser data waiting for enrolling next class update after parsing is finished.
  */
-public class ParserData extends ParserInstance.Data {
+public class ClassUpdateParserData extends ParserInstance.Data {
 
-    public ParserData(ParserInstance parserInstance) {
+    public ClassUpdateParserData(ParserInstance parserInstance) {
         super(parserInstance);
     }
 

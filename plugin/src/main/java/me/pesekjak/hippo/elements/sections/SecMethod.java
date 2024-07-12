@@ -20,6 +20,7 @@ import me.pesekjak.hippo.elements.structures.StructNewClass;
 import me.pesekjak.hippo.utils.SkriptUtil;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
@@ -34,11 +35,16 @@ import java.util.*;
 })
 @Since("1.0.0")
 @ClassElement
-public class SecMethod extends Section {
+public class SecMethod extends Section implements ReturnHandler<Object> {
 
     private int modifier;
     private Type returnType;
     private MethodWrapper methodWrapper;
+
+    // TODO
+    //  this is temporary solution until Skript introduces
+    //  different API for providing return values
+    private final ThreadLocal<Object> returnedObject = new ThreadLocal<>();
 
     static {
         Skript.registerSection(
@@ -48,6 +54,7 @@ public class SecMethod extends Section {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public boolean init(Expression<?> @NotNull [] expressions,
                         int matchedPattern,
                         @NotNull Kleenean isDelayed,
@@ -95,10 +102,14 @@ public class SecMethod extends Section {
             if (method.isAbstract())
                 throw new IllegalModifiersException("Method sections cannot be abstract");
 
-            Trigger trigger = loadCode(sectionNode, "method", MethodCallEvent.class);
+            Trigger trigger = loadReturnableSectionCode(sectionNode, "method", new Class[] {MethodCallEvent.class});
 
             source.addMethod(method);
-            methodWrapper = new MethodWrapper(method, List.of(namedParameters), trigger);
+            methodWrapper = new MethodWrapper(method, List.of(namedParameters), trigger, () -> {
+                Object returned = getReturnValue();
+                resetReturnValue();
+                return returned;
+            });
 
             storage.getTable().put(method.getName(), method.getDescriptor(), methodWrapper);
 
@@ -127,6 +138,30 @@ public class SecMethod extends Section {
 
     public Type getReturnType() {
         return returnType;
+    }
+
+    @Override
+    public void returnValues(Object @Nullable [] values) {
+        Object value = values != null && values.length > 0 ? values[0] : null;
+        returnedObject.set(value);
+    }
+
+    @Override
+    public boolean isSingleReturnValue() {
+        return true;
+    }
+
+    @Override
+    public @Nullable Class<?> returnValueType() {
+        return Object.class;
+    }
+
+    public @Nullable Object getReturnValue() {
+        return returnedObject.get();
+    }
+
+    public void resetReturnValue() {
+        returnedObject.remove();
     }
 
 }

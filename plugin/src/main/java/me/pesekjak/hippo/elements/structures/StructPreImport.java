@@ -15,6 +15,7 @@ import me.pesekjak.hippo.utils.SkriptUtil;
 import me.pesekjak.hippo.utils.TypeLookup;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
 import org.skriptlang.skript.lang.entry.EntryContainer;
 import org.skriptlang.skript.lang.script.Script;
@@ -50,9 +51,10 @@ public class StructPreImport extends Structure {
     public boolean init(Literal<?> @NotNull [] args,
                         int matchedPattern,
                         SkriptParser.@NotNull ParseResult parseResult,
-                        @NotNull EntryContainer entryContainer) {
+                        @Nullable EntryContainer entryContainer) {
         script = SkriptUtil.getCurrentScript(getParser());
         if (script == null) return false;
+        if (entryContainer == null) return false;
         SectionNode node = entryContainer.getSource();
 
         node.forEach(subNode -> registerPreImport(subNode.getKey(), script));

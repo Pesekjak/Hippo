@@ -30,6 +30,7 @@ import me.pesekjak.hippo.utils.SkriptUtil;
 import me.pesekjak.hippo.utils.UnlockedTrigger;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.objectweb.asm.Type;
 import org.skriptlang.skript.lang.entry.EntryContainer;
@@ -53,34 +54,35 @@ public class StructNewClass extends Structure {
 
     private final LinkedList<EffAnnotations> nextAnnotations = new LinkedList<>();
 
-    private Literal<Annotation> annotations;
     private Literal<Modifier> modifiers;
     private Literal<PreImport> type;
     private Literal<?> superClass;
     private Literal<?> interfaces;
     private SkriptParser.ParseResult parseResult;
+    private EntryContainer entryContainer;
 
     static {
         Skript.registerStructure(
                 StructNewClass.class,
-                "[%-annotations%] %modifiers% (:class|:interface|:enum) %preimport% "
+                "%modifiers% (:class|:interface|:enum) %preimport% "
                         + "[extends %-preimport/javatype%] "
                         + "[implements %-preimports/javatypes%]"
         );
     }
 
-    @SuppressWarnings("unchecked")
     @Override
+    @SuppressWarnings("unchecked")
     public boolean init(Literal<?> @NotNull [] args,
                         int matchedPattern,
                         SkriptParser.@NotNull ParseResult parseResult,
-                        @NotNull EntryContainer entryContainer) {
-        annotations = (Literal<Annotation>) args[0];
-        modifiers = (Literal<Modifier>) args[1];
-        type = (Literal<PreImport>) args[2];
-        superClass = args[3];
-        interfaces = args[4];
+                        @Nullable EntryContainer entryContainer) {
+        if (entryContainer == null) return false;
+        modifiers = (Literal<Modifier>) args[0];
+        type = (Literal<PreImport>) args[1];
+        superClass = args[2];
+        interfaces = args[3];
         this.parseResult = parseResult;
+        this.entryContainer = entryContainer;
         return true;
     }
 
@@ -109,7 +111,19 @@ public class StructNewClass extends Structure {
         if (this.interfaces != null)
             interfaces.addAll(SkriptUtil.collectTypes(this.interfaces, new DummyEvent()));
 
-        List<Annotation> annotations = this.annotations == null ? Collections.emptyList() : List.of((this.annotations).getAll(event));
+        List<Annotation> annotations = new ArrayList<>();
+        List<Structure> structures = getParser().getCurrentScript().getStructures();
+        int index = structures.indexOf(this);
+        if (index > -1) {
+            for (int i = index - 1; i >= 0; i--) {
+                Structure next = structures.get(i);
+                if (next instanceof StructClassAnnotations classAnnotations) {
+                    annotations.addAll(classAnnotations.getAnnotations());
+                    continue;
+                }
+                break;
+            }
+        }
 
         AbstractClass clazz;
 
@@ -170,7 +184,7 @@ public class StructNewClass extends Structure {
                 "class " + clazz.getName(),
                 null,
                 new SimpleEvent(),
-                getEntryContainer().getSource(),
+                entryContainer.getSource(),
                 NewClassEvent.class
         );
         for (TriggerItem item : trigger.getItems()) {

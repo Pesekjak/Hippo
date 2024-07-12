@@ -6,12 +6,7 @@ import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
-import ch.njol.skript.lang.Effect;
-import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.SkriptParser;
-import ch.njol.skript.lang.TriggerItem;
-import ch.njol.skript.sections.SecLoop;
-import ch.njol.skript.sections.SecWhile;
+import ch.njol.skript.lang.*;
 import ch.njol.skript.util.LiteralUtils;
 import ch.njol.util.Kleenean;
 import me.pesekjak.hippo.bukkit.ThrowableEvent;
@@ -53,20 +48,17 @@ public class EffThrow extends Effect {
                 .orElse(null);
 
         if (exception == null) {
-            SkriptUtil.warning(node, "Provided throwable is not valid, new Error will be provided instead");
-            exception = new Error();
+            SkriptUtil.warning(node, "Provided throwable is not valid, new java.lang.Exception will be provided instead");
+            exception = new Exception();
         }
 
         if (event instanceof ThrowableEvent throwableEvent)
             throwableEvent.setThrowable(exception);
 
-        // Exit all loops
+        TriggerSection parent = getParent();
         while (parent != null) {
-            if (parent instanceof SecLoop) {
-                ((SecLoop) parent).exit(event);
-            } else if (parent instanceof SecWhile) {
-                ((SecWhile) parent).exit(event);
-            }
+            if (parent instanceof SectionExitHandler exitHandler)
+                exitHandler.exit(event);
             parent = parent.getParent();
         }
 

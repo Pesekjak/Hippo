@@ -107,7 +107,6 @@ public final class Storage {
         return Collections.unmodifiableCollection(STORAGE.values());
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private Storage(ClassWrapper clazz) {
         this.clazz = Objects.requireNonNull(clazz);
         classStorage = Tables.newCustomTable(new ConcurrentHashMap<>(), ConcurrentHashMap::new);
@@ -278,7 +277,9 @@ public final class Storage {
         if (event.getThrowable() != null)
             ExceptionThrower.throwException(event.getThrowable());
 
-        return event.getReturned();
+        if (methodWrapper.returnSupplier() == null) return null; // abstract method
+
+        return methodWrapper.returnSupplier().get();
     }
 
     /**

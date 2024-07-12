@@ -12,9 +12,29 @@ import java.util.*;
 /**
  * Utils for easier conversion between Skript and Java types.
  */
-// Java Utils
 // Source: https://github.com/SkriptLang/skript-reflect/blob/2.x/src/main/java/com/btk5h/skriptmirror/util/JavaUtil.java
-// License: https://github.com/SkriptLang/skript-reflect/blob/2.x/LICENSE
+//
+// MIT License
+//
+// Copyright (c) 2016-2023, Bryan Terce, TPGamesNL
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 public final class JavaUtil {
 
     private static final Map<Class<?>, Class<?>> WRAPPER_CLASSES = new HashMap<>();

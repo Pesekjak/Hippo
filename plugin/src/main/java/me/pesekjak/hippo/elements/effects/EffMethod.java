@@ -102,7 +102,7 @@ public class EffMethod extends Effect {
                 throw new IllegalModifiersException("Method effects need to be abstract");
 
             source.addMethod(method);
-            methodWrapper = new MethodWrapper(method, List.of(namedParameters), null);
+            methodWrapper = new MethodWrapper(method, List.of(namedParameters), null, null);
 
             storage.getTable().put(method.getName(), method.getDescriptor(), methodWrapper);
 

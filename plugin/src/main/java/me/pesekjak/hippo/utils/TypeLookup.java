@@ -25,7 +25,6 @@ import java.util.List;
  */
 public final class TypeLookup {
 
-    @SuppressWarnings("UnstableApiUsage")
     private static final Table<Script, String, PreImport> PRE_IMPORTS = Tables.newCustomTable(new HashMap<>(), HashMap::new);
 
     private TypeLookup() {

@@ -6,7 +6,7 @@ import ch.njol.skript.lang.parser.ParserInstance;
 import me.pesekjak.hippo.bukkit.BukkitListeners;
 import me.pesekjak.hippo.core.loader.DynamicClassLoader;
 import me.pesekjak.hippo.elements.classes.Types;
-import me.pesekjak.hippo.skript.ParserData;
+import me.pesekjak.hippo.skript.ClassUpdateParserData;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -76,7 +76,7 @@ public class Hippo extends JavaPlugin {
 
         try {
             addonInstance.loadClasses("me.pesekjak.hippo.elements");
-            ParserInstance.registerData(ParserData.class, ParserData::new);
+            ParserInstance.registerData(ClassUpdateParserData.class, ClassUpdateParserData::new);
             Class.forName(DynamicClassLoader.class.getName(), true, Hippo.class.getClassLoader());
         } catch (IOException | ClassNotFoundException exception) {
             getLogger().log(Level.SEVERE, "Failed to load Hippo classes. Disabling Hippo...", exception);
@@ -104,7 +104,7 @@ public class Hippo extends JavaPlugin {
         if (config.contains("java_classfile_version") && config.isInt("java_classfile_version")) {
             int value = config.getInt("java_classfile_version");
 
-            if (value > 0 && value < 22) {
+            if (value >= 1 && value <= 23) {
                 javaClassFileVersion = value == 1 ? Opcodes.V1_1 : 46 + value - 2;
             } else {
                 getLogger().warning("ClassFile version " + value + " specified in the config is not valid");

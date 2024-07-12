@@ -10,7 +10,6 @@ import ch.njol.skript.lang.parser.ParserInstance;
 import ch.njol.skript.log.SkriptLogger;
 import ch.njol.skript.util.LiteralUtils;
 import ch.njol.skript.variables.Variables;
-import ch.njol.util.Kleenean;
 import com.btk5h.skriptmirror.JavaType;
 import me.pesekjak.hippo.core.PreImport;
 import org.bukkit.event.Event;
@@ -66,32 +65,23 @@ public final class SkriptUtil {
      */
     @SafeVarargs
     public static UnlockedTrigger loadCode(ParserInstance parser,
-                                   Structure structure,
-                                   String name,
-                                   @Nullable Runnable afterLoading,
-                                   SkriptEvent skriptEvent,
-                                   SectionNode sectionNode,
-                                   Class<? extends Event>... events) {
+                                           Structure structure,
+                                           String name,
+                                           @Nullable Runnable afterLoading,
+                                           SkriptEvent skriptEvent,
+                                           SectionNode sectionNode,
+                                           Class<? extends Event>... events) {
         // replicates Section#loadCode method
-        String previousName = parser.getCurrentEventName();
-        Class<? extends Event>[] previousEvents = parser.getCurrentEvents();
-        Structure previousStructure = parser.getCurrentStructure();
-        List<TriggerSection> previousSections = parser.getCurrentSections();
-        Kleenean previousDelay = parser.getHasDelayBefore();
+        ParserInstance.Backup parserBackup = parser.backup();
+        parser.reset();
 
         parser.setCurrentEvent(name, events);
         parser.setCurrentStructure(structure);
-        parser.setCurrentSections(new ArrayList<>());
-        parser.setHasDelayBefore(Kleenean.FALSE);
         List<TriggerItem> triggerItems = ScriptLoader.loadItems(sectionNode);
         if (afterLoading != null)
             afterLoading.run();
 
-        //noinspection ConstantConditions - We are resetting it to what it was
-        parser.setCurrentEvent(previousName, previousEvents);
-        parser.setCurrentStructure(previousStructure);
-        parser.setCurrentSections(previousSections);
-        parser.setHasDelayBefore(previousDelay);
+        parser.restoreBackup(parserBackup);
         return new UnlockedTrigger(parser.getCurrentScript(), name, skriptEvent, triggerItems);
     }
 
@@ -131,7 +121,7 @@ public final class SkriptUtil {
     }
 
     /**
-     * Sends info message related to a node using Skript's logger.
+     * Sends info message related to a node using Skript logger.
      *
      * @param node node to use
      * @param message message to log
@@ -141,7 +131,7 @@ public final class SkriptUtil {
     }
 
     /**
-     * Sends warning message related to a node using Skript's logger.
+     * Sends warning message related to a node using Skript logger.
      *
      * @param node node to use
      * @param message message to log
@@ -151,7 +141,7 @@ public final class SkriptUtil {
     }
 
     /**
-     * Sends error message related to a node using Skript's logger.
+     * Sends error message related to a node using Skript logger.
      *
      * @param node node to use
      * @param message message to log
@@ -161,7 +151,7 @@ public final class SkriptUtil {
     }
 
     /**
-     * Sends message related to a node using Skript's logger.
+     * Sends message related to a node using Skript logger.
      *
      * @param node node to use
      * @param message message to log
