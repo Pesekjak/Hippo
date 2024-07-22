@@ -12,8 +12,24 @@ public class MethodCallEvent extends InstanceEvent {
 
     private static final HandlerList HANDLERS = new HandlerList();
 
+    private @Nullable Object returned;
+
     public MethodCallEvent(AbstractClass source, @Nullable Object instance) {
         super(source, instance);
+    }
+
+    /**
+     * @return returned object
+     */
+    public @Nullable Object getReturned() {
+        return returned;
+    }
+
+    /**
+     * @param returned new returned object
+     */
+    public void setReturned(@Nullable Object returned) {
+        this.returned = returned;
     }
 
     @Override

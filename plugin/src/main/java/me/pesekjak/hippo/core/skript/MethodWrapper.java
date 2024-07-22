@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -19,14 +18,10 @@ import static org.objectweb.asm.Opcodes.*;
  * @param method wrapped method
  * @param arguments named parameters of the method
  * @param trigger trigger of the method
- * @param returnSupplier supplier of returned values
  */
 // Named parameters are used because Method object does not store info about parameters names, and
 // they are later used to set variables for the method code execution.
-public record MethodWrapper(Method method,
-                            List<NamedParameter> arguments,
-                            @Nullable Trigger trigger,
-                            @Nullable Supplier<?> returnSupplier) implements ClassContentSkriptWrapper {
+public record MethodWrapper(Method method, List<NamedParameter> arguments, @Nullable Trigger trigger) implements ClassContentSkriptWrapper {
 
     @Override
     public ClassContent content() {

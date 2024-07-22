@@ -277,9 +277,7 @@ public final class Storage {
         if (event.getThrowable() != null)
             ExceptionThrower.throwException(event.getThrowable());
 
-        if (methodWrapper.returnSupplier() == null) return null; // abstract method
-
-        return methodWrapper.returnSupplier().get();
+        return event.getReturned();
     }
 
     /**

@@ -41,11 +41,6 @@ public class SecMethod extends Section implements ReturnHandler<Object> {
     private Type returnType;
     private MethodWrapper methodWrapper;
 
-    // TODO
-    //  this is temporary solution until Skript introduces
-    //  different API for providing return values
-    private final ThreadLocal<Object> returnedObject = new ThreadLocal<>();
-
     static {
         Skript.registerSection(
                 SecMethod.class,
@@ -105,11 +100,7 @@ public class SecMethod extends Section implements ReturnHandler<Object> {
             Trigger trigger = loadReturnableSectionCode(sectionNode, "method", new Class[] {MethodCallEvent.class});
 
             source.addMethod(method);
-            methodWrapper = new MethodWrapper(method, List.of(namedParameters), trigger, () -> {
-                Object returned = getReturnValue();
-                resetReturnValue();
-                return returned;
-            });
+            methodWrapper = new MethodWrapper(method, List.of(namedParameters), trigger);
 
             storage.getTable().put(method.getName(), method.getDescriptor(), methodWrapper);
 
@@ -141,9 +132,9 @@ public class SecMethod extends Section implements ReturnHandler<Object> {
     }
 
     @Override
-    public void returnValues(Object @Nullable [] values) {
-        Object value = values != null && values.length > 0 ? values[0] : null;
-        returnedObject.set(value);
+    public void returnValues(@NotNull Event event, @NotNull Expression<?> expression) {
+        if (!(event instanceof MethodCallEvent methodCall)) return;
+        methodCall.setReturned(expression.getSingle(event));
     }
 
     @Override
@@ -154,14 +145,6 @@ public class SecMethod extends Section implements ReturnHandler<Object> {
     @Override
     public @Nullable Class<?> returnValueType() {
         return Object.class;
-    }
-
-    public @Nullable Object getReturnValue() {
-        return returnedObject.get();
-    }
-
-    public void resetReturnValue() {
-        returnedObject.remove();
     }
 
 }
