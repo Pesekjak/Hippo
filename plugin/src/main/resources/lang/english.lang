@@ -5,3 +5,17 @@ types:
   parameter: parameter¦s @a
   preimport: preimport¦s @a
   character: character¦s @a
+
+modifiers:
+  public: public
+  private: private
+  protected: protected
+  static: static
+  final: final
+  synchronized: synchronized
+  volatile: volatile
+  transient: transient
+  native: native
+  abstract: abstract
+  strict: strict
+  default: default

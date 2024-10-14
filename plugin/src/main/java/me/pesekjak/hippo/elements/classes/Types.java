@@ -1,6 +1,7 @@
 package me.pesekjak.hippo.elements.classes;
 
 import ch.njol.skript.classes.ClassInfo;
+import ch.njol.skript.classes.EnumClassInfo;
 import ch.njol.skript.classes.Parser;
 import ch.njol.skript.lang.ParseContext;
 import ch.njol.skript.lang.parser.ParserInstance;
@@ -11,7 +12,6 @@ import me.pesekjak.hippo.core.NamedParameter;
 import me.pesekjak.hippo.core.PreImport;
 import me.pesekjak.hippo.core.annotations.Annotation;
 import me.pesekjak.hippo.elements.classes.handles.Modifier;
-import me.pesekjak.hippo.utils.EnumTypeParser;
 import me.pesekjak.hippo.utils.SkriptUtil;
 import me.pesekjak.hippo.utils.TypeLookup;
 import me.pesekjak.hippo.utils.parser.AnnotationParser;
@@ -77,9 +77,8 @@ public final class Types {
     }
 
     private static void registerModifierType() {
-        Classes.registerClass(new ClassInfo<>(Modifier.class, "modifier")
+        Classes.registerClass(new EnumClassInfo<>(Modifier.class, "modifier", "modifiers")
                 .user("modifiers?")
-                .parser(new EnumTypeParser<>("modifier", Modifier.class))
                 .name("Modifier")
                 .description("Represents a Java modifier.")
                 .examples("public, static int hello")
