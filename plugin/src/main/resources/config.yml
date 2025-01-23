@@ -1,2 +1,5 @@
 # The version used in headers of compiled classes.
 java_classfile_version: 17
+
+# If true, skript-reflect cache for java calls are disabled.
+disable_cache: false

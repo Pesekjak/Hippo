@@ -10,6 +10,7 @@ import ch.njol.skript.lang.*;
 import ch.njol.skript.log.SkriptLogger;
 import ch.njol.skript.util.LiteralUtils;
 import ch.njol.util.Kleenean;
+import me.pesekjak.hippo.Hippo;
 import me.pesekjak.hippo.bukkit.ConstructorCallEvent;
 import me.pesekjak.hippo.bukkit.ConstructorSuperCallEvent;
 import me.pesekjak.hippo.elements.sections.SecConstructor;
@@ -19,6 +20,9 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxOrigin;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -32,15 +36,21 @@ import java.util.List;
         "\t\tsuper[String](\"elephant\")"
 })
 @Since("1.0.0")
+@SuppressWarnings("UnstableApiUsage")
 public class EffSuperConstructorCall extends Effect {
 
     private List<Type> types;
     private Expression<Object> values;
 
     static {
-        Skript.registerEffect(
-                EffSuperConstructorCall.class,
-                "super\\[[<.+>]\\]\\([%-objects%]\\)"
+        Hippo.getAddonInstance().syntaxRegistry().register(
+                SyntaxRegistry.EFFECT,
+                SyntaxInfo.builder(EffSuperConstructorCall.class)
+                        .addPattern("super\\[[<.+>]\\]\\([%-objects%]\\)")
+                        .supplier(EffSuperConstructorCall::new)
+                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .priority(SyntaxInfo.PATTERN_MATCHES_EVERYTHING)
+                        .build()
         );
     }
 

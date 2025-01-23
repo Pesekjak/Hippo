@@ -1,18 +1,17 @@
 package me.pesekjak.hippo.elements.expressions;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.config.Node;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import com.btk5h.skriptmirror.JavaType;
 import com.btk5h.skriptmirror.util.SkriptMirrorUtil;
+import me.pesekjak.hippo.Hippo;
 import me.pesekjak.hippo.bukkit.NewClassEvent;
 import me.pesekjak.hippo.core.ASMUtil;
 import me.pesekjak.hippo.core.PreImport;
@@ -24,6 +23,9 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Type;
 import org.skriptlang.skript.lang.script.Script;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxOrigin;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 @Name("Pre-Imported Class")
 @Description("Reference of pre-imported class.")
@@ -34,16 +36,21 @@ import org.skriptlang.skript.lang.script.Script;
         "\tset {_blob} to new Blob()"
 })
 @Since("1.0.0")
+@SuppressWarnings("UnstableApiUsage")
 public class ExprPreImport extends SimpleExpression<Object> {
 
     private PreImport preImport;
     private Node node;
 
     static {
-        // Object class is used so SimpleExpression#get(Event) can return PreImports
-        Skript.registerExpression(
-                ExprPreImport.class, Object.class, ExpressionType.PATTERN_MATCHES_EVERYTHING,
-                "<" + SkriptMirrorUtil.IDENTIFIER + ">"
+        Hippo.getAddonInstance().syntaxRegistry().register(
+                SyntaxRegistry.EXPRESSION,
+                SyntaxInfo.Expression.builder(ExprPreImport.class, Object.class)
+                        .addPattern("<" + SkriptMirrorUtil.IDENTIFIER + ">")
+                        .supplier(ExprPreImport::new)
+                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .priority(SyntaxInfo.PATTERN_MATCHES_EVERYTHING)
+                        .build()
         );
     }
 

@@ -22,21 +22,26 @@ import java.util.stream.Collectors;
  */
 public class DynamicClassLoader extends ClassLoader {
 
-    private static final ClassLoader EMPTY_CLASS_LOADER;
-    private static final DynamicClassLoader INSTANCE;
+    private static ClassLoader emptyClassLoader;
+    private static DynamicClassLoader instance;
 
     final Map<String, SingleClassLoader> loaders = new ConcurrentHashMap<>();
     final Map<String, CompileException> compileExceptions = new ConcurrentHashMap<>();
 
-    static {
+    /**
+     * Injects class loader used by reflect.
+     * <p>
+     * This needs to be called during Hippo initialization.
+     */
+    public static void injectReflectClassLoader() {
         try {
 
-            EMPTY_CLASS_LOADER = LibraryLoader.getClassLoader();
+            emptyClassLoader = LibraryLoader.getClassLoader();
 
-            INSTANCE = new DynamicClassLoader(EMPTY_CLASS_LOADER);
+            instance = new DynamicClassLoader(emptyClassLoader);
             Field classLoaderField = LibraryLoader.class.getDeclaredField("classLoader");
             classLoaderField.setAccessible(true);
-            classLoaderField.set(null, INSTANCE);
+            classLoaderField.set(null, instance);
 
         } catch (NoSuchFieldException | IllegalAccessException exception) {
             throw new RuntimeException(exception);
@@ -47,7 +52,7 @@ public class DynamicClassLoader extends ClassLoader {
      * @return instance of the class loader
      */
     public static DynamicClassLoader getInstance() {
-        return INSTANCE;
+        return instance;
     }
 
     DynamicClassLoader(ClassLoader parent) {
@@ -63,7 +68,7 @@ public class DynamicClassLoader extends ClassLoader {
             return super.findClass(name);
         } catch (ClassNotFoundException exception) {
             // classes provided by reflect
-            return EMPTY_CLASS_LOADER.loadClass(name);
+            return emptyClassLoader.loadClass(name);
         }
     }
 

@@ -8,6 +8,7 @@ import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.*;
 import ch.njol.util.Kleenean;
+import me.pesekjak.hippo.Hippo;
 import me.pesekjak.hippo.bukkit.NewClassEvent;
 import me.pesekjak.hippo.bukkit.StaticBlockCallEvent;
 import me.pesekjak.hippo.core.*;
@@ -17,6 +18,9 @@ import me.pesekjak.hippo.elements.ClassElement;
 import me.pesekjak.hippo.elements.structures.StructNewClass;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxOrigin;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.util.List;
 
@@ -29,12 +33,18 @@ import java.util.List;
 })
 @Since("1.0.0")
 @ClassElement
+@SuppressWarnings("UnstableApiUsage")
 public class SecStatic extends Section {
 
     static {
-        Skript.registerSection(
-                SecStatic.class,
-                "static"
+        Hippo.getAddonInstance().syntaxRegistry().register(
+                SyntaxRegistry.SECTION,
+                SyntaxInfo.builder(SecStatic.class)
+                        .addPattern("static")
+                        .supplier(SecStatic::new)
+                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .priority(SyntaxInfo.SIMPLE)
+                        .build()
         );
     }
 

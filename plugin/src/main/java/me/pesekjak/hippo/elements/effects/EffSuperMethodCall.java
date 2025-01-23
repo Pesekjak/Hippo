@@ -1,6 +1,5 @@
 package me.pesekjak.hippo.elements.effects;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
@@ -9,9 +8,13 @@ import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
+import me.pesekjak.hippo.Hippo;
 import me.pesekjak.hippo.elements.expressions.ExprSuperMethodCall;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxOrigin;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 @Name("Superclass Method Call")
 @Description("Calls method of the parent class.")
@@ -23,15 +26,21 @@ import org.jetbrains.annotations.NotNull;
         "\t\treturn 1"
 })
 @Since("1.1")
+@SuppressWarnings("UnstableApiUsage")
 // Mirrors behaviour of ExprSuperMethodCall
 public class EffSuperMethodCall extends Effect {
 
     private ExprSuperMethodCall mirror;
 
     static {
-        Skript.registerEffect(
-                EffSuperMethodCall.class,
-                ExprSuperMethodCall.PATTERNS
+        Hippo.getAddonInstance().syntaxRegistry().register(
+                SyntaxRegistry.EFFECT,
+                SyntaxInfo.builder(EffSuperMethodCall.class)
+                        .addPatterns(ExprSuperMethodCall.PATTERNS)
+                        .supplier(EffSuperMethodCall::new)
+                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .priority(SyntaxInfo.PATTERN_MATCHES_EVERYTHING)
+                        .build()
         );
     }
 

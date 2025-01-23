@@ -10,6 +10,7 @@ import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Literal;
 import ch.njol.skript.lang.SkriptParser;
 import com.btk5h.skriptmirror.util.SkriptMirrorUtil;
+import me.pesekjak.hippo.Hippo;
 import me.pesekjak.hippo.core.PreImport;
 import me.pesekjak.hippo.utils.SkriptUtil;
 import me.pesekjak.hippo.utils.TypeLookup;
@@ -20,6 +21,9 @@ import org.objectweb.asm.Type;
 import org.skriptlang.skript.lang.entry.EntryContainer;
 import org.skriptlang.skript.lang.script.Script;
 import org.skriptlang.skript.lang.structure.Structure;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxOrigin;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,6 +36,7 @@ import java.util.regex.Pattern;
         "\tjava.lang.RuntimeException as RTE"
 })
 @Since("1.0.0")
+@SuppressWarnings("UnstableApiUsage")
 public class StructPreImport extends Structure {
 
     private static final Pattern IMPORT_STATEMENT = Pattern.compile(
@@ -41,9 +46,14 @@ public class StructPreImport extends Structure {
     private Script script;
 
     static {
-        Skript.registerStructure(
-                StructPreImport.class,
-                "pre[-]import"
+        Hippo.getAddonInstance().syntaxRegistry().register(
+                SyntaxRegistry.STRUCTURE,
+                SyntaxInfo.Structure.builder(StructPreImport.class)
+                        .addPattern("pre[-]import")
+                        .supplier(StructPreImport::new)
+                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .priority(SyntaxInfo.SIMPLE)
+                        .build()
         );
     }
 

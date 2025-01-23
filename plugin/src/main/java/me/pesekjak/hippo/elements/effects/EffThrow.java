@@ -9,11 +9,15 @@ import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.*;
 import ch.njol.skript.util.LiteralUtils;
 import ch.njol.util.Kleenean;
+import me.pesekjak.hippo.Hippo;
 import me.pesekjak.hippo.bukkit.ThrowableEvent;
 import me.pesekjak.hippo.utils.ReflectConverter;
 import me.pesekjak.hippo.utils.SkriptUtil;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxOrigin;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.util.Optional;
 
@@ -26,15 +30,21 @@ import java.util.Optional;
         "\t\tthrow new UnsupportedOperationException()"
 })
 @Since("1.1")
+@SuppressWarnings("UnstableApiUsage")
 public class EffThrow extends Effect {
 
     private Expression<Object> exception;
     private Node node;
 
     static {
-        Skript.registerEffect(
-                EffThrow.class,
-                "throw %object%"
+        Hippo.getAddonInstance().syntaxRegistry().register(
+                SyntaxRegistry.EFFECT,
+                SyntaxInfo.builder(EffThrow.class)
+                        .addPattern("throw %object%")
+                        .supplier(EffThrow::new)
+                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .priority(SyntaxInfo.COMBINED)
+                        .build()
         );
     }
 

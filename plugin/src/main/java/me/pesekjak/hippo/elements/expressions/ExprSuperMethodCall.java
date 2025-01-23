@@ -1,6 +1,5 @@
 package me.pesekjak.hippo.elements.expressions;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.classes.Changer;
 import ch.njol.skript.config.Node;
 import ch.njol.skript.doc.Description;
@@ -12,6 +11,7 @@ import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.skript.util.LiteralUtils;
 import ch.njol.util.Kleenean;
 import com.btk5h.skriptmirror.skript.reflect.ExprJavaCall;
+import me.pesekjak.hippo.Hippo;
 import me.pesekjak.hippo.bukkit.*;
 import me.pesekjak.hippo.core.AbstractClass;
 import me.pesekjak.hippo.core.loader.DynamicClassLoader;
@@ -23,10 +23,12 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.lang.script.Script;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxOrigin;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.WrongMethodTypeException;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -42,22 +44,13 @@ import java.util.function.Function;
         "\t\treturn {_v} + 1"
 })
 @Since("1.1")
+@SuppressWarnings("UnstableApiUsage")
 public class ExprSuperMethodCall extends SimpleExpression<Object> {
 
     public static final String[] PATTERNS = new String[] {
             "(0¦|1¦try) super.<" + SyntaxCommons.VARIABLE_NAME + ">[\\[[<.+>]\\]]\\([%-objects%]\\)",
             "(0¦|1¦try) super..%string%[\\[[<.+>]\\]]\\([%-objects%]\\)"
     };
-
-    private static final Field LAST_EXCEPTION_FIELD;
-
-    static {
-        try {
-            LAST_EXCEPTION_FIELD = ExprJavaCall.class.getDeclaredField("lastError");
-        } catch (Exception exception) {
-            throw new RuntimeException(exception);
-        }
-    }
 
     private Function<Event, String> methodName;
     private Expression<?> arguments;
@@ -68,9 +61,14 @@ public class ExprSuperMethodCall extends SimpleExpression<Object> {
     private Node node;
 
     static {
-        Skript.registerExpression(
-                ExprSuperMethodCall.class, Object.class, ExpressionType.PATTERN_MATCHES_EVERYTHING,
-                PATTERNS
+        Hippo.getAddonInstance().syntaxRegistry().register(
+                SyntaxRegistry.EXPRESSION,
+                SyntaxInfo.Expression.builder(ExprSuperMethodCall.class, Object.class)
+                        .addPatterns(PATTERNS)
+                        .supplier(ExprSuperMethodCall::new)
+                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .priority(SyntaxInfo.PATTERN_MATCHES_EVERYTHING)
+                        .build()
         );
     }
 
@@ -140,9 +138,7 @@ public class ExprSuperMethodCall extends SimpleExpression<Object> {
                     message = message + " (" + throwable.getMessage() + ")";
                 SkriptUtil.warning(node, message);
             } else {
-                try {
-                    LAST_EXCEPTION_FIELD.set(null, throwable);
-                } catch (IllegalAccessException ignored) { }
+                ExprJavaCall.lastError = throwable;
             }
 
             return new Object[0];

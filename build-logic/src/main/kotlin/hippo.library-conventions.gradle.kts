@@ -31,6 +31,7 @@ dependencies {
     testImplementation(libs.findLibrary("junit-api").get())
     testRuntimeOnly(libs.findLibrary("junit-engine").get())
     testImplementation(libs.findLibrary("junit-params").get())
+    testRuntimeOnly(libs.findLibrary("junit-launcher").get())
 }
 
 //
@@ -48,7 +49,7 @@ java {
 //
 
 checkstyle {
-    toolVersion = "10.13.0"
+    toolVersion = libs.findPlugin("checkstyle").get().get().version.toString()
     config = resources.text.fromUri(CheckStyleProvider.get())
 }
 

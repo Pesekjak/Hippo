@@ -35,6 +35,9 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.objectweb.asm.Type;
 import org.skriptlang.skript.lang.entry.EntryContainer;
 import org.skriptlang.skript.lang.structure.Structure;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxOrigin;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.util.*;
 
@@ -45,6 +48,7 @@ import java.util.*;
         "public interface Elephant implements Animal:"
 })
 @Since("1.0.0")
+@SuppressWarnings("UnstableApiUsage")
 public class StructNewClass extends Structure {
 
     public static final Priority PRIORITY = new Priority(440);
@@ -62,11 +66,16 @@ public class StructNewClass extends Structure {
     private EntryContainer entryContainer;
 
     static {
-        Skript.registerStructure(
-                StructNewClass.class,
-                "%modifiers% (:class|:interface|:enum) %preimport% "
-                        + "[extends %-preimport/javatype%] "
-                        + "[implements %-preimports/javatypes%]"
+        Hippo.getAddonInstance().syntaxRegistry().register(
+                SyntaxRegistry.STRUCTURE,
+                SyntaxInfo.Structure.builder(StructNewClass.class)
+                        .addPattern("%modifiers% (:class|:interface|:enum) %preimport% "
+                                + "[extends %-preimport/javatype%] "
+                                + "[implements %-preimports/javatypes%]")
+                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .supplier(StructNewClass::new)
+                        .priority(SyntaxInfo.COMBINED)
+                        .build()
         );
     }
 

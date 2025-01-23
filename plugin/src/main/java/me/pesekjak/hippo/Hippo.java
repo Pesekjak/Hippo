@@ -1,24 +1,27 @@
 package me.pesekjak.hippo;
 
+import ch.njol.skript.ScriptLoader;
 import ch.njol.skript.Skript;
-import ch.njol.skript.SkriptAddon;
 import ch.njol.skript.lang.parser.ParserInstance;
-import me.pesekjak.hippo.bukkit.BukkitListeners;
+import com.btk5h.skriptmirror.util.ReflectCacheInjector;
 import me.pesekjak.hippo.core.loader.DynamicClassLoader;
 import me.pesekjak.hippo.elements.classes.Types;
 import me.pesekjak.hippo.skript.ClassUpdateParserData;
+import me.pesekjak.hippo.skript.ScriptPreInitListener;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.objectweb.asm.Opcodes;
+import org.skriptlang.skript.addon.SkriptAddon;
+import org.skriptlang.skript.util.ClassLoader;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.logging.Level;
 
 /**
  * Main class handling the logic of a Bukkit plugin.
  */
+@SuppressWarnings("UnstableApiUsage")
 public class Hippo extends JavaPlugin {
 
     //  .-''''-. _
@@ -43,10 +46,13 @@ public class Hippo extends JavaPlugin {
     // WHERE HIPPOS, ELEPHANTS, WATER BUFFALO
     // AND OTHER ANIMALS LIVE.
 
+    public static final String ADDON_NAME = "Hippo";
+
     private static Hippo instance;
     private static SkriptAddon addonInstance;
 
     private int javaClassFileVersion = Opcodes.V17;
+    private boolean disablesCache = false;
 
     /**
      * @return current instance of the plugin
@@ -65,7 +71,10 @@ public class Hippo extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        addonInstance = Skript.registerAddon(getInstance()).setLanguageFileDirectory("lang");
+        addonInstance = Skript.instance().registerAddon(getClass(), ADDON_NAME);
+        addonInstance.localizer().setSourceDirectories("lang", null);
+
+        loadConfig();
 
         if (!Types.register()) {
             getLogger().severe("Failed to register required types, the addon can not function properly");
@@ -75,17 +84,15 @@ public class Hippo extends JavaPlugin {
         }
 
         try {
-            addonInstance.loadClasses("me.pesekjak.hippo.elements");
+            ClassLoader.loadClasses(Hippo.class, getFile(), "me.pesekjak.hippo", "elements");
             ParserInstance.registerData(ClassUpdateParserData.class, ClassUpdateParserData::new);
-            Class.forName(DynamicClassLoader.class.getName(), true, Hippo.class.getClassLoader());
-        } catch (IOException | ClassNotFoundException exception) {
+            ScriptLoader.eventRegistry().register(new ScriptPreInitListener());
+            DynamicClassLoader.injectReflectClassLoader();
+            if (disablesCache) ReflectCacheInjector.inject();
+        } catch (Exception exception) {
             getLogger().log(Level.SEVERE, "Failed to load Hippo classes. Disabling Hippo...", exception);
             Bukkit.getPluginManager().disablePlugin(this);
-            return;
         }
-
-        Bukkit.getPluginManager().registerEvents(new BukkitListeners(), this);
-        loadConfig();
     }
 
     public int getJavaClassFileVersion() {
@@ -111,6 +118,12 @@ public class Hippo extends JavaPlugin {
             }
         } else {
             getLogger().warning("Config file is missing 'java_classfile_version' entry");
+        }
+
+        if (config.contains("disable_cache") && config.isBoolean("disable_cache")) {
+            disablesCache = config.getBoolean("disable_cache");
+        } else {
+            getLogger().warning("Config file is missing 'disable_cache' entry");
         }
     }
 

@@ -20,6 +20,9 @@ dependencyResolutionManagement {
             library("junit-engine", "org.junit.jupiter:junit-jupiter-engine:$junit")
             library("junit-params", "org.junit.jupiter:junit-jupiter-params:$junit")
 
+            val junitLauncher: String by settings
+            library("junit-launcher", "org.junit.platform:junit-platform-launcher:$junitLauncher")
+
             val spigotApi: String by settings
             library("spigot-api", "org.spigotmc:spigot-api:$spigotApi")
 
@@ -30,7 +33,10 @@ dependencyResolutionManagement {
             library("asm", "org.ow2.asm:asm:$asm")
 
             val shadow: String by settings
-            plugin("shadow", "io.github.goooler.shadow").version(shadow)
+            plugin("shadow", "com.gradleup.shadow").version(shadow)
+
+            val checkstyle: String by settings
+            plugin("checkstyle", "checkstyle").version(checkstyle)
         }
 
     }

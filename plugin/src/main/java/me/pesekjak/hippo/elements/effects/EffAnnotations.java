@@ -1,6 +1,5 @@
 package me.pesekjak.hippo.elements.effects;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.config.Node;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
@@ -10,12 +9,16 @@ import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.util.Kleenean;
+import me.pesekjak.hippo.Hippo;
 import me.pesekjak.hippo.bukkit.NewClassEvent;
 import me.pesekjak.hippo.core.annotations.Annotation;
 import me.pesekjak.hippo.elements.ClassElement;
 import me.pesekjak.hippo.elements.structures.StructNewClass;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxOrigin;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,15 +34,21 @@ import java.util.Objects;
 })
 @Since("1.0.0")
 @ClassElement
+@SuppressWarnings("UnstableApiUsage")
 public class EffAnnotations extends Effect {
 
     private Expression<?> annotations;
     private Node node;
 
     static {
-        Skript.registerEffect(
-                EffAnnotations.class,
-                "%*annotations%"
+        Hippo.getAddonInstance().syntaxRegistry().register(
+                SyntaxRegistry.EFFECT,
+                SyntaxInfo.builder(EffAnnotations.class)
+                        .addPattern("%*annotations%")
+                        .supplier(EffAnnotations::new)
+                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .priority(SyntaxInfo.COMBINED)
+                        .build()
         );
     }
 

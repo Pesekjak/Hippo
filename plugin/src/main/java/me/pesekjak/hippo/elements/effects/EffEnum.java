@@ -10,6 +10,7 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.util.LiteralUtils;
 import ch.njol.util.Kleenean;
+import me.pesekjak.hippo.Hippo;
 import me.pesekjak.hippo.bukkit.EnumValuesEvent;
 import me.pesekjak.hippo.bukkit.NewClassEvent;
 import me.pesekjak.hippo.core.AbstractClass;
@@ -29,6 +30,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxOrigin;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.util.Collections;
 import java.util.List;
@@ -46,6 +50,7 @@ import java.util.List;
 })
 @Since("1.0.0")
 @ClassElement
+@SuppressWarnings("UnstableApiUsage")
 public class EffEnum extends Effect {
 
     private EnumWrapper enumWrapper;
@@ -53,9 +58,14 @@ public class EffEnum extends Effect {
     private Expression<Object> values;
 
     static {
-        Skript.registerEffect(
-                EffEnum.class,
-                "enum <" + SyntaxCommons.VARIABLE_NAME + ">\\[[<.+>]\\]\\([%-objects%]\\)"
+        Hippo.getAddonInstance().syntaxRegistry().register(
+                SyntaxRegistry.EFFECT,
+                SyntaxInfo.builder(EffEnum.class)
+                        .addPattern("enum <" + SyntaxCommons.VARIABLE_NAME + ">\\[[<.+>]\\]\\([%-objects%]\\)")
+                        .supplier(EffEnum::new)
+                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .priority(SyntaxInfo.COMBINED)
+                        .build()
         );
     }
 

@@ -10,6 +10,7 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.util.LiteralUtils;
 import ch.njol.util.Kleenean;
+import me.pesekjak.hippo.Hippo;
 import me.pesekjak.hippo.bukkit.NewClassEvent;
 import me.pesekjak.hippo.core.AbstractClass;
 import me.pesekjak.hippo.core.Field;
@@ -22,6 +23,9 @@ import me.pesekjak.hippo.elements.classes.handles.Modifier;
 import me.pesekjak.hippo.elements.structures.StructNewClass;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxOrigin;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.util.List;
 
@@ -33,14 +37,20 @@ import java.util.List;
 })
 @Since("1.0.0")
 @ClassElement
+@SuppressWarnings("UnstableApiUsage")
 public class EffField extends Effect {
 
     private FieldWrapper fieldWrapper;
 
     static {
-        Skript.registerEffect(
-                EffField.class,
-                "%*modifiers% %*parameter% [= %-object%]"
+        Hippo.getAddonInstance().syntaxRegistry().register(
+                SyntaxRegistry.EFFECT,
+                SyntaxInfo.builder(EffField.class)
+                        .addPattern("%*modifiers% %*parameter% [= %-object%]")
+                        .supplier(EffField::new)
+                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .priority(SyntaxInfo.COMBINED)
+                        .build()
         );
     }
 

@@ -8,16 +8,19 @@ import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SectionSkriptEvent;
 import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
+import me.pesekjak.hippo.Hippo;
 import me.pesekjak.hippo.bukkit.*;
 import me.pesekjak.hippo.elements.sections.SecMethod;
 import me.pesekjak.hippo.utils.SkriptUtil;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxOrigin;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
 
@@ -31,14 +34,20 @@ import static org.objectweb.asm.Opcodes.ACC_STATIC;
         "\t\tset this.name to {_name}"
 })
 @Since("1.0.0")
+@SuppressWarnings("UnstableApiUsage")
 public class ExprThis extends SimpleExpression<Object> {
 
     private Node node;
 
     static {
-        Skript.registerExpression(
-                ExprThis.class, Object.class, ExpressionType.SIMPLE,
-                "this"
+        Hippo.getAddonInstance().syntaxRegistry().register(
+                SyntaxRegistry.EXPRESSION,
+                SyntaxInfo.Expression.builder(ExprThis.class, Object.class)
+                        .addPattern("this")
+                        .supplier(ExprThis::new)
+                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .priority(SyntaxInfo.SIMPLE)
+                        .build()
         );
     }
 
