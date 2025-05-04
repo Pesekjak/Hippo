@@ -23,8 +23,8 @@ dependencyResolutionManagement {
             val junitLauncher: String by settings
             library("junit-launcher", "org.junit.platform:junit-platform-launcher:$junitLauncher")
 
-            val spigotApi: String by settings
-            library("spigot-api", "org.spigotmc:spigot-api:$spigotApi")
+            val paperApi: String by settings
+            library("paper-api", "io.papermc.paper:paper-api:$paperApi")
 
             val skript: String by settings
             library("skript", "com.github.SkriptLang:Skript:$skript")

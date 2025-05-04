@@ -12,6 +12,7 @@ import ch.njol.skript.lang.SkriptParser;
 import com.btk5h.skriptmirror.util.SkriptMirrorUtil;
 import me.pesekjak.hippo.Hippo;
 import me.pesekjak.hippo.core.PreImport;
+import me.pesekjak.hippo.elements.expressions.ExprPreImport;
 import me.pesekjak.hippo.utils.SkriptUtil;
 import me.pesekjak.hippo.utils.TypeLookup;
 import org.bukkit.event.Event;
@@ -68,6 +69,7 @@ public class StructPreImport extends Structure {
         SectionNode node = entryContainer.getSource();
 
         node.forEach(subNode -> registerPreImport(subNode.getKey(), script));
+        ExprPreImport.updateSyntax();
 
         return true;
     }
@@ -75,6 +77,11 @@ public class StructPreImport extends Structure {
     @Override
     public boolean load() {
         return true;
+    }
+
+    @Override
+    public Priority getPriority() {
+        return new Priority(200);
     }
 
     @Override

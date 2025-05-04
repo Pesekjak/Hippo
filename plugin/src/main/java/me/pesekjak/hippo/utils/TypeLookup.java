@@ -9,11 +9,13 @@ import me.pesekjak.hippo.core.ASMUtil;
 import me.pesekjak.hippo.core.PreImport;
 import me.pesekjak.hippo.utils.parser.Analyzer;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import org.objectweb.asm.Type;
 import org.skriptlang.reflect.java.elements.structures.StructImport;
 import org.skriptlang.skript.lang.script.Script;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -147,6 +149,15 @@ public final class TypeLookup {
                 })
                 .toList();
         toUnregister.forEach(TypeLookup::unregisterPreImports);
+    }
+
+    /**
+     * Returns all the aliases used for pre-imports across all scripts.
+     *
+     * @return pre-import aliases
+     */
+    public static @Unmodifiable Collection<String> getPreImportKeywords() {
+        return Collections.unmodifiableSet(PRE_IMPORTS.columnKeySet());
     }
 
 }

@@ -41,34 +41,28 @@ public final class ClassUpdate {
         DynamicClassLoader classLoader = DynamicClassLoader.getInstance();
 
         Set<ClassSignature> updated = new HashSet<>();
-        gettingUpdated: {
-            for (ClassSignature signature : update.getSignatures()) {
-                ClassSignature old = Optional.ofNullable(classLoader.loaders.get(signature.clazz().getName()))
-                        .map(SingleClassLoader::getClassSignature)
-                        .orElse(null);
-                if (old != null && signature.matches(old)) continue;
-                updated.add(signature);
-            }
+        for (ClassSignature signature : update.getSignatures()) {
+            ClassSignature old = Optional.ofNullable(classLoader.loaders.get(signature.clazz().getName()))
+                    .map(SingleClassLoader::getClassSignature)
+                    .orElse(null);
+            if (old != null && signature.matches(old)) continue;
+            updated.add(signature);
         }
 
         Set<AbstractClass> dependant = new HashSet<>();
-        gettingDependant: {
-            for (ClassSignature signature : updated)
-                dependant.addAll(LoaderUtils.getDependant(signature.clazz()));
-        }
+        for (ClassSignature signature : updated)
+            dependant.addAll(LoaderUtils.getDependant(signature.clazz()));
 
         ClassChecker checker = new ClassChecker();
 
-        gettingNotDependant: {
-            List<String> dependantNames = dependant.stream().map(AbstractClass::getName).toList();
-            List<Type> notDependant = classLoader.loaders.values().stream()
-                    .map(SingleClassLoader::getClassSignature)
-                    .map(ClassSignature::clazz)
-                    .filter(c -> !dependantNames.contains(c.getName()))
-                    .map(AbstractClass::getType)
-                    .toList();
-            checker.addSuccessful(notDependant);
-        }
+        List<String> dependantNames = dependant.stream().map(AbstractClass::getName).toList();
+        List<Type> notDependant = classLoader.loaders.values().stream()
+                .map(SingleClassLoader::getClassSignature)
+                .map(ClassSignature::clazz)
+                .filter(c -> !dependantNames.contains(c.getName()))
+                .map(AbstractClass::getType)
+                .toList();
+        checker.addSuccessful(notDependant);
 
         for (AbstractClass d : dependant) {
             checker.hasLegitSuperClass(d);
@@ -76,20 +70,18 @@ public final class ClassUpdate {
         }
 
         Set<ClassSignature> sortedSuccessful;
-        sortingSuccessful: {
-            List<Type> checkerResult = new ArrayList<>(checker.getSuccessful());
-            ClassSignature[] successful = new ClassSignature[checkerResult.size()];
+        List<Type> checkerResult = new ArrayList<>(checker.getSuccessful());
+        ClassSignature[] successful = new ClassSignature[checkerResult.size()];
 
-            for (ClassSignature signature : updated) {
-                int index = checkerResult.indexOf(signature.clazz().getType());
-                if (index == -1) continue;
-                successful[index] = signature;
-            }
-
-            sortedSuccessful = Arrays.stream(successful)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
+        for (ClassSignature signature : updated) {
+            int index = checkerResult.indexOf(signature.clazz().getType());
+            if (index == -1) continue;
+            successful[index] = signature;
         }
+
+        sortedSuccessful = Arrays.stream(successful)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
 
         Result result = new Result(sortedSuccessful, checker.getFailed());
         classLoader.pushUpdate(result);

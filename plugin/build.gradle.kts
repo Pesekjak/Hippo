@@ -4,11 +4,8 @@ plugins {
 }
 
 repositories {
-    maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
+    maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.skriptlang.org/releases/")
-
-    maven("https://oss.sonatype.org/content/repositories/snapshots")
-    maven("https://oss.sonatype.org/content/repositories/central")
 }
 
 dependencies {
@@ -16,11 +13,11 @@ dependencies {
     implementation(project(":magic-utils"))
     implementation(libs.asm)
 
-    compileOnly(libs.spigot.api)
+    compileOnly(libs.paper.api)
     compileOnly(libs.skript)
     compileOnly(files("$projectDir/../libs/skript-reflect.jar"))
 
-    testImplementation(libs.spigot.api)
+    testImplementation(libs.paper.api)
     testImplementation(libs.skript)
     testImplementation(files("$projectDir/../libs/skript-reflect.jar"))
 }

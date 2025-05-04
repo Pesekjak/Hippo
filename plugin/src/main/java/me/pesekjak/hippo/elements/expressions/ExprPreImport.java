@@ -10,7 +10,6 @@ import ch.njol.skript.lang.SkriptParser;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import com.btk5h.skriptmirror.JavaType;
-import com.btk5h.skriptmirror.util.SkriptMirrorUtil;
 import me.pesekjak.hippo.Hippo;
 import me.pesekjak.hippo.bukkit.NewClassEvent;
 import me.pesekjak.hippo.core.ASMUtil;
@@ -21,8 +20,10 @@ import me.pesekjak.hippo.utils.SkriptUtil;
 import me.pesekjak.hippo.utils.TypeLookup;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
 import org.skriptlang.skript.lang.script.Script;
+import org.skriptlang.skript.registration.DefaultSyntaxInfos;
 import org.skriptlang.skript.registration.SyntaxInfo;
 import org.skriptlang.skript.registration.SyntaxOrigin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
@@ -39,19 +40,25 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 @SuppressWarnings("UnstableApiUsage")
 public class ExprPreImport extends SimpleExpression<Object> {
 
+    private static final SyntaxRegistry SYNTAX_REGISTRY = Hippo.getAddonInstance().syntaxRegistry();
+    private static @Nullable DefaultSyntaxInfos.Expression<ExprPreImport, Object> lastRegistered;
+
     private PreImport preImport;
     private Node node;
 
-    static {
-        Hippo.getAddonInstance().syntaxRegistry().register(
-                SyntaxRegistry.EXPRESSION,
-                SyntaxInfo.Expression.builder(ExprPreImport.class, Object.class)
-                        .addPattern("<" + SkriptMirrorUtil.IDENTIFIER + ">")
-                        .supplier(ExprPreImport::new)
-                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
-                        .priority(SyntaxInfo.PATTERN_MATCHES_EVERYTHING)
-                        .build()
-        );
+    /**
+     * Updates the expression syntax to use currently registered pre-import aliases.
+     */
+    public static void updateSyntax() {
+        if (lastRegistered != null) SYNTAX_REGISTRY.unregister(lastRegistered);
+        var builder = SyntaxInfo.Expression.builder(ExprPreImport.class, Object.class)
+                .supplier(ExprPreImport::new)
+                .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                .priority(SyntaxInfo.SIMPLE);
+        if (TypeLookup.getPreImportKeywords().isEmpty()) return;
+        TypeLookup.getPreImportKeywords().forEach(builder::addPattern);
+        lastRegistered = builder.build();
+        Hippo.getAddonInstance().syntaxRegistry().register(SyntaxRegistry.EXPRESSION, lastRegistered);
     }
 
     // This expression will return PreImport instance if the pre-imported class does not exist
@@ -97,8 +104,7 @@ public class ExprPreImport extends SimpleExpression<Object> {
                         SkriptParser.@NotNull ParseResult parseResult) {
         Script script = SkriptUtil.getCurrentScript(getParser());
         if (script == null) return false;
-        String alias = parseResult.regexes.get(0).group();
-        Type type = TypeLookup.lookup(script, alias, false);
+        Type type = TypeLookup.lookup(script, parseResult.expr, false);
         if (type == null) return false;
         if (!(ASMUtil.isComplex(type) && !ASMUtil.isArray(type))) return false;
         preImport = new PreImport(type);

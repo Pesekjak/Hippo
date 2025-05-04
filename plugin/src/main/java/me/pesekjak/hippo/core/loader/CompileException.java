@@ -7,7 +7,6 @@ import org.objectweb.asm.Type;
  */
 public class CompileException extends Exception {
 
-    public static final String UNKNOWN = "Unknown reason";
     public static final String NOT_EXISTING = "Class does not exist";
 
     //

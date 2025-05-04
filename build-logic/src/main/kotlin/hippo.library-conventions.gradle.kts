@@ -69,7 +69,7 @@ dependencies {
 
 tasks {
     withType<JavaCompile> {
-        options.release.set(17)
+        options.release.set(21)
         options.encoding = Charsets.UTF_8.name()
     }
     withType<ProcessResources> {
