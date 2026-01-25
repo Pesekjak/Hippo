@@ -1,0 +1,51 @@
+name: Build Hippo
+
+on:
+  push:
+    branches:
+      - "master"
+  pull_request:
+    branches:
+      - "master"
+
+jobs:
+  build:
+    if: "! contains(toJSON(github.event.commits.*.message), '[ci skip]')"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Get Short SHA
+        id: slug
+        run: echo "sha7=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Get Base Version
+        id: version
+        run: |
+          BASE_VERSION=$(grep "^version=" gradle.properties | cut -d'=' -f2 || echo "UNKNOWN")
+          echo "base_version=$BASE_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build with Gradle
+        run: |
+          NEW_VERSION="${{ steps.version.outputs.base_version }}-${{ steps.slug.outputs.sha7 }}"
+          ./gradlew clean build :plugin:build -Pversion="$NEW_VERSION" --no-daemon
+
+      - name: Upload Shadow Jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hippo-${{ steps.slug.outputs.sha7 }}
+          path: plugin/build/libs/*.jar
+          if-no-files-found: error
