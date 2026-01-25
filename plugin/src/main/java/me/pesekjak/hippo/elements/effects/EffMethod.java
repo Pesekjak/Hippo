@@ -23,8 +23,8 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.registration.SyntaxInfo;
-import org.skriptlang.skript.registration.SyntaxOrigin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.util.Arrays;
@@ -39,7 +39,6 @@ import java.util.List;
 })
 @Since("1.0.0")
 @ClassElement
-@SuppressWarnings("UnstableApiUsage")
 public class EffMethod extends Effect {
 
     private MethodWrapper methodWrapper;
@@ -50,7 +49,7 @@ public class EffMethod extends Effect {
                 SyntaxInfo.builder(EffMethod.class)
                         .addPattern("%*modifiers% %*parameter%\\([%-*parameters%(0¦|1¦\\.\\.\\.)]\\) [throws %-javatypes%]")
                         .supplier(EffMethod::new)
-                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .origin(Origin.of(Hippo.getAddonInstance()))
                         .priority(SyntaxInfo.COMBINED)
                         .build()
         );

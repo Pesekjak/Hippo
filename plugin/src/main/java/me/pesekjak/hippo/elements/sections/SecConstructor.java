@@ -27,8 +27,8 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.registration.SyntaxInfo;
-import org.skriptlang.skript.registration.SyntaxOrigin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.util.*;
@@ -44,7 +44,6 @@ import java.util.*;
 })
 @Since("1.0.0")
 @ClassElement
-@SuppressWarnings("UnstableApiUsage")
 public class SecConstructor extends Section {
 
     static {
@@ -53,7 +52,7 @@ public class SecConstructor extends Section {
                 SyntaxInfo.builder(SecConstructor.class)
                         .addPattern("%*modifiers% %javatype%\\([%-*parameters%(0¦|1¦\\.\\.\\.)]\\) [throws %-javatypes%]")
                         .supplier(SecConstructor::new)
-                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .origin(Origin.of(Hippo.getAddonInstance()))
                         .priority(SyntaxInfo.COMBINED)
                         .build()
         );

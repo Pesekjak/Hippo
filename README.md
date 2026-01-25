@@ -10,8 +10,8 @@
 ---
 
 ## Requirements
-* [Skript](https://github.com/SkriptLang/Skript) - version: 2.11.1 or above
-* [skript-reflect](https://github.com/SkriptLang/skript-reflect) - version: 2.6 or above
+* [Skript](https://github.com/SkriptLang/Skript) - version: 2.14.0 or above
+* [skript-reflect](https://github.com/SkriptLang/skript-reflect) - version: 2.6.2 or above
 
 ---
 

@@ -24,8 +24,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.registration.SyntaxInfo;
-import org.skriptlang.skript.registration.SyntaxOrigin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.util.*;
@@ -39,7 +39,6 @@ import java.util.*;
 })
 @Since("1.0.0")
 @ClassElement
-@SuppressWarnings("UnstableApiUsage")
 public class SecMethod extends Section implements ReturnHandler<Object> {
 
     private int modifier;
@@ -52,7 +51,7 @@ public class SecMethod extends Section implements ReturnHandler<Object> {
                 SyntaxInfo.builder(SecMethod.class)
                         .addPattern("[override] %*modifiers% %*parameter%\\([%-*parameters%(0¦|1¦\\.\\.\\.)]\\) [throws %-javatypes%]")
                         .supplier(SecMethod::new)
-                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .origin(Origin.of(Hippo.getAddonInstance()))
                         .priority(SyntaxInfo.COMBINED)
                         .build()
         );

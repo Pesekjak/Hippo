@@ -22,10 +22,10 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.lang.script.Script;
 import org.skriptlang.skript.registration.DefaultSyntaxInfos;
 import org.skriptlang.skript.registration.SyntaxInfo;
-import org.skriptlang.skript.registration.SyntaxOrigin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 @Name("Pre-Imported Class")
@@ -53,7 +53,7 @@ public class ExprPreImport extends SimpleExpression<Object> {
         if (lastRegistered != null) SYNTAX_REGISTRY.unregister(lastRegistered);
         var builder = SyntaxInfo.Expression.builder(ExprPreImport.class, Object.class)
                 .supplier(ExprPreImport::new)
-                .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                .origin(Origin.of(Hippo.getAddonInstance()))
                 .priority(SyntaxInfo.SIMPLE);
         if (TypeLookup.getPreImportKeywords().isEmpty()) return;
         TypeLookup.getPreImportKeywords().forEach(builder::addPattern);

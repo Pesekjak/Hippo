@@ -16,8 +16,8 @@ import me.pesekjak.hippo.elements.ClassElement;
 import me.pesekjak.hippo.elements.structures.StructNewClass;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.registration.SyntaxInfo;
-import org.skriptlang.skript.registration.SyntaxOrigin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.util.Arrays;
@@ -34,7 +34,6 @@ import java.util.Objects;
 })
 @Since("1.0.0")
 @ClassElement
-@SuppressWarnings("UnstableApiUsage")
 public class EffAnnotations extends Effect {
 
     private Expression<?> annotations;
@@ -46,7 +45,7 @@ public class EffAnnotations extends Effect {
                 SyntaxInfo.builder(EffAnnotations.class)
                         .addPattern("%*annotations%")
                         .supplier(EffAnnotations::new)
-                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .origin(Origin.of(Hippo.getAddonInstance()))
                         .priority(SyntaxInfo.COMBINED)
                         .build()
         );

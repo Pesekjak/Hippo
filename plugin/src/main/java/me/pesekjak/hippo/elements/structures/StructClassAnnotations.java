@@ -12,10 +12,10 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.lang.entry.EntryContainer;
 import org.skriptlang.skript.lang.structure.Structure;
 import org.skriptlang.skript.registration.SyntaxInfo;
-import org.skriptlang.skript.registration.SyntaxOrigin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.util.Collections;
@@ -38,7 +38,7 @@ public class StructClassAnnotations extends Structure {
                 SyntaxRegistry.STRUCTURE,
                 SyntaxInfo.Structure.builder(StructClassAnnotations.class)
                         .addPattern("%annotations%")
-                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .origin(Origin.of(Hippo.getAddonInstance()))
                         .supplier(StructClassAnnotations::new)
                         .priority(SyntaxInfo.COMBINED)
                         .nodeType(SyntaxInfo.Structure.NodeType.SIMPLE)

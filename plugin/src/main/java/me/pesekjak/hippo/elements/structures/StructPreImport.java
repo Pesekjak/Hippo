@@ -19,11 +19,11 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.lang.entry.EntryContainer;
 import org.skriptlang.skript.lang.script.Script;
 import org.skriptlang.skript.lang.structure.Structure;
 import org.skriptlang.skript.registration.SyntaxInfo;
-import org.skriptlang.skript.registration.SyntaxOrigin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.util.regex.Matcher;
@@ -52,7 +52,7 @@ public class StructPreImport extends Structure {
                 SyntaxInfo.Structure.builder(StructPreImport.class)
                         .addPattern("pre[-]import")
                         .supplier(StructPreImport::new)
-                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .origin(Origin.of(Hippo.getAddonInstance()))
                         .priority(SyntaxInfo.SIMPLE)
                         .build()
         );

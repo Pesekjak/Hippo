@@ -22,9 +22,9 @@ import me.pesekjak.hippo.utils.SkriptUtil;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.lang.script.Script;
 import org.skriptlang.skript.registration.SyntaxInfo;
-import org.skriptlang.skript.registration.SyntaxOrigin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.lang.invoke.MethodHandle;
@@ -66,7 +66,7 @@ public class ExprSuperMethodCall extends SimpleExpression<Object> {
                 SyntaxInfo.Expression.builder(ExprSuperMethodCall.class, Object.class)
                         .addPatterns(PATTERNS)
                         .supplier(ExprSuperMethodCall::new)
-                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .origin(Origin.of(Hippo.getAddonInstance()))
                         .priority(SyntaxInfo.PATTERN_MATCHES_EVERYTHING)
                         .build()
         );
@@ -173,7 +173,7 @@ public class ExprSuperMethodCall extends SimpleExpression<Object> {
         int descriptorRegexIndex;
 
         if (matchedPattern == 0) {
-            String methodName = parseResult.regexes.get(0).group();
+            String methodName = parseResult.regexes.getFirst().group();
             this.methodName = event -> methodName;
             arguments = LiteralUtils.defendExpression(expressions[0]);
 

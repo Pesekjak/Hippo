@@ -18,8 +18,8 @@ import me.pesekjak.hippo.elements.sections.SecMethod;
 import me.pesekjak.hippo.utils.SkriptUtil;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.registration.SyntaxInfo;
-import org.skriptlang.skript.registration.SyntaxOrigin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
@@ -45,7 +45,7 @@ public class ExprThis extends SimpleExpression<Object> {
                 SyntaxInfo.Expression.builder(ExprThis.class, Object.class)
                         .addPattern("this")
                         .supplier(ExprThis::new)
-                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .origin(Origin.of(Hippo.getAddonInstance()))
                         .priority(SyntaxInfo.SIMPLE)
                         .build()
         );

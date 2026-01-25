@@ -20,8 +20,8 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.registration.SyntaxInfo;
-import org.skriptlang.skript.registration.SyntaxOrigin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.util.Collections;
@@ -36,7 +36,6 @@ import java.util.List;
         "\t\tsuper[String](\"elephant\")"
 })
 @Since("1.0.0")
-@SuppressWarnings("UnstableApiUsage")
 public class EffSuperConstructorCall extends Effect {
 
     private List<Type> types;
@@ -48,7 +47,7 @@ public class EffSuperConstructorCall extends Effect {
                 SyntaxInfo.builder(EffSuperConstructorCall.class)
                         .addPattern("super\\[[<.+>]\\]\\([%-objects%]\\)")
                         .supplier(EffSuperConstructorCall::new)
-                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .origin(Origin.of(Hippo.getAddonInstance()))
                         .priority(SyntaxInfo.PATTERN_MATCHES_EVERYTHING)
                         .build()
         );
@@ -91,7 +90,7 @@ public class EffSuperConstructorCall extends Effect {
             if (parseResult.regexes.isEmpty()) {
                 types = Collections.emptyList();
             } else {
-                types = SuperSignatureParser.parse(parseResult.regexes.get(0).group(), SkriptUtil.getCurrentScript(getParser()));
+                types = SuperSignatureParser.parse(parseResult.regexes.getFirst().group(), SkriptUtil.getCurrentScript(getParser()));
                 if (types.contains(null)) throw new NullPointerException();
             }
         } catch (Exception exception) {

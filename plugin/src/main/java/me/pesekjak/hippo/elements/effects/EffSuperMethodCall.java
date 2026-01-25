@@ -12,8 +12,8 @@ import me.pesekjak.hippo.Hippo;
 import me.pesekjak.hippo.elements.expressions.ExprSuperMethodCall;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.registration.SyntaxInfo;
-import org.skriptlang.skript.registration.SyntaxOrigin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 @Name("Superclass Method Call")
@@ -26,7 +26,6 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
         "\t\treturn 1"
 })
 @Since("1.1")
-@SuppressWarnings("UnstableApiUsage")
 // Mirrors behaviour of ExprSuperMethodCall
 public class EffSuperMethodCall extends Effect {
 
@@ -38,7 +37,7 @@ public class EffSuperMethodCall extends Effect {
                 SyntaxInfo.builder(EffSuperMethodCall.class)
                         .addPatterns(ExprSuperMethodCall.PATTERNS)
                         .supplier(EffSuperMethodCall::new)
-                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .origin(Origin.of(Hippo.getAddonInstance()))
                         .priority(SyntaxInfo.PATTERN_MATCHES_EVERYTHING)
                         .build()
         );

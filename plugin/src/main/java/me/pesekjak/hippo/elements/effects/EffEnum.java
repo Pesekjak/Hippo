@@ -30,8 +30,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.registration.SyntaxInfo;
-import org.skriptlang.skript.registration.SyntaxOrigin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.util.Collections;
@@ -50,7 +50,6 @@ import java.util.List;
 })
 @Since("1.0.0")
 @ClassElement
-@SuppressWarnings("UnstableApiUsage")
 public class EffEnum extends Effect {
 
     private EnumWrapper enumWrapper;
@@ -63,7 +62,7 @@ public class EffEnum extends Effect {
                 SyntaxInfo.builder(EffEnum.class)
                         .addPattern("enum <" + SyntaxCommons.VARIABLE_NAME + ">\\[[<.+>]\\]\\([%-objects%]\\)")
                         .supplier(EffEnum::new)
-                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .origin(Origin.of(Hippo.getAddonInstance()))
                         .priority(SyntaxInfo.COMBINED)
                         .build()
         );

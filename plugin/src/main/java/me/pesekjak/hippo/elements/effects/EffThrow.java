@@ -15,8 +15,8 @@ import me.pesekjak.hippo.utils.ReflectConverter;
 import me.pesekjak.hippo.utils.SkriptUtil;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.registration.SyntaxInfo;
-import org.skriptlang.skript.registration.SyntaxOrigin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.util.Optional;
@@ -30,7 +30,6 @@ import java.util.Optional;
         "\t\tthrow new UnsupportedOperationException()"
 })
 @Since("1.1")
-@SuppressWarnings("UnstableApiUsage")
 public class EffThrow extends Effect {
 
     private Expression<Object> exception;
@@ -42,7 +41,7 @@ public class EffThrow extends Effect {
                 SyntaxInfo.builder(EffThrow.class)
                         .addPattern("throw %object%")
                         .supplier(EffThrow::new)
-                        .origin(SyntaxOrigin.of(Hippo.getAddonInstance()))
+                        .origin(Origin.of(Hippo.getAddonInstance()))
                         .priority(SyntaxInfo.COMBINED)
                         .build()
         );
